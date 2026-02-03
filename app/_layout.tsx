@@ -6,7 +6,7 @@ import 'react-native-reanimated';
 import '../global.css';
 
 export const unstable_settings = {
-  initialRouteName: 'index',
+  initialRouteName: 'login',
 };
 
 export default function RootLayout() {
