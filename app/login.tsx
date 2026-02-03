@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useRouter } from "expo-router";
-import { Eye, EyeOff, ShieldCheck } from "lucide-react-native";
+import { Eye, EyeOff } from "lucide-react-native";
 import React, { useState } from "react";
 import {
     Image,
@@ -68,10 +68,14 @@ export default function LoginPage() {
                         keyboardShouldPersistTaps="handled"
                     >
                         {/* Header Section */}
-                        <View className="items-center mt-10 mb-6">
-                            {/* Shield Icon */}
-                            <View className="bg-white/25 p-4 rounded-3xl mb-5">
-                                <ShieldCheck size={36} color="white" strokeWidth={2.5} />
+                        <View className="items-center mt-2 mb-6">
+                            {/* Logo */}
+                            <View className="p-4">
+                                <Image
+                                    source={require('../assets/images/psaslogo.png')}
+                                    className="w-32 h-32"
+                                    resizeMode="contain"
+                                />
                             </View>
 
                             {/* Title */}
