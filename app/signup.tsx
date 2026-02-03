@@ -29,10 +29,21 @@ export default function SignupPage() {
 
     return (
         <View className="flex-1 bg-white">
-            <LinearGradient
-                colors={['#2563EB', '#1D4ED8']}
-                className="absolute top-0 left-0 right-0 h-[40%] rounded-b-[30px]"
+            {/* Background Image */}
+            <Image
+                source={require('../assets/images/lvccgate.jpg')}
+                className="absolute top-0 left-0 right-0 h-[42%]"
+                style={{ borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }}
+                resizeMode="cover"
             />
+
+            {/* Dark Overlay for better text readability */}
+            <LinearGradient
+                colors={['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.3)']}
+                className="absolute top-0 left-0 right-0 h-[42%]"
+                style={{ borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }}
+            />
+
 
             <SafeAreaView className="flex-1">
                 <KeyboardAvoidingView
