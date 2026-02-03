@@ -5,34 +5,33 @@ import { Eye, EyeOff, ShieldCheck } from "lucide-react-native";
 import React, { useState } from "react";
 import { Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useGoogleLogin, useLogin } from '../hooks/authHooks';
+import { useGoogleLogin } from '../hooks/authHooks';
 
 // Google Logo URL
 const GOOGLE_LOGO = "https://www.svgrepo.com/show/475656/google-color.svg";
 
-export default function LoginPage() {
+export default function SignupPage() {
+    const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
-    const [rememberMe, setRememberMe] = useState(false);
     const router = useRouter();
 
     const { handleGoogleLogin } = useGoogleLogin();
-    const { handleLogin, loading } = useLogin();
 
-    const handleSubmit = async () => {
-        if (!email || !password) {
+    const handleSignup = async () => {
+        if (!name || !email || !password) {
             alert("Please fill in all fields");
             return;
         }
-        await handleLogin(email, password);
+        alert("Signup logic would go here!");
     };
 
     return (
         <View className="flex-1 bg-white">
             <LinearGradient
-                colors={['#2563EB', '#1D4ED8']} // Vibrant Blue Gradient
-                className="absolute top-0 left-0 right-0 h-[45%] rounded-b-[30px]" // Curved bottom for blue bg
+                colors={['#2563EB', '#1D4ED8']}
+                className="absolute top-0 left-0 right-0 h-[40%] rounded-b-[30px]"
             />
 
             <SafeAreaView className="flex-1">
@@ -46,43 +45,33 @@ export default function LoginPage() {
                         className="px-6"
                     >
                         {/* Header Section */}
-                        <View className="items-center mt-8 mb-8">
+                        <View className="items-center mt-6 mb-8">
                             <View className="bg-white/20 p-3 rounded-2xl mb-4 backdrop-blur-md">
                                 <ShieldCheck size={32} color="white" />
                             </View>
                             <Text className="text-3xl font-bold text-white text-center mb-2">
-                                Sign in to your{"\n"}Account
+                                Create an{"\n"}Account
                             </Text>
                             <Text className="text-blue-100 text-center text-sm">
-                                Enter your email and password to log in
+                                Sign up to get started
                             </Text>
                         </View>
 
                         {/* White Card Section */}
                         <View className="bg-white rounded-3xl p-6 shadow-xl shadow-black/10 elevation-5 mb-8">
 
-                            {/* Google Login */}
-                            <TouchableOpacity
-                                onPress={handleGoogleLogin}
-                                className="flex-row items-center justify-center gap-3 py-3.5 rounded-xl border border-gray-200 bg-white mb-6 active:bg-gray-50"
-                            >
-                                <Image
-                                    source={{ uri: GOOGLE_LOGO }}
-                                    className="w-5 h-5"
-                                    resizeMode="contain"
-                                />
-                                <Text className="text-gray-700 font-semibold text-base">Continue with Google</Text>
-                            </TouchableOpacity>
-
-                            {/* Divider */}
-                            <View className="flex-row items-center mb-6">
-                                <View className="flex-1 h-[1px] bg-gray-200" />
-                                <Text className="mx-4 text-gray-400 text-sm">Or login with</Text>
-                                <View className="flex-1 h-[1px] bg-gray-200" />
-                            </View>
-
                             {/* Form Inputs */}
                             <View className="space-y-4 gap-4">
+                                <View>
+                                    <TextInput
+                                        placeholder="Full Name"
+                                        value={name}
+                                        onChangeText={setName}
+                                        className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 bg-gray-50 focus:border-blue-500 focus:bg-white"
+                                        placeholderTextColor="#9CA3AF"
+                                    />
+                                </View>
+
                                 <View>
                                     <TextInput
                                         placeholder="Email Address"
@@ -115,40 +104,54 @@ export default function LoginPage() {
                                     </TouchableOpacity>
                                 </View>
 
-                                {/* Remember Me & Forgot Password */}
-                                <View className="flex-row justify-between items-center mt-1">
-                                    <TouchableOpacity
-                                        className="flex-row items-center gap-2"
-                                        onPress={() => setRememberMe(!rememberMe)}
-                                    >
-                                        <View className={`w-5 h-5 rounded border ${rememberMe ? 'bg-blue-600 border-blue-600' : 'border-gray-300'} items-center justify-center`}>
-                                            {rememberMe && <View className="w-2.5 h-2.5 bg-white rounded-sm" />}
-                                        </View>
-                                        <Text className="text-gray-500 text-sm">Remember me</Text>
-                                    </TouchableOpacity>
-
-                                    <TouchableOpacity>
-                                        <Text className="text-blue-600 font-semibold text-sm">Forgot Password?</Text>
-                                    </TouchableOpacity>
+                                {/* Terms Checkbox (Optional but good for signup) */}
+                                <View className="flex-row items-start gap-2 mt-1">
+                                    <View className="w-5 h-5 rounded border border-blue-600 bg-blue-600 items-center justify-center mt-0.5">
+                                        <View className="w-2.5 h-2.5 bg-white rounded-sm" />
+                                    </View>
+                                    <Text className="text-gray-500 text-xs flex-1">
+                                        By signing up, you agree to our <Text className="text-blue-600 font-semibold">Terms of Service</Text> and <Text className="text-blue-600 font-semibold">Privacy Policy</Text>.
+                                    </Text>
                                 </View>
 
-                                {/* Login Button */}
+                                {/* Signup Button */}
                                 <TouchableOpacity
-                                    onPress={handleSubmit}
+                                    onPress={handleSignup}
                                     className="w-full bg-blue-600 py-4 rounded-xl shadow-lg shadow-blue-600/30 active:bg-blue-700 mt-2"
                                 >
                                     <Text className="text-white text-center font-bold text-lg">
-                                        {loading ? "Logging in..." : "Log In"}
+                                        Sign Up
                                     </Text>
                                 </TouchableOpacity>
+
                             </View>
 
-                            {/* Sign Up Link */}
+                            {/* Divider */}
+                            <View className="flex-row items-center my-6">
+                                <View className="flex-1 h-[1px] bg-gray-200" />
+                                <Text className="mx-4 text-gray-400 text-sm">Or sign up with</Text>
+                                <View className="flex-1 h-[1px] bg-gray-200" />
+                            </View>
+
+                            {/* Google Signup */}
+                            <TouchableOpacity
+                                onPress={handleGoogleLogin}
+                                className="flex-row items-center justify-center gap-3 py-3.5 rounded-xl border border-gray-200 bg-white active:bg-gray-50"
+                            >
+                                <Image
+                                    source={{ uri: GOOGLE_LOGO }}
+                                    className="w-5 h-5"
+                                    resizeMode="contain"
+                                />
+                                <Text className="text-gray-700 font-semibold text-base">Continue with Google</Text>
+                            </TouchableOpacity>
+
+                            {/* Login Link */}
                             <View className="flex-row justify-center mt-8">
-                                <Text className="text-gray-500">Don't have an account? </Text>
-                                <Link href="/signup" asChild>
+                                <Text className="text-gray-500">Already have an account? </Text>
+                                <Link href="/login" asChild>
                                     <TouchableOpacity>
-                                        <Text className="text-blue-600 font-bold">Sign Up</Text>
+                                        <Text className="text-blue-600 font-bold">Log In</Text>
                                     </TouchableOpacity>
                                 </Link>
                             </View>
