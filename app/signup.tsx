@@ -1,7 +1,7 @@
 
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useRouter } from "expo-router";
-import { Eye, EyeOff, ShieldCheck } from "lucide-react-native";
+import { Eye, EyeOff } from "lucide-react-native";
 import React, { useState } from "react";
 import { Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -56,9 +56,13 @@ export default function SignupPage() {
                         className="px-6"
                     >
                         {/* Header Section */}
-                        <View className="items-center mt-6 mb-8">
-                            <View className="bg-white/20 p-3 rounded-2xl mb-4 backdrop-blur-md">
-                                <ShieldCheck size={32} color="white" />
+                        <View className="items-center mt-2 mb-6">
+                            <View className="p-4">
+                                <Image
+                                    source={require('../assets/images/psaslogo.png')}
+                                    className="w-32 h-32"
+                                    resizeMode="contain"
+                                />
                             </View>
                             <Text className="text-3xl font-bold text-white text-center mb-2">
                                 Create an{"\n"}Account
