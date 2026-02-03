@@ -41,12 +41,21 @@ export default function LoginPage() {
         <View className="flex-1 bg-white">
             <StatusBar barStyle="light-content" />
 
-            {/* Blue Gradient Background */}
+            {/* Background Image */}
+            <Image
+                source={require('../assets/images/lvccgate.jpg')}
+                className="absolute top-0 left-0 right-0 h-[42%]"
+                style={{ borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }}
+                resizeMode="cover"
+            />
+
+            {/* Dark Overlay for better text readability */}
             <LinearGradient
-                colors={['#3B82F6', '#2563EB']}
+                colors={['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.3)']}
                 className="absolute top-0 left-0 right-0 h-[42%]"
                 style={{ borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }}
             />
+
 
             <SafeAreaView className="flex-1">
                 <KeyboardAvoidingView
