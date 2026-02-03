@@ -1,9 +1,18 @@
-
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useRouter } from "expo-router";
 import { Eye, EyeOff, ShieldCheck } from "lucide-react-native";
 import React, { useState } from "react";
-import { Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StatusBar,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGoogleLogin, useLogin } from '../hooks/authHooks';
 
@@ -11,10 +20,10 @@ import { useGoogleLogin, useLogin } from '../hooks/authHooks';
 const GOOGLE_LOGO = "https://www.svgrepo.com/show/475656/google-color.svg";
 
 export default function LoginPage() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
-    const [rememberMe, setRememberMe] = useState(false);
+    const [email, setEmail] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
+    const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [rememberMe, setRememberMe] = useState<boolean>(false);
     const router = useRouter();
 
     const { handleGoogleLogin } = useGoogleLogin();
@@ -30,9 +39,13 @@ export default function LoginPage() {
 
     return (
         <View className="flex-1 bg-white">
+            <StatusBar barStyle="light-content" />
+
+            {/* Blue Gradient Background */}
             <LinearGradient
-                colors={['#2563EB', '#1D4ED8']} // Vibrant Blue Gradient
-                className="absolute top-0 left-0 right-0 h-[45%] rounded-b-[30px]" // Curved bottom for blue bg
+                colors={['#3B82F6', '#2563EB']}
+                className="absolute top-0 left-0 right-0 h-[42%]"
+                style={{ borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }}
             />
 
             <SafeAreaView className="flex-1">
@@ -41,118 +54,158 @@ export default function LoginPage() {
                     className="flex-1"
                 >
                     <ScrollView
-                        contentContainerStyle={{ flexGrow: 1 }}
+                        contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24 }}
                         showsVerticalScrollIndicator={false}
-                        className="px-6"
+                        keyboardShouldPersistTaps="handled"
                     >
                         {/* Header Section */}
-                        <View className="items-center mt-8 mb-8">
-                            <View className="bg-white/20 p-3 rounded-2xl mb-4 backdrop-blur-md">
-                                <ShieldCheck size={32} color="white" />
+                        <View className="items-center mt-10 mb-6">
+                            {/* Shield Icon */}
+                            <View className="bg-white/25 p-4 rounded-3xl mb-5">
+                                <ShieldCheck size={36} color="white" strokeWidth={2.5} />
                             </View>
-                            <Text className="text-3xl font-bold text-white text-center mb-2">
+
+                            {/* Title */}
+                            <Text className="text-[32px] font-bold text-white text-center mb-2 leading-10">
                                 Sign in to your{"\n"}Account
                             </Text>
-                            <Text className="text-blue-100 text-center text-sm">
+
+                            {/* Subtitle */}
+                            <Text className="text-white/90 text-center text-[15px] mt-1">
                                 Enter your email and password to log in
                             </Text>
                         </View>
 
                         {/* White Card Section */}
-                        <View className="bg-white rounded-3xl p-6 shadow-xl shadow-black/10 elevation-5 mb-8">
-
-                            {/* Google Login */}
+                        <View
+                            className="bg-white rounded-[28px] p-7 mb-8"
+                            style={{
+                                shadowColor: '#000',
+                                shadowOffset: { width: 0, height: 4 },
+                                shadowOpacity: 0.08,
+                                shadowRadius: 12,
+                                elevation: 8,
+                            }}
+                        >
+                            {/* Google Login Button */}
                             <TouchableOpacity
                                 onPress={handleGoogleLogin}
-                                className="flex-row items-center justify-center gap-3 py-3.5 rounded-xl border border-gray-200 bg-white mb-6 active:bg-gray-50"
+                                className="flex-row items-center justify-center py-4 rounded-xl border-[1.5px] border-gray-200 bg-white mb-6"
+                                activeOpacity={0.7}
                             >
                                 <Image
                                     source={{ uri: GOOGLE_LOGO }}
-                                    className="w-5 h-5"
+                                    className="w-5 h-5 mr-3"
                                     resizeMode="contain"
                                 />
-                                <Text className="text-gray-700 font-semibold text-base">Continue with Google</Text>
+                                <Text className="text-gray-800 font-semibold text-[15px]">
+                                    Continue with Google
+                                </Text>
                             </TouchableOpacity>
 
                             {/* Divider */}
                             <View className="flex-row items-center mb-6">
                                 <View className="flex-1 h-[1px] bg-gray-200" />
-                                <Text className="mx-4 text-gray-400 text-sm">Or login with</Text>
+                                <Text className="mx-4 text-gray-400 text-[13px]">Or login with</Text>
                                 <View className="flex-1 h-[1px] bg-gray-200" />
                             </View>
 
-                            {/* Form Inputs */}
-                            <View className="space-y-4 gap-4">
-                                <View>
-                                    <TextInput
-                                        placeholder="Email Address"
-                                        value={email}
-                                        onChangeText={setEmail}
-                                        className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 bg-gray-50 focus:border-blue-500 focus:bg-white"
-                                        placeholderTextColor="#9CA3AF"
-                                        autoCapitalize="none"
-                                        keyboardType="email-address"
-                                    />
-                                </View>
+                            {/* Email Input */}
+                            <View className="mb-4">
+                                <TextInput
+                                    placeholder="Loisbecket@gmail.com"
+                                    value={email}
+                                    onChangeText={setEmail}
+                                    className="w-full px-4 py-4 border-[1.5px] border-gray-200 rounded-xl text-gray-800 bg-gray-50 text-[15px]"
+                                    placeholderTextColor="#9CA3AF"
+                                    autoCapitalize="none"
+                                    keyboardType="email-address"
+                                    autoCorrect={false}
+                                />
+                            </View>
 
-                                <View className="relative">
-                                    <TextInput
-                                        placeholder="Password"
-                                        value={password}
-                                        onChangeText={setPassword}
-                                        secureTextEntry={!showPassword}
-                                        className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 bg-gray-50 focus:border-blue-500 focus:bg-white pr-12"
-                                        placeholderTextColor="#9CA3AF"
-                                    />
-                                    <TouchableOpacity
-                                        onPress={() => setShowPassword(!showPassword)}
-                                        className="absolute right-4 top-3.5"
-                                    >
-                                        {showPassword ?
-                                            <EyeOff size={22} color="#9CA3AF" /> :
-                                            <Eye size={22} color="#9CA3AF" />
-                                        }
-                                    </TouchableOpacity>
-                                </View>
-
-                                {/* Remember Me & Forgot Password */}
-                                <View className="flex-row justify-between items-center mt-1">
-                                    <TouchableOpacity
-                                        className="flex-row items-center gap-2"
-                                        onPress={() => setRememberMe(!rememberMe)}
-                                    >
-                                        <View className={`w-5 h-5 rounded border ${rememberMe ? 'bg-blue-600 border-blue-600' : 'border-gray-300'} items-center justify-center`}>
-                                            {rememberMe && <View className="w-2.5 h-2.5 bg-white rounded-sm" />}
-                                        </View>
-                                        <Text className="text-gray-500 text-sm">Remember me</Text>
-                                    </TouchableOpacity>
-
-                                    <TouchableOpacity>
-                                        <Text className="text-blue-600 font-semibold text-sm">Forgot Password?</Text>
-                                    </TouchableOpacity>
-                                </View>
-
-                                {/* Login Button */}
+                            {/* Password Input */}
+                            <View className="relative mb-3">
+                                <TextInput
+                                    placeholder="••••••••"
+                                    value={password}
+                                    onChangeText={setPassword}
+                                    secureTextEntry={!showPassword}
+                                    className="w-full px-4 py-4 border-[1.5px] border-gray-200 rounded-xl text-gray-800 bg-gray-50 pr-12 text-[15px]"
+                                    placeholderTextColor="#9CA3AF"
+                                    autoCapitalize="none"
+                                />
                                 <TouchableOpacity
-                                    onPress={handleSubmit}
-                                    className="w-full bg-blue-600 py-4 rounded-xl shadow-lg shadow-blue-600/30 active:bg-blue-700 mt-2"
+                                    onPress={() => setShowPassword(!showPassword)}
+                                    className="absolute right-4 top-4"
+                                    activeOpacity={0.7}
                                 >
-                                    <Text className="text-white text-center font-bold text-lg">
-                                        {loading ? "Logging in..." : "Log In"}
+                                    {showPassword ? (
+                                        <EyeOff size={20} color="#9CA3AF" />
+                                    ) : (
+                                        <Eye size={20} color="#9CA3AF" />
+                                    )}
+                                </TouchableOpacity>
+                            </View>
+
+                            {/* Remember Me & Forgot Password */}
+                            <View className="flex-row justify-between items-center mb-6 mt-2">
+                                <TouchableOpacity
+                                    className="flex-row items-center"
+                                    onPress={() => setRememberMe(!rememberMe)}
+                                    activeOpacity={0.7}
+                                >
+                                    <View
+                                        className={`w-[18px] h-[18px] rounded-[4px] border-[1.5px] mr-2 items-center justify-center ${rememberMe ? 'bg-blue-600 border-blue-600' : 'border-gray-300 bg-white'
+                                            }`}
+                                    >
+                                        {rememberMe && (
+                                            <View className="w-2 h-2 bg-white rounded-[2px]" />
+                                        )}
+                                    </View>
+                                    <Text className="text-gray-600 text-[14px]">Remember me</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity activeOpacity={0.7}>
+                                    <Text className="text-blue-600 font-semibold text-[14px]">
+                                        Forgot Password ?
                                     </Text>
                                 </TouchableOpacity>
                             </View>
 
+                            {/* Login Button */}
+                            <TouchableOpacity
+                                onPress={handleSubmit}
+                                disabled={loading}
+                                className={`w-full py-4 rounded-xl mb-6 ${loading ? 'bg-blue-400' : 'bg-blue-600'
+                                    }`}
+                                activeOpacity={0.8}
+                                style={{
+                                    shadowColor: '#2563EB',
+                                    shadowOffset: { width: 0, height: 4 },
+                                    shadowOpacity: 0.3,
+                                    shadowRadius: 8,
+                                    elevation: 6,
+                                }}
+                            >
+                                <Text className="text-white text-center font-bold text-[16px]">
+                                    {loading ? "Logging in..." : "Log In"}
+                                </Text>
+                            </TouchableOpacity>
+
                             {/* Sign Up Link */}
-                            <View className="flex-row justify-center mt-8">
-                                <Text className="text-gray-500">Don't have an account? </Text>
+                            <View className="flex-row justify-center">
+                                <Text className="text-gray-600 text-[14px]">
+                                    Don't have an account?{" "}
+                                </Text>
                                 <Link href="/signup" asChild>
-                                    <TouchableOpacity>
-                                        <Text className="text-blue-600 font-bold">Sign Up</Text>
+                                    <TouchableOpacity activeOpacity={0.7}>
+                                        <Text className="text-blue-600 font-bold text-[14px]">
+                                            Sign Up
+                                        </Text>
                                     </TouchableOpacity>
                                 </Link>
                             </View>
-
                         </View>
                     </ScrollView>
                 </KeyboardAvoidingView>
