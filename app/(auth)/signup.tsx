@@ -5,7 +5,7 @@ import { Eye, EyeOff } from "lucide-react-native";
 import React, { useState } from "react";
 import { Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useGoogleLogin } from '../hooks/authHooks';
+import { useGoogleLogin } from '../../hooks/authHooks';
 
 // Google Logo URL
 const GOOGLE_LOGO = "https://www.svgrepo.com/show/475656/google-color.svg";

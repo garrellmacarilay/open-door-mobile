@@ -15,9 +15,9 @@ export const useLogin = () => {
             // Simulate API call
             await new Promise(resolve => setTimeout(resolve, 1500));
 
-            // Navigate to admin or home on success
-            // router.replace('/(tabs)'); 
-            alert('Login Successful!');
+            // Navigate to Student Dashboard on success
+            router.replace('/(student)/dashboard');
+            // alert('Login Successful!');
         } catch (error) {
             setMessage('Login failed');
             alert('Login failed');

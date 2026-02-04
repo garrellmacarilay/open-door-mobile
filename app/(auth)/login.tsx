@@ -14,7 +14,7 @@ import {
     View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useGoogleLogin, useLogin } from '../hooks/authHooks';
+import { useGoogleLogin, useLogin } from '../../hooks/authHooks';
 
 // Google Logo URL
 const GOOGLE_LOGO = "https://www.svgrepo.com/show/475656/google-color.svg";
