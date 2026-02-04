@@ -31,7 +31,7 @@ export default function SignupPage() {
         <View className="flex-1 bg-white">
             {/* Background Image */}
             <Image
-                source={require('../assets/images/lvccgate.jpg')}
+                source={require('../../assets/images/lvccgate.jpg')}
                 className="absolute top-0 left-0 right-0 h-[42%]"
                 style={{ borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }}
                 resizeMode="cover"
@@ -59,7 +59,7 @@ export default function SignupPage() {
                         <View className="items-center mt-2 mb-6">
                             <View className="p-4">
                                 <Image
-                                    source={require('../assets/images/psaslogo.png')}
+                                    source={require('../../assets/images/psaslogo.png')}
                                     className="w-32 h-32"
                                     resizeMode="contain"
                                 />
