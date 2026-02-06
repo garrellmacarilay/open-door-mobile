@@ -6,12 +6,14 @@ interface CalendarWidgetProps {
     currentDate?: Date;
     events?: any[];
     onDateSelect?: (date: Date) => void;
+    onBookPress?: () => void;
 }
 
 export default function CalendarWidget({
     currentDate: initialDate = new Date(),
     events = [],
-    onDateSelect
+    onDateSelect,
+    onBookPress
 }: CalendarWidgetProps) {
     const [viewDate, setViewDate] = useState(initialDate);
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -133,7 +135,10 @@ export default function CalendarWidget({
                 </View>
 
                 {/* Book/Add Button (Placeholder for 'Book Consultation') */}
-                <TouchableOpacity className="p-2 bg-[#1156E8] rounded-lg">
+                <TouchableOpacity
+                    className="p-2 bg-[#1156E8] rounded-lg"
+                    onPress={onBookPress}
+                >
                     <Ionicons name="add" size={18} color="white" />
                 </TouchableOpacity>
             </View>
