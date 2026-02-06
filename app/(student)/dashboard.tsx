@@ -49,7 +49,10 @@ export default function StudentDashboard() {
 
                 {/* Calendar Section */}
                 <View className="mb-2">
-                    <CalendarWidget />
+                    <CalendarWidget
+                        events={appointments}
+                    // onDateSelect={(date) => console.log('Selected', date)} 
+                    />
                 </View>
 
                 {/* Upcoming Appointments Section */}
