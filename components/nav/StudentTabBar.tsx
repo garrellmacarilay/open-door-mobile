@@ -18,12 +18,13 @@ export default function StudentTabBar({ state, descriptors, navigation }: Bottom
     return (
         <View className="absolute bottom-8 left-0 right-0 items-center justify-center">
             <View
-                className="flex-row items-center justify-between bg-white rounded-full shadow-lg px-6 py-4"
+                className="flex-row items-center justify-between rounded-full shadow-lg px-6 py-4"
                 style={{
                     width: width * 0.85,
+                    backgroundColor: '#142240', // Updated to match Upcoming Appointment Header
                     shadowColor: '#000',
                     shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.1,
+                    shadowOpacity: 0.3,
                     shadowRadius: 10,
                     elevation: 5,
                 }}
@@ -54,14 +55,16 @@ export default function StudentTabBar({ state, descriptors, navigation }: Bottom
                             className="items-center justify-center"
                         >
                             <View
-                                className={`p-3 rounded-full ${isFocused ? 'bg-primary' : 'bg-transparent'}`}
+                                className={`p-3 rounded-full items-center justify-center`}
                                 style={{
-                                    backgroundColor: isFocused ? '#5B21B6' : 'transparent', // Using a purple-900 like hex or whatever your primary is (approximating from image)
+                                    backgroundColor: isFocused ? '#5B21B6' : 'transparent', // Circle effect when clicked
+                                    width: 50,
+                                    height: 50,
                                 }}
                             >
                                 <IconComponent
                                     size={24}
-                                    color={isFocused ? 'white' : '#9CA3AF'} // White when active, gray-400 inactive
+                                    color={isFocused ? 'white' : '#9CA3AF'}
                                 />
                             </View>
                         </TouchableOpacity>
