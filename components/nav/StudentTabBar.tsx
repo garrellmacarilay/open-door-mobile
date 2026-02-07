@@ -55,12 +55,11 @@ export default function StudentTabBar({ state, descriptors, navigation }: Bottom
                             className="items-center justify-center"
                         >
                             <View
-                                className={`items-center justify-center`}
+                                className={`items-center justify-center rounded-full`}
                                 style={{
                                     backgroundColor: isFocused ? '#5B21B6' : 'transparent', // Circle effect when clicked
                                     width: 50,
                                     height: 50,
-                                    borderRadius: 25, // Ensure it is a perfect circle
                                 }}
                             >
                                 <IconComponent
