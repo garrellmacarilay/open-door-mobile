@@ -58,7 +58,7 @@ export default function StudentDashboard() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
+        <SafeAreaView className="flex-1 bg-gray-50 pt-12">
             <StatusBar style="dark" />
 
             {/* Header */}
