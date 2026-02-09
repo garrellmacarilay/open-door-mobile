@@ -7,8 +7,7 @@ import { Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, Tou
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGoogleLogin } from '../../hooks/authHooks';
 
-// Google Logo URL
-const GOOGLE_LOGO = "https://www.svgrepo.com/show/475656/google-color.svg";
+
 
 export default function SignupPage() {
     const [name, setName] = useState("");
@@ -163,7 +162,7 @@ export default function SignupPage() {
                                 className="flex-row items-center justify-center gap-3 py-3.5 rounded-xl border border-gray-200 bg-white active:bg-gray-50"
                             >
                                 <Image
-                                    source={{ uri: GOOGLE_LOGO }}
+                                    source={require('../../assets/images/google.png')}
                                     className="w-5 h-5"
                                     resizeMode="contain"
                                 />

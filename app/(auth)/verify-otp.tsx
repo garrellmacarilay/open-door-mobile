@@ -14,8 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Google Logo URL
-const GOOGLE_LOGO = "https://www.svgrepo.com/show/475656/google-color.svg";
+
 
 type VerificationState = 'idle' | 'error' | 'success' | 'verifying';
 
@@ -161,7 +160,7 @@ export default function VerifyOTPPage() {
                             {/* Google Logo */}
                             <View className="mb-8">
                                 <Image
-                                    source={{ uri: GOOGLE_LOGO }}
+                                    source={require('../../assets/images/google.png')}
                                     className="w-16 h-16"
                                     resizeMode="contain"
                                 />

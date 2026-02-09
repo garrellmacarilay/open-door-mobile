@@ -16,9 +16,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGoogleLogin, useLogin } from '../../hooks/authHooks';
 
-// Google Logo URL
-const GOOGLE_LOGO = "https://www.svgrepo.com/show/475656/google-color.svg";
-
 export default function LoginPage() {
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
@@ -107,7 +104,7 @@ export default function LoginPage() {
                                 activeOpacity={0.7}
                             >
                                 <Image
-                                    source={{ uri: GOOGLE_LOGO }}
+                                    source={require('../../assets/images/google.png')}
                                     className="w-5 h-5 mr-3"
                                     resizeMode="contain"
                                 />
