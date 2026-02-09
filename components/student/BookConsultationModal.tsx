@@ -29,8 +29,8 @@ export default function BookConsultationModal({ visible, onClose, onSubmit }: Bo
 
     // Helper to generic Input
     const renderLabel = (text: string, required = false) => (
-        <Text className="text-black text-sm font-semibold mb-1" style={{ fontFamily: 'Inter-SemiBold' }}>
-            {text} {required && <Text className="text-red-500">*</Text>}
+        <Text className="text-white text-sm font-semibold mb-2" style={{ fontFamily: 'Inter-SemiBold' }}>
+            {text} {required && <Text className="text-red-400">*</Text>}
         </Text>
     );
 
@@ -60,37 +60,43 @@ export default function BookConsultationModal({ visible, onClose, onSubmit }: Bo
             visible={visible}
             onRequestClose={onClose}
         >
-            <View className="flex-1 bg-black/50 justify-center items-center p-4">
+            <View className="flex-1 bg-[#142240]">
                 <KeyboardAvoidingView
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                    className="w-full max-h-[90%]"
+                    className="flex-1"
                 >
-                    <View className="bg-white rounded-xl shadow-xl w-full flex-col max-h-full">
-
+                    <View className="flex-1 pt-12">
                         {/* Header */}
-                        <View className="bg-[#122141] rounded-t-xl px-6 py-4 flex-row justify-between items-center">
-                            <Text className="text-white text-lg font-bold" style={{ fontFamily: 'Inter-Bold' }}>
+                        <View className="px-6 py-5 flex-row justify-between items-center border-b border-white/10">
+                            <Text className="text-white text-2xl font-bold" style={{ fontFamily: 'Inter-Bold' }}>
                                 Book a Consultation
                             </Text>
-                            <TouchableOpacity onPress={onClose}>
+                            <TouchableOpacity
+                                onPress={onClose}
+                                className="w-10 h-10 rounded-full bg-white/10 items-center justify-center"
+                            >
                                 <Ionicons name="close" size={24} color="white" />
                             </TouchableOpacity>
                         </View>
 
                         {/* Content */}
-                        <ScrollView className="p-6" contentContainerStyle={{ paddingBottom: 20 }}>
+                        <ScrollView
+                            className="flex-1 px-6"
+                            contentContainerStyle={{ paddingTop: 24, paddingBottom: 40 }}
+                            showsVerticalScrollIndicator={false}
+                        >
 
-                            {/* Office Select (Simplified as Row of Buttons or just simple text for MVP if list is long, using buttons for now) */}
-                            <View className="mb-4">
+                            {/* Office Select */}
+                            <View className="mb-6">
                                 {renderLabel('Office', true)}
-                                <View className="border border-[#9B9999] rounded-lg overflow-hidden bg-[#FFFCFC]">
-                                    {OFFICE_OPTIONS.map((office) => (
+                                <View className="rounded-xl overflow-hidden bg-white/5 border border-white/10">
+                                    {OFFICE_OPTIONS.map((office, index) => (
                                         <TouchableOpacity
                                             key={office.id}
-                                            className={`p-3 border-b border-gray-100 ${form.office_id === office.id ? 'bg-blue-50' : 'bg-white'}`}
+                                            className={`p-4 ${index !== OFFICE_OPTIONS.length - 1 ? 'border-b border-white/10' : ''} ${form.office_id === office.id ? 'bg-[#5B21B6]' : 'bg-transparent'}`}
                                             onPress={() => setForm({ ...form, office_id: office.id })}
                                         >
-                                            <Text className={`${form.office_id === office.id ? 'text-[#155DFC] font-semibold' : 'text-black'}`}>
+                                            <Text className={`text-base ${form.office_id === office.id ? 'text-white font-semibold' : 'text-white/70'}`}>
                                                 {office.name}
                                             </Text>
                                         </TouchableOpacity>
@@ -99,16 +105,16 @@ export default function BookConsultationModal({ visible, onClose, onSubmit }: Bo
                             </View>
 
                             {/* Service Type */}
-                            <View className="mb-4">
+                            <View className="mb-6">
                                 {renderLabel('Type of Service', true)}
-                                <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row gap-2">
+                                <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row gap-3">
                                     {SERVICE_TYPE_OPTIONS.map((type) => (
                                         <TouchableOpacity
                                             key={type}
-                                            className={`px-4 py-2 rounded-full border ${form.service_type === type ? 'bg-[#155DFC] border-[#155DFC]' : 'bg-white border-[#9B9999]'}`}
+                                            className={`px-6 py-3 rounded-full ${form.service_type === type ? 'bg-[#5B21B6]' : 'bg-white/5 border border-white/20'}`}
                                             onPress={() => setForm({ ...form, service_type: type })}
                                         >
-                                            <Text className={`text-xs ${form.service_type === type ? 'text-white' : 'text-gray-700'}`}>
+                                            <Text className={`text-sm font-medium ${form.service_type === type ? 'text-white' : 'text-white/70'}`}>
                                                 {type}
                                             </Text>
                                         </TouchableOpacity>
@@ -117,12 +123,13 @@ export default function BookConsultationModal({ visible, onClose, onSubmit }: Bo
                             </View>
 
                             {/* Date & Time Row */}
-                            <View className="flex-row gap-4 mb-4">
+                            <View className="flex-row gap-4 mb-6">
                                 <View className="flex-1">
                                     {renderLabel('Date', true)}
                                     <TextInput
-                                        className="w-full h-10 px-3 border border-[#9B9999] rounded-lg bg-white text-sm"
+                                        className="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/20 text-white text-base"
                                         placeholder="YYYY-MM-DD"
+                                        placeholderTextColor="rgba(255,255,255,0.4)"
                                         value={form.date}
                                         onChangeText={(text) => setForm({ ...form, date: text })}
                                     />
@@ -130,8 +137,9 @@ export default function BookConsultationModal({ visible, onClose, onSubmit }: Bo
                                 <View className="flex-1">
                                     {renderLabel('Time', true)}
                                     <TextInput
-                                        className="w-full h-10 px-3 border border-[#9B9999] rounded-lg bg-white text-sm"
+                                        className="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/20 text-white text-base"
                                         placeholder="HH:MM"
+                                        placeholderTextColor="rgba(255,255,255,0.4)"
                                         value={form.time}
                                         onChangeText={(text) => setForm({ ...form, time: text })}
                                     />
@@ -139,56 +147,65 @@ export default function BookConsultationModal({ visible, onClose, onSubmit }: Bo
                             </View>
 
                             {/* Concern Description */}
-                            <View className="mb-4">
+                            <View className="mb-6">
                                 {renderLabel('Concern Description', true)}
                                 <TextInput
-                                    className="w-full px-3 py-2 border border-[#9B9999] rounded-lg bg-[#FFFCFC] text-sm text-black"
+                                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/20 text-white text-base"
                                     placeholder="Briefly describe your concern"
+                                    placeholderTextColor="rgba(255,255,255,0.4)"
                                     multiline
                                     numberOfLines={4}
-                                    style={{ height: 100, textAlignVertical: 'top' }}
+                                    style={{ height: 120, textAlignVertical: 'top' }}
                                     value={form.concern_description}
                                     onChangeText={(text) => setForm({ ...form, concern_description: text })}
                                 />
                             </View>
 
                             {/* Group Members */}
-                            <View className="mb-4">
+                            <View className="mb-6">
                                 {renderLabel('Group Members (Optional)')}
                                 <TextInput
-                                    className="w-full px-3 py-2 border border-[#9B9999] rounded-lg bg-[#FFFCFC] text-sm text-black"
+                                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/20 text-white text-base"
                                     placeholder="Enter names"
+                                    placeholderTextColor="rgba(255,255,255,0.4)"
                                     multiline
                                     numberOfLines={2}
-                                    style={{ height: 60, textAlignVertical: 'top' }}
+                                    style={{ height: 80, textAlignVertical: 'top' }}
                                     value={form.group_members}
                                     onChangeText={(text) => setForm({ ...form, group_members: text })}
                                 />
                             </View>
 
-                            {/* Attachment (Placeholder) */}
-                            <View className="mb-6">
+                            {/* Attachment */}
+                            <View className="mb-8">
                                 {renderLabel('Attachment (Optional)')}
-                                <TouchableOpacity className="w-full h-10 border border-[#9B9999] rounded-lg bg-[#FFFCFC] items-center justify-center flex-row gap-2">
-                                    <Ionicons name="cloud-upload-outline" size={20} color="#666" />
-                                    <Text className="text-gray-500 text-sm">Upload File (Image)</Text>
+                                <TouchableOpacity className="w-full h-14 rounded-xl bg-white/5 border border-white/20 items-center justify-center flex-row gap-3">
+                                    <Ionicons name="cloud-upload-outline" size={24} color="rgba(255,255,255,0.7)" />
+                                    <Text className="text-white/70 text-base">Upload File (Image)</Text>
                                 </TouchableOpacity>
-                                <Text className="text-gray-400 text-xs mt-1 italic">We only accept png, jpeg and jpg for now</Text>
+                                <Text className="text-white/40 text-xs mt-2 italic">We only accept png, jpeg and jpg for now</Text>
                             </View>
 
                             {/* Buttons */}
-                            <View className="flex-row justify-end gap-3 pt-2">
+                            <View className="flex-row gap-4">
                                 <TouchableOpacity
                                     onPress={onClose}
-                                    className="px-4 py-2 rounded-lg border border-black bg-white"
+                                    className="flex-1 h-14 rounded-xl border-2 border-white/20 bg-transparent items-center justify-center"
                                 >
-                                    <Text className="text-black text-xs font-medium">Cancel</Text>
+                                    <Text className="text-white text-base font-semibold">Cancel</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     onPress={handleSubmit}
-                                    className="px-4 py-2 rounded-lg bg-[#155DFC]"
+                                    className="flex-1 h-14 rounded-xl bg-[#5B21B6] items-center justify-center"
+                                    style={{
+                                        shadowColor: '#5B21B6',
+                                        shadowOffset: { width: 0, height: 4 },
+                                        shadowOpacity: 0.3,
+                                        shadowRadius: 8,
+                                        elevation: 8,
+                                    }}
                                 >
-                                    <Text className="text-white text-xs font-medium">Submit Request</Text>
+                                    <Text className="text-white text-base font-bold">Submit Request</Text>
                                 </TouchableOpacity>
                             </View>
 

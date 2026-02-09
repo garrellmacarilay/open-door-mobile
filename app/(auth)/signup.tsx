@@ -31,7 +31,7 @@ export default function SignupPage() {
             {/* Background Image */}
             <Image
                 source={require('../../assets/images/lvccgate.jpg')}
-                className="absolute top-0 left-0 right-0 h-[42%]"
+                className="absolute top-0 left-0 right-0 h-[52%] w-[100%]"
                 style={{ borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }}
                 resizeMode="cover"
             />
@@ -39,7 +39,7 @@ export default function SignupPage() {
             {/* Dark Overlay for better text readability */}
             <LinearGradient
                 colors={['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.3)']}
-                className="absolute top-0 left-0 right-0 h-[42%]"
+                className="absolute top-0 left-0 right-0 h-[52%]"
                 style={{ borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }}
             />
 
@@ -140,7 +140,7 @@ export default function SignupPage() {
                                 {/* Signup Button */}
                                 <TouchableOpacity
                                     onPress={handleSignup}
-                                    className="w-full bg-blue-600 py-4 rounded-xl shadow-lg shadow-blue-600/30 active:bg-blue-700 mt-2"
+                                    className="w-full bg-[#122141] py-4 rounded-xl shadow-lg shadow-blue-600/30 active:bg-blue-700 mt-2"
                                 >
                                     <Text className="text-white text-center font-bold text-lg">
                                         Sign Up

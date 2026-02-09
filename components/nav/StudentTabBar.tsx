@@ -18,10 +18,9 @@ export default function StudentTabBar({ state, descriptors, navigation }: Bottom
     return (
         <View className="absolute bottom-8 left-0 right-0 items-center justify-center">
             <View
-                className="flex-row items-center justify-between rounded-full shadow-lg px-6 py-4"
+                className="flex-row items-center justify-between rounded-full shadow-lg px-6 py-4 bg-[#142240]"
                 style={{
                     width: width * 0.85,
-                    backgroundColor: '#142240', // Updated to match Upcoming Appointment Header
                     shadowColor: '#000',
                     shadowOffset: { width: 0, height: 4 },
                     shadowOpacity: 0.3,
@@ -55,12 +54,7 @@ export default function StudentTabBar({ state, descriptors, navigation }: Bottom
                             className="items-center justify-center"
                         >
                             <View
-                                className={`items-center justify-center rounded-full`}
-                                style={{
-                                    backgroundColor: isFocused ? '#5B21B6' : 'transparent', // Circle effect when clicked
-                                    width: 50,
-                                    height: 50,
-                                }}
+                                className={`items-center justify-center rounded-full w-[50px] h-[50px] ${isFocused ? 'bg-[#5B21B6]' : 'bg-transparent'}`}
                             >
                                 <IconComponent
                                     size={24}

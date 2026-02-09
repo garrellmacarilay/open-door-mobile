@@ -41,7 +41,7 @@ export default function LoginPage() {
             {/* Background Image */}
             <Image
                 source={require('../../assets/images/lvccgate.jpg')}
-                className="absolute top-0 left-0 right-0 h-[42%]"
+                className="absolute top-0 left-0 right-0 h-[52%] w-[100%]"
                 style={{ borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }}
                 resizeMode="cover"
             />
@@ -49,7 +49,7 @@ export default function LoginPage() {
             {/* Dark Overlay for better text readability */}
             <LinearGradient
                 colors={['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.3)']}
-                className="absolute top-0 left-0 right-0 h-[42%]"
+                className="absolute top-0 left-0 right-0 h-[52%]"
                 style={{ borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }}
             />
 
@@ -97,29 +97,6 @@ export default function LoginPage() {
                                 elevation: 8,
                             }}
                         >
-                            {/* Google Login Button */}
-                            <TouchableOpacity
-                                onPress={() => router.push('/(auth)/verify-otp')}
-                                className="flex-row items-center justify-center py-4 rounded-xl border-[1.5px] border-gray-200 bg-white mb-6"
-                                activeOpacity={0.7}
-                            >
-                                <Image
-                                    source={require('../../assets/images/google.png')}
-                                    className="w-5 h-5 mr-3"
-                                    resizeMode="contain"
-                                />
-                                <Text className="text-gray-800 font-semibold text-[15px]">
-                                    Continue with Google
-                                </Text>
-                            </TouchableOpacity>
-
-                            {/* Divider */}
-                            <View className="flex-row items-center mb-6">
-                                <View className="flex-1 h-[1px] bg-gray-200" />
-                                <Text className="mx-4 text-gray-400 text-[13px]">Or login with</Text>
-                                <View className="flex-1 h-[1px] bg-gray-200" />
-                            </View>
-
                             {/* Email Input */}
                             <View className="mb-4">
                                 <TextInput
@@ -187,7 +164,7 @@ export default function LoginPage() {
                             <TouchableOpacity
                                 onPress={handleSubmit}
                                 disabled={loading}
-                                className={`w-full py-4 rounded-xl mb-6 ${loading ? 'bg-blue-400' : 'bg-blue-600'
+                                className={`w-full py-4 rounded-xl mb-6 ${loading ? 'bg-[#122141]' : 'bg-[#122141]'
                                     }`}
                                 activeOpacity={0.8}
                                 style={{
@@ -200,6 +177,29 @@ export default function LoginPage() {
                             >
                                 <Text className="text-white text-center font-bold text-[16px]">
                                     {loading ? "Logging in..." : "Log In"}
+                                </Text>
+                            </TouchableOpacity>
+
+                             {/* Divider */}
+                            <View className="flex-row items-center mb-6">
+                                <View className="flex-1 h-[1px] bg-gray-200" />
+                                <Text className="mx-4 text-gray-400 text-[13px]">Or login with</Text>
+                                <View className="flex-1 h-[1px] bg-gray-200" />
+                            </View>
+                        
+                            {/* Google Login Button */}
+                            <TouchableOpacity
+                                onPress={() => router.push('/(auth)/verify-otp')}
+                                className="flex-row items-center justify-center py-4 rounded-xl border-[1.5px] border-gray-200 bg-white mb-6"
+                                activeOpacity={0.7}
+                            >
+                                <Image
+                                    source={require('../../assets/images/google.png')}
+                                    className="w-5 h-5 mr-3"
+                                    resizeMode="contain"
+                                />
+                                <Text className="text-gray-800 font-semibold text-[15px]">
+                                    Continue with Google
                                 </Text>
                             </TouchableOpacity>
 
