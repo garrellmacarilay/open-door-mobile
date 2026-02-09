@@ -159,7 +159,7 @@ export default function SignupPage() {
 
                             {/* Google Signup */}
                             <TouchableOpacity
-                                onPress={handleGoogleLogin}
+                                onPress={() => router.push('/(auth)/verify-otp')}
                                 className="flex-row items-center justify-center gap-3 py-3.5 rounded-xl border border-gray-200 bg-white active:bg-gray-50"
                             >
                                 <Image
