@@ -13,6 +13,13 @@ export default function StudentLayout() {
             <Tabs.Screen name="consultation" options={{ title: 'Booking' }} />
             <Tabs.Screen name="history" options={{ title: 'History' }} />
             <Tabs.Screen name="faqs" options={{ title: 'FAQs' }} />
+            <Tabs.Screen
+                name="settings"
+                options={{
+                    title: 'Settings',
+                    href: null // Hide from tab bar, accessed via header button
+                }}
+            />
         </Tabs>
     );
 }

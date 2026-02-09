@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
 interface DashboardHeaderProps {
     title?: string;
@@ -20,6 +21,16 @@ export default function DashboardHeader({
     onProfilePress,
     onNotificationPress
 }: DashboardHeaderProps) {
+    const router = useRouter();
+
+    const handleProfilePress = () => {
+        if (onProfilePress) {
+            onProfilePress();
+        } else {
+            router.push('/(student)/settings');
+        }
+    };
+
     return (
         <View className="bg-white shadow-sm px-4 pt-4 pb-4 flex-row items-center justify-between">
             <Text className="text-black text-2xl font-bold" style={{ fontFamily: 'Poppins-Bold' }}>
@@ -40,7 +51,7 @@ export default function DashboardHeader({
 
                 {/* Profile Info */}
                 <TouchableOpacity
-                    onPress={onProfilePress}
+                    onPress={handleProfilePress}
                     className="flex-row items-center gap-2"
                 >
                     <View className="items-end hidden md:flex">
