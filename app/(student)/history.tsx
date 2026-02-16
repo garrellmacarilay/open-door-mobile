@@ -41,6 +41,34 @@ type FilterStatus = 'all' | 'pending' | 'approved' | 'completed' | 'declined';
 export default function History() {
     const [activeFilter, setActiveFilter] = useState<FilterStatus>('all');
 
+    const getStatusStyle = (status: string) => {
+        switch (status) {
+            case 'pending': return { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Pending' };
+            case 'approved': return { bg: 'bg-green-100', text: 'text-green-700', label: 'Approved' };
+            case 'completed': return { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Completed' };
+            case 'declined': return { bg: 'bg-red-100', text: 'text-red-700', label: 'Declined' };
+            default: return { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Unknown' };
+        }
+    };
+
+    const filteredData = activeFilter === 'all'
+        ? HISTORY_DATA
+        : HISTORY_DATA.filter(item => item.status === activeFilter);
+
+    const FilterButton = ({ label, value }: { label: string; value: FilterStatus }) => {
+        const isActive = activeFilter === value;
+        return (
+            <TouchableOpacity
+                onPress={() => setActiveFilter(value)}
+                className={`px-4 py-2 rounded-lg ${isActive ? 'bg-[#1C2A48]' : 'bg-white border border-gray-200'}`}
+            >
+                <Text className={`text-xs font-semibold ${isActive ? 'text-white' : 'text-gray-600'}`} style={{ fontFamily: 'Inter-SemiBold' }}>
+                    {label}
+                </Text>
+            </TouchableOpacity>
+        );
+    };
+
     return (
         <SafeAreaView className="flex-1 bg-gray-50">
             <StatusBar style="dark" />
@@ -60,6 +88,17 @@ export default function History() {
                         <Ionicons name="calendar-outline" size={20} color="white" />
                     </TouchableOpacity>
                 </View>
+            </View>
+
+            {/* Filter Tabs */}
+            <View className="bg-white px-5 py-3 border-b border-gray-100">
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row gap-2">
+                    <FilterButton label="All" value="all" />
+                    <FilterButton label="Pending" value="pending" />
+                    <FilterButton label="Approved" value="approved" />
+                    <FilterButton label="Completed" value="completed" />
+                    <FilterButton label="Declined" value="declined" />
+                </ScrollView>
             </View>
         </SafeAreaView>
     );
