@@ -100,6 +100,69 @@ export default function History() {
                     <FilterButton label="Declined" value="declined" />
                 </ScrollView>
             </View>
+
+            {/* History List */}
+            <ScrollView className="flex-1 px-5 pt-4" showsVerticalScrollIndicator={false}>
+                {filteredData.map((item, index) => {
+                    const statusStyle = getStatusStyle(item.status);
+                    return (
+                        <View key={index} className="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-gray-100">
+                            {/* Header with ID and Status */}
+                            <View className="flex-row items-start justify-between mb-3">
+                                <View className="flex-1">
+                                    <Text className="text-gray-500 text-xs mb-1" style={{ fontFamily: 'Inter-Regular' }}>
+                                        {item.id}
+                                    </Text>
+                                    <Text className="text-[#1C2A48] text-base font-bold" style={{ fontFamily: 'Poppins-Bold' }}>
+                                        {item.title}
+                                    </Text>
+                                </View>
+                                <View className={`px-3 py-1.5 rounded-full ${statusStyle.bg}`}>
+                                    <Text className={`text-xs font-semibold ${statusStyle.text}`} style={{ fontFamily: 'Poppins-SemiBold' }}>
+                                        {statusStyle.label}
+                                    </Text>
+                                </View>
+                            </View>
+
+                            {/* Date and Time */}
+                            <View className="flex-row items-center gap-4 mb-4">
+                                <View className="flex-row items-center gap-1.5">
+                                    <Ionicons name="calendar-outline" size={14} color="#6B7280" />
+                                    <Text className="text-gray-600 text-xs" style={{ fontFamily: 'Inter-Regular' }}>
+                                        {item.date}
+                                    </Text>
+                                </View>
+                                <View className="flex-row items-center gap-1.5">
+                                    <Ionicons name="time-outline" size={14} color="#6B7280" />
+                                    <Text className="text-gray-600 text-xs" style={{ fontFamily: 'Inter-Regular' }}>
+                                        {item.time}
+                                    </Text>
+                                </View>
+                            </View>
+
+                            {/* View Appointment Button */}
+                            <TouchableOpacity className="bg-[#1C2A48] rounded-xl py-3 flex-row items-center justify-center gap-2">
+                                <Text className="text-white text-sm font-semibold" style={{ fontFamily: 'Poppins-SemiBold' }}>
+                                    View Appointment
+                                </Text>
+                                <Ionicons name="chevron-forward" size={16} color="white" />
+                            </TouchableOpacity>
+                        </View>
+                    );
+                })}
+
+                {filteredData.length === 0 && (
+                    <View className="bg-white rounded-2xl p-12 items-center">
+                        <Ionicons name="document-text-outline" size={48} color="#D1D5DB" />
+                        <Text className="text-gray-400 text-center mt-3" style={{ fontFamily: 'Inter-Regular' }}>
+                            No records found
+                        </Text>
+                    </View>
+                )}
+
+                {/* Padding for bottom nav */}
+                <View className="h-20" />
+            </ScrollView>
         </SafeAreaView>
     );
 }
