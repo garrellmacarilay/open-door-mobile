@@ -44,8 +44,22 @@ export default function History() {
     return (
         <SafeAreaView className="flex-1 bg-gray-50">
             <StatusBar style="dark" />
-            <View className="flex-1 items-center justify-center">
-                <Text className="text-gray-500">History Page</Text>
+
+            {/* Header */}
+            <View className="bg-white px-5 pt-4 pb-4 border-b border-gray-100">
+                <View className="flex-row items-start justify-between mb-1">
+                    <View className="flex-1">
+                        <Text className="text-[#1C2A48] text-2xl font-bold mb-1" style={{ fontFamily: 'Poppins-Bold' }}>
+                            Records
+                        </Text>
+                        <Text className="text-gray-500 text-xs" style={{ fontFamily: 'Inter-Regular' }}>
+                            Consultation History
+                        </Text>
+                    </View>
+                    <TouchableOpacity className="w-10 h-10 items-center justify-center bg-[#1C2A48] rounded-lg">
+                        <Ionicons name="calendar-outline" size={20} color="white" />
+                    </TouchableOpacity>
+                </View>
             </View>
         </SafeAreaView>
     );
