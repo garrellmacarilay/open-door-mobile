@@ -113,48 +113,67 @@ export default function CalendarWidget({
     };
 
     return (
-        <View className="bg-white rounded-xl p-4 shadow-sm mb-4">
-            {/* Header - Referenced from CalendarHeader.jsx but adapted for Mobile */}
-            <View className="flex-row justify-between items-center mb-6">
-                {/* Today Button (Icon) */}
-                <TouchableOpacity onPress={handleTodayClick} className="p-2 bg-gray-50 rounded-lg border border-gray-200">
-                    <Ionicons name="calendar-outline" size={18} color="#142240" />
-                </TouchableOpacity>
-
+        <View className="bg-white rounded-2xl p-5 shadow-md mb-4">
+            {/* Header */}
+            <View className="flex-row justify-between items-center mb-5">
                 {/* Month Navigation */}
-                <View className="flex-row items-center gap-4">
-                    <TouchableOpacity onPress={() => navigateMonth('prev')}>
-                        <Ionicons name="chevron-back" size={20} color="#142240" />
+                <View className="flex-row items-center gap-3">
+                    <TouchableOpacity onPress={() => navigateMonth('prev')} className="w-8 h-8 items-center justify-center">
+                        <Ionicons name="chevron-back" size={20} color="#1C2A48" />
                     </TouchableOpacity>
-                    <Text className="text-base font-bold text-[#142240]" style={{ fontFamily: 'Poppins-Bold' }}>
+                    <Text className="text-lg font-bold text-[#1C2A48] min-w-[140px] text-center" style={{ fontFamily: 'Poppins-Bold' }}>
                         {monthName}
                     </Text>
-                    <TouchableOpacity onPress={() => navigateMonth('next')}>
-                        <Ionicons name="chevron-forward" size={20} color="#142240" />
+                    <TouchableOpacity onPress={() => navigateMonth('next')} className="w-8 h-8 items-center justify-center">
+                        <Ionicons name="chevron-forward" size={20} color="#1C2A48" />
                     </TouchableOpacity>
                 </View>
 
-                {/* Book/Add Button (Placeholder for 'Book Consultation') */}
+                {/* Book Button */}
                 <TouchableOpacity
-                    className="p-2 bg-[#1156E8] rounded-lg"
+                    className="bg-[#1C2A48] rounded-lg px-4 py-2"
                     onPress={onBookPress}
                 >
-                    <Ionicons name="add" size={18} color="white" />
+                    <Text className="text-white text-xs font-semibold" style={{ fontFamily: 'Poppins-SemiBold' }}>
+                        Book
+                    </Text>
                 </TouchableOpacity>
             </View>
 
             {/* Weekdays */}
-            <View className="flex-row justify-between mb-2 border-b border-gray-100 pb-2">
-                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
-                    <Text key={index} className="w-[14.28%] text-center text-xs text-gray-400 font-medium" style={{ fontFamily: 'Inter-Medium' }}>
-                        {day}
-                    </Text>
+            <View className="flex-row justify-between mb-3">
+                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
+                    <View key={index} className="w-[14.28%] items-center">
+                        <Text className="text-xs text-gray-500 font-semibold" style={{ fontFamily: 'Inter-SemiBold' }}>
+                            {day}
+                        </Text>
+                    </View>
                 ))}
             </View>
 
             {/* Grid */}
-            <View className="flex-row flex-wrap">
+            <View className="flex-row flex-wrap mb-4">
                 {renderDays()}
+            </View>
+
+            {/* Color Legend */}
+            <View className="flex-row justify-center items-center gap-4 pt-3 border-t border-gray-100">
+                <View className="flex-row items-center gap-1.5">
+                    <View className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
+                    <Text className="text-[10px] text-gray-600">Pending</Text>
+                </View>
+                <View className="flex-row items-center gap-1.5">
+                    <View className="w-2.5 h-2.5 rounded-full bg-green-500" />
+                    <Text className="text-[10px] text-gray-600">Approved</Text>
+                </View>
+                <View className="flex-row items-center gap-1.5">
+                    <View className="w-2.5 h-2.5 rounded-full bg-red-400" />
+                    <Text className="text-[10px] text-gray-600">Declined</Text>
+                </View>
+                <View className="flex-row items-center gap-1.5">
+                    <View className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                    <Text className="text-[10px] text-gray-600">Completed</Text>
+                </View>
             </View>
         </View>
     );

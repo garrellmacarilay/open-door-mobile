@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, SafeAreaView } from 'react-native';
+import { View, Text, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import DashboardHeader from '../../components/student/DashboardHeader';
 import AppointmentCard from '../../components/student/AppointmentCard';
 import CalendarWidget from '../../components/student/CalendarWidget';
@@ -37,6 +38,8 @@ const DUMMY_APPOINTMENTS = [
 export default function StudentDashboard() {
     const [appointments, setAppointments] = useState(DUMMY_APPOINTMENTS);
     const [isBookingModalVisible, setBookingModalVisible] = useState(false);
+    const [selectedOffice, setSelectedOffice] = useState('All Offices');
+    const [selectedStatus, setSelectedStatus] = useState('All Status');
 
     const handleBookConsultation = (formData: any) => {
         console.log('Booking submitted:', formData);
@@ -58,47 +61,73 @@ export default function StudentDashboard() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50 pt-12">
-            <StatusBar style="dark" />
+        <SafeAreaView className="flex-1 bg-gray-50">
+            <StatusBar style="light" />
 
             {/* Header */}
             <DashboardHeader
                 user={{ name: "Garrell Macarilay", email: "student@example.com" }}
             />
 
-            <ScrollView className="flex-1 px-4 pt-4" showsVerticalScrollIndicator={false}>
-
-                {/* Calendar Section */}
-                <View className="mb-2">
-                    <CalendarWidget
-                        events={appointments}
-                        // onDateSelect={(date) => console.log('Selected', date)} 
-                        onBookPress={() => setBookingModalVisible(true)}
-                    />
+            <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+                {/* Title Section */}
+                <View className="bg-white px-5 pt-4 pb-3 border-b border-gray-100">
+                    <Text className="text-[#1C2A48] text-xl font-bold mb-1" style={{ fontFamily: 'Poppins-Bold' }}>
+                        Student Dashboard
+                    </Text>
+                    <Text className="text-gray-500 text-xs" style={{ fontFamily: 'Inter-Regular' }}>
+                        Student Consultation Overview
+                    </Text>
                 </View>
 
-                {/* Upcoming Appointments Section */}
-                <View className="mb-6">
-                    <View className="bg-[#142240] rounded-t-lg py-3 px-4 mb-0 shadow-sm flex-row items-center">
-                        <Text className="text-white font-bold text-base" style={{ fontFamily: 'Inter-Bold' }}>
-                            Upcoming Appointments
+                {/* Filter Section */}
+                <View className="bg-white px-5 py-3 flex-row gap-3 border-b border-gray-100">
+                    {/* All Offices Dropdown */}
+                    <TouchableOpacity className="flex-1 flex-row items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5">
+                        <Text className="text-gray-700 text-xs" style={{ fontFamily: 'Inter-Medium' }}>
+                            {selectedOffice}
                         </Text>
-                    </View>
+                        <Ionicons name="chevron-down" size={14} color="#6B7280" />
+                    </TouchableOpacity>
 
-                    <View className="bg-white p-3 rounded-b-lg shadow-sm min-h-[100px]">
+                    {/* All Status Dropdown */}
+                    <TouchableOpacity className="flex-1 flex-row items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5">
+                        <Text className="text-gray-700 text-xs" style={{ fontFamily: 'Inter-Medium' }}>
+                            {selectedStatus}
+                        </Text>
+                        <Ionicons name="chevron-down" size={14} color="#6B7280" />
+                    </TouchableOpacity>
+                </View>
+
+                <View className="px-5 pt-4">
+                    {/* Calendar Section */}
+                    <CalendarWidget
+                        events={appointments}
+                        onBookPress={() => setBookingModalVisible(true)}
+                    />
+
+                    {/* Appointment Feed Section */}
+                    <View className="mb-6">
+                        <Text className="text-[#1C2A48] text-base font-bold mb-4" style={{ fontFamily: 'Poppins-Bold' }}>
+                            Appointment Feed
+                        </Text>
+
                         {appointments.map(apt => (
                             // @ts-ignore
                             <AppointmentCard key={apt.id} appointment={apt} />
                         ))}
 
                         {appointments.length === 0 && (
-                            <Text className="text-gray-500 text-center py-4">No upcoming appointments</Text>
+                            <View className="bg-white rounded-xl p-8 items-center">
+                                <Ionicons name="calendar-outline" size={48} color="#D1D5DB" />
+                                <Text className="text-gray-400 text-center mt-3">No appointments scheduled</Text>
+                            </View>
                         )}
                     </View>
-                </View>
 
-                {/* Padding for bottom nav */}
-                <View className="h-20" />
+                    {/* Padding for bottom nav */}
+                    <View className="h-20" />
+                </View>
             </ScrollView>
 
             <BookConsultationModal
