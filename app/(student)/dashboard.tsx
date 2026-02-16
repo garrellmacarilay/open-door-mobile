@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import DashboardHeader from '../../components/student/DashboardHeader';
 import AppointmentCard from '../../components/student/AppointmentCard';
