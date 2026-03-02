@@ -65,35 +65,44 @@ export default function StudentDashboard() {
 
             <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
                 {/* Title Section */}
-                <View className="bg-white px-5 pt-4 pb-3 border-b border-gray-100">
-                    <Text className="text-[#1C2A48] text-xl font-bold mb-1" style={{ fontFamily: 'Poppins-Bold' }}>
-                        Student Dashboard
-                    </Text>
-                    <Text className="text-gray-500 text-xs" style={{ fontFamily: 'Inter-Regular' }}>
+                <View className="px-6 pt-5 pb-4">
+                    <View className="flex-row items-center justify-between mb-1">
+                        <Text className="text-[#1C274C] text-[24px] font-extrabold tracking-[-0.5px]">
+                            Student Dashboard
+                        </Text>
+                        <TouchableOpacity activeOpacity={0.7} className="p-1">
+                            <Ionicons name="grid" size={24} color="#1C274C" />
+                        </TouchableOpacity>
+                    </View>
+                    <Text className="text-[#6B7280] text-[15px] font-semibold">
                         Student Consultation Overview
                     </Text>
                 </View>
 
                 {/* Filter Section */}
-                <View className="bg-white px-5 py-3 flex-row gap-3 border-b border-gray-100">
+                <View className="px-6 flex-row gap-4 mb-6">
                     {/* All Offices Dropdown */}
-                    <TouchableOpacity className="flex-1 flex-row items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5">
-                        <Text className="text-gray-700 text-xs" style={{ fontFamily: 'Inter-Medium' }}>
+                    <TouchableOpacity className="flex-1 flex-row items-center justify-between bg-white border border-gray-200 rounded-[12px] px-3.5 py-3 shadow-sm" activeOpacity={0.7}>
+                        <Text className="text-[#1C274C] text-[13px] font-bold">
                             {selectedOffice}
                         </Text>
-                        <Ionicons name="chevron-down" size={14} color="#6B7280" />
+                        <View className="bg-gray-100 rounded-md p-0.5">
+                            <Ionicons name="chevron-down" size={14} color="#6B7280" />
+                        </View>
                     </TouchableOpacity>
 
                     {/* All Status Dropdown */}
-                    <TouchableOpacity className="flex-1 flex-row items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5">
-                        <Text className="text-gray-700 text-xs" style={{ fontFamily: 'Inter-Medium' }}>
+                    <TouchableOpacity className="flex-1 flex-row items-center justify-between bg-white border border-gray-200 rounded-[12px] px-3.5 py-3 shadow-sm" activeOpacity={0.7}>
+                        <Text className="text-[#1C274C] text-[13px] font-bold">
                             {selectedStatus}
                         </Text>
-                        <Ionicons name="chevron-down" size={14} color="#6B7280" />
+                        <View className="bg-gray-100 rounded-md p-0.5">
+                            <Ionicons name="chevron-down" size={14} color="#6B7280" />
+                        </View>
                     </TouchableOpacity>
                 </View>
 
-                <View className="px-5 pt-4">
+                <View className="px-6 mt-2">
                     {/* Calendar Section */}
                     <CalendarWidget
                         events={appointments}
@@ -101,8 +110,8 @@ export default function StudentDashboard() {
                     />
 
                     {/* Appointment Feed Section */}
-                    <View className="mb-6">
-                        <Text className="text-[#1C2A48] text-base font-bold mb-4" style={{ fontFamily: 'Poppins-Bold' }}>
+                    <View className="mb-6 mt-4">
+                        <Text className="text-[#1C274C] text-[22px] font-bold tracking-tight mb-5">
                             Appointment Feed
                         </Text>
 
