@@ -138,6 +138,22 @@ export default function StudentDashboard() {
                 onClose={() => setBookingModalVisible(false)}
                 onSubmit={handleBookConsultation}
             />
+
+            {/* Floating Action Button for Booking */}
+            <TouchableOpacity
+                onPress={() => setBookingModalVisible(true)}
+                activeOpacity={0.8}
+                className="absolute right-6 bottom-28 w-[56px] h-[56px] bg-[#18233D] rounded-full items-center justify-center border-[2.5px] border-white z-50"
+                style={{
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.2,
+                    shadowRadius: 8,
+                    elevation: 6,
+                }}
+            >
+                <Ionicons name="add" size={30} color="#FFFFFF" />
+            </TouchableOpacity>
         </View>
     );
 }
