@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 
@@ -58,7 +57,7 @@ export default function FAQs() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-white">
+        <View className="flex-1 bg-white">
             <StatusBar style="dark" />
 
             {/* Header */}
@@ -140,6 +139,6 @@ export default function FAQs() {
                 {/* Bottom Spacing */}
                 <View className="h-6" />
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 }

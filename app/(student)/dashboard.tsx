@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import DashboardHeader from '../../components/student/DashboardHeader';
 import AppointmentCard from '../../components/student/AppointmentCard';
 import CalendarWidget from '../../components/student/CalendarWidget';
 import BookConsultationModal from '../../components/student/BookConsultationModal';
@@ -62,13 +60,8 @@ export default function StudentDashboard() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
+        <View className="flex-1 bg-gray-50">
             <StatusBar style="light" />
-
-            {/* Header */}
-            <DashboardHeader
-                user={{ name: "Garrell Macarilay", email: "student@example.com" }}
-            />
 
             <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
                 {/* Title Section */}
@@ -136,6 +129,6 @@ export default function StudentDashboard() {
                 onClose={() => setBookingModalVisible(false)}
                 onSubmit={handleBookConsultation}
             />
-        </SafeAreaView>
+        </View>
     );
 }

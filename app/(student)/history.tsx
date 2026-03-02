@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 
@@ -70,7 +69,7 @@ export default function History() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
+        <View className="flex-1 bg-gray-50">
             <StatusBar style="dark" />
 
             {/* Header */}
@@ -163,6 +162,6 @@ export default function History() {
                 {/* Padding for bottom nav */}
                 <View className="h-20" />
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 }
