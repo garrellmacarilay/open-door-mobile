@@ -143,7 +143,7 @@ export default function StudentDashboard() {
             <TouchableOpacity
                 onPress={() => setBookingModalVisible(true)}
                 activeOpacity={0.8}
-                className="absolute right-6 bottom-28 w-[56px] h-[56px] bg-[#18233D] rounded-full items-center justify-center border-[2.5px] border-white z-50"
+                className="absolute right-7 bottom-[120px] w-[56px] h-[56px] bg-[#18233D] rounded-full items-center justify-center border-[2.5px] border-white z-50"
                 style={{
                     shadowColor: '#000',
                     shadowOffset: { width: 0, height: 4 },

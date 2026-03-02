@@ -69,7 +69,7 @@ export default function CalendarWidget({
                 const fadeDay = dayNumber <= 0 ? prevMonthDays + dayNumber : dayNumber - daysInMonth;
 
                 days.push(
-                    <View key={`empty-${i}`} className="w-[14.28%] aspect-square flex items-center justify-start pt-2">
+                    <View key={`empty-${i}`} className="w-[14.28%] aspect-square flex items-center justify-start pt-2 mb-3">
                         <Text className="text-[13px] font-bold text-gray-300">
                             {fadeDay}
                         </Text>
@@ -85,7 +85,7 @@ export default function CalendarWidget({
             days.push(
                 <TouchableOpacity
                     key={dayNumber}
-                    className="w-[14.28%] aspect-square items-center justify-start pt-2 relative"
+                    className="w-[14.28%] aspect-square items-center justify-start pt-2 mb-3 relative"
                     onPress={() => {
                         setSelectedDate(cellDate);
                         onDateSelect?.(cellDate);
@@ -145,9 +145,9 @@ export default function CalendarWidget({
             </View>
 
             {/* Calendar Body */}
-            <View className="px-4 pt-4 pb-6">
+            <View className="px-4 pt-4 pb-7">
                 {/* Weekdays */}
-                <View className="flex-row justify-between mb-2">
+                <View className="flex-row justify-between mb-3">
                     {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => {
                         const isWeekend = index === 0 || index === 6;
                         return (
@@ -161,7 +161,7 @@ export default function CalendarWidget({
                 </View>
 
                 {/* Grid */}
-                <View className="flex-row flex-wrap mb-6">
+                <View className="flex-row flex-wrap mb-1">
                     {renderDays()}
                 </View>
 
