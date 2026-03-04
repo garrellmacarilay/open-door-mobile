@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { StatusBar } from 'expo-status-bar';
 
 interface FAQ {
     id: number;
@@ -58,7 +57,6 @@ export default function FAQs() {
 
     return (
         <View className="flex-1 bg-white">
-            <StatusBar style="dark" />
 
             {/* Header */}
             <View className="px-6 pt-4 pb-6 bg-white border-b border-gray-100">
@@ -136,8 +134,8 @@ export default function FAQs() {
                     ))}
                 </View>
 
-                {/* Bottom Spacing */}
-                <View className="h-6" />
+                {/* Bottom Spacing — clears the tab bar */}
+                <View className="h-28" />
             </ScrollView>
         </View>
     );

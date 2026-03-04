@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { StatusBar } from 'expo-status-bar';
 import HistoryModal from '../../components/student/HistoryModal';
 
 // Dummy Data
@@ -72,7 +71,6 @@ export default function History() {
 
     return (
         <View className="flex-1 bg-gray-50">
-            <StatusBar style="dark" />
 
             {/* Header */}
             <View className="bg-white px-5 pt-4 pb-4 border-b border-gray-100">
