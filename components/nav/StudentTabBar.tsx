@@ -28,42 +28,44 @@ export default function StudentTabBar({ state, descriptors, navigation }: Bottom
                     elevation: 5,
                 }}
             >
-                {state.routes.map((route, index) => {
-                    const { options } = descriptors[route.key];
-                    const isFocused = state.index === index;
+                {state.routes
+                    .filter(route => Object.keys(ICONS).includes(route.name))
+                    .map((route, index) => {
+                        const { options } = descriptors[route.key];
+                        const isFocused = state.index === state.routes.findIndex(r => r.key === route.key);
 
-                    const onPress = () => {
-                        const event = navigation.emit({
-                            type: 'tabPress',
-                            target: route.key,
-                            canPreventDefault: true,
-                        });
+                        const onPress = () => {
+                            const event = navigation.emit({
+                                type: 'tabPress',
+                                target: route.key,
+                                canPreventDefault: true,
+                            });
 
-                        if (!isFocused && !event.defaultPrevented) {
-                            navigation.navigate(route.name);
-                        }
-                    };
+                            if (!isFocused && !event.defaultPrevented) {
+                                navigation.navigate(route.name);
+                            }
+                        };
 
-                    const IconComponent = ICONS[route.name] || LayoutDashboard;
+                        const IconComponent = ICONS[route.name] || LayoutDashboard;
 
-                    return (
-                        <TouchableOpacity
-                            key={route.key}
-                            onPress={onPress}
-                            activeOpacity={0.7}
-                            className="items-center justify-center"
-                        >
-                            <View
-                                className={`items-center justify-center rounded-full w-[50px] h-[50px] ${isFocused ? 'bg-[#5B21B6]' : 'bg-transparent'}`}
+                        return (
+                            <TouchableOpacity
+                                key={route.key}
+                                onPress={onPress}
+                                activeOpacity={0.7}
+                                className="items-center justify-center flex-1"
                             >
-                                <IconComponent
-                                    size={24}
-                                    color={isFocused ? 'white' : '#9CA3AF'}
-                                />
-                            </View>
-                        </TouchableOpacity>
-                    );
-                })}
+                                <View
+                                    className={`items-center justify-center rounded-xl w-[50px] h-[50px] ${isFocused ? 'bg-[#5B21B6]' : 'bg-transparent'}`}
+                                >
+                                    <IconComponent
+                                        size={24}
+                                        color={isFocused ? 'white' : '#9CA3AF'}
+                                    />
+                                </View>
+                            </TouchableOpacity>
+                        );
+                    })}
             </View>
         </View>
     );
