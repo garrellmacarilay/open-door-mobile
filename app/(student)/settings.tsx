@@ -14,6 +14,7 @@ import {
     View,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import LogoutConfirmationModal from '../../components/common/LogoutConfirmationModal';
 
 export default function UserSettingsPage() {
     const router = useRouter();
@@ -29,6 +30,7 @@ export default function UserSettingsPage() {
     const [showCurrent, setShowCurrent] = useState(false);
     const [showNew, setShowNew] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
 
     // Handle image picker
     const handleImagePicker = async () => {
@@ -63,18 +65,7 @@ export default function UserSettingsPage() {
 
     // Handle logout
     const handleLogout = () => {
-        Alert.alert(
-            'Logout',
-            'Are you sure you want to logout?',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Logout',
-                    style: 'destructive',
-                    onPress: () => router.replace('/(auth)/login'),
-                },
-            ]
-        );
+        setShowLogoutModal(true);
     };
 
     return (
@@ -235,6 +226,15 @@ export default function UserSettingsPage() {
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
+
+            <LogoutConfirmationModal
+                visible={showLogoutModal}
+                onCancel={() => setShowLogoutModal(false)}
+                onConfirm={() => {
+                    setShowLogoutModal(false);
+                    router.replace('/(auth)/login');
+                }}
+            />
         </View>
     );
 }
