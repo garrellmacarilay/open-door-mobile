@@ -4,7 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import AppointmentCard from '../../components/student/AppointmentCard';
 import CalendarWidget from '../../components/student/CalendarWidget';
 import BookConsultationModal from '../../components/student/BookConsultationModal';
-import { StatusBar } from 'expo-status-bar';
+import BookingInfoModal from '../../components/student/BookingInfoModal';
+import BookingSuccessModal from '../../components/student/BookingSuccessModal';
 
 // Dummy Data
 const DUMMY_APPOINTMENTS = [
@@ -36,32 +37,45 @@ const DUMMY_APPOINTMENTS = [
 
 export default function StudentDashboard() {
     const [appointments, setAppointments] = useState(DUMMY_APPOINTMENTS);
-    const [isBookingModalVisible, setBookingModalVisible] = useState(false);
+    const [showInfoModal, setShowInfoModal] = useState(false);
+    const [showBookingModal, setShowBookingModal] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [selectedOffice, setSelectedOffice] = useState('All Offices');
     const [selectedStatus, setSelectedStatus] = useState('All Status');
 
+    // Step 1: FAB pressed → show info modal
+    const handleFabPress = () => {
+        setShowInfoModal(true);
+    };
+
+    // Step 2: Info modal "Continue" → show booking form
+    const handleInfoContinue = () => {
+        setShowInfoModal(false);
+        setShowBookingModal(true);
+    };
+
+    // Step 3: Booking form submitted → show success
     const handleBookConsultation = (formData: any) => {
-        console.log('Booking submitted:', formData);
-        // Add to appointments dummy data for now
         const newAppointment = {
             id: Math.random(),
-            title: `${formData.service_type} Session`,
+            title: `${formData.topic || 'New'} Session`,
             details: {
                 student: "Current User",
-                office: "Selected Office", // Map ID to name if real app
+                office: formData.office || "Selected Office",
                 status: "pending",
-                service_type: formData.service_type
+                service_type: formData.topic
             },
-            dateString: new Date(formData.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+            dateString: formData.date,
             time: formData.time
         };
         // @ts-ignore
         setAppointments([...appointments, newAppointment]);
+        setShowBookingModal(false);
+        setShowSuccessModal(true);
     };
 
     return (
         <View className="flex-1 bg-gray-50">
-            <StatusBar style="light" />
 
             <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
                 {/* Title Section */}
@@ -81,7 +95,6 @@ export default function StudentDashboard() {
 
                 {/* Filter Section */}
                 <View className="px-6 flex-row gap-4 mb-6">
-                    {/* All Offices Dropdown */}
                     <TouchableOpacity className="flex-1 flex-row items-center justify-between bg-white border border-gray-200 rounded-[12px] px-3.5 py-3 shadow-sm" activeOpacity={0.7}>
                         <Text className="text-[#1C274C] text-[13px] font-bold">
                             {selectedOffice}
@@ -91,7 +104,6 @@ export default function StudentDashboard() {
                         </View>
                     </TouchableOpacity>
 
-                    {/* All Status Dropdown */}
                     <TouchableOpacity className="flex-1 flex-row items-center justify-between bg-white border border-gray-200 rounded-[12px] px-3.5 py-3 shadow-sm" activeOpacity={0.7}>
                         <Text className="text-[#1C274C] text-[13px] font-bold">
                             {selectedStatus}
@@ -106,7 +118,7 @@ export default function StudentDashboard() {
                     {/* Calendar Section */}
                     <CalendarWidget
                         events={appointments}
-                        onBookPress={() => setBookingModalVisible(true)}
+                        onBookPress={handleFabPress}
                     />
 
                     {/* Appointment Feed Section */}
@@ -129,19 +141,33 @@ export default function StudentDashboard() {
                     </View>
 
                     {/* Padding for bottom nav */}
-                    <View className="h-20" />
+                    <View className="h-24" />
                 </View>
             </ScrollView>
 
+            {/* Step 1: Pre-info modal */}
+            <BookingInfoModal
+                visible={showInfoModal}
+                onClose={() => setShowInfoModal(false)}
+                onContinue={handleInfoContinue}
+            />
+
+            {/* Step 2: Booking form modal */}
             <BookConsultationModal
-                visible={isBookingModalVisible}
-                onClose={() => setBookingModalVisible(false)}
+                visible={showBookingModal}
+                onClose={() => setShowBookingModal(false)}
                 onSubmit={handleBookConsultation}
             />
 
-            {/* Floating Action Button for Booking */}
+            {/* Step 3: Success modal */}
+            <BookingSuccessModal
+                visible={showSuccessModal}
+                onClose={() => setShowSuccessModal(false)}
+            />
+
+            {/* Floating Action Button */}
             <TouchableOpacity
-                onPress={() => setBookingModalVisible(true)}
+                onPress={handleFabPress}
                 activeOpacity={0.8}
                 className="absolute right-7 bottom-[120px] w-[56px] h-[56px] bg-[#18233D] rounded-full items-center justify-center border-[2.5px] border-white z-50"
                 style={{
@@ -157,3 +183,4 @@ export default function StudentDashboard() {
         </View>
     );
 }
+

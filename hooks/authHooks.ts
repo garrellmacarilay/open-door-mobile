@@ -7,7 +7,7 @@ export const useLogin = () => {
     const [message, setMessage] = useState('');
     const router = useRouter();
 
-    const handleLogin = async (email, password) => {
+    const handleLogin = async (email: string, password: string) => {
         setLoading(true);
         setMessage('');
         try {
