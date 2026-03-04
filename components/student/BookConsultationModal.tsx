@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, TouchableOpacity, TextInput, ScrollView, FlatList, Platform, KeyboardAvoidingView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import DatePickerModal from './DatePickerModal';
 
 interface BookConsultationModalProps {
     visible: boolean;
@@ -31,6 +32,7 @@ export default function BookConsultationModal({ visible, onClose, onSubmit }: Bo
         group_members: '',
     });
     const [showOfficePicker, setShowOfficePicker] = useState(false);
+    const [showDatePicker, setShowDatePicker] = useState(false);
 
     // Helper for labels
     const renderLabel = (text: string, required = false) => (
@@ -111,16 +113,16 @@ export default function BookConsultationModal({ visible, onClose, onSubmit }: Bo
                                 <View className="flex-row gap-3 mb-4">
                                     <View className="flex-1">
                                         {renderLabel('Date', true)}
-                                        <View className="w-full h-[46px] border border-gray-200 rounded-[10px] px-3 flex-row items-center justify-between bg-white">
-                                            <TextInput
-                                                className="flex-1 text-[#1F2937] text-[14px]"
-                                                placeholder="mm/dd/yyyy"
-                                                placeholderTextColor="#9CA3AF"
-                                                value={form.date}
-                                                onChangeText={(text) => setForm({ ...form, date: text })}
-                                            />
-                                            <Ionicons name="calendar-outline" size={18} color="#9CA3AF" />
-                                        </View>
+                                        <TouchableOpacity
+                                            className={`w-full h-[46px] border rounded-[10px] px-3 flex-row items-center justify-between bg-white ${form.date ? 'border-[#1D4ED8]' : 'border-gray-200'}`}
+                                            activeOpacity={0.7}
+                                            onPress={() => setShowDatePicker(true)}
+                                        >
+                                            <Text className={`text-[14px] ${form.date ? 'text-[#1C274C] font-semibold' : 'text-gray-400'}`}>
+                                                {form.date || 'mm/dd/yyyy'}
+                                            </Text>
+                                            <Ionicons name="calendar-outline" size={18} color={form.date ? '#1D4ED8' : '#9CA3AF'} />
+                                        </TouchableOpacity>
                                     </View>
                                     <View className="flex-1">
                                         {renderLabel('Time', true)}
@@ -255,6 +257,15 @@ export default function BookConsultationModal({ visible, onClose, onSubmit }: Bo
                     </View>
                 </TouchableOpacity>
             </Modal>
+
+            {/* Date Picker Calendar */}
+            <DatePickerModal
+                visible={showDatePicker}
+                selectedDate={form.date}
+                onSelect={(date) => setForm(prev => ({ ...prev, date }))}
+                onClose={() => setShowDatePicker(false)}
+                minDaysFromNow={2}
+            />
         </>
     );
 }
