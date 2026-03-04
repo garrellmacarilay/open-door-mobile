@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Modal, TouchableOpacity, TextInput, ScrollView, FlatList, Platform, KeyboardAvoidingView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DatePickerModal from './DatePickerModal';
+import TimePickerModal from './TimePickerModal';
 
 interface BookConsultationModalProps {
     visible: boolean;
@@ -33,6 +34,7 @@ export default function BookConsultationModal({ visible, onClose, onSubmit }: Bo
     });
     const [showOfficePicker, setShowOfficePicker] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
+    const [showTimePicker, setShowTimePicker] = useState(false);
 
     // Helper for labels
     const renderLabel = (text: string, required = false) => (
@@ -126,16 +128,16 @@ export default function BookConsultationModal({ visible, onClose, onSubmit }: Bo
                                     </View>
                                     <View className="flex-1">
                                         {renderLabel('Time', true)}
-                                        <View className="w-full h-[46px] border border-gray-200 rounded-[10px] px-3 flex-row items-center justify-between bg-white">
-                                            <TextInput
-                                                className="flex-1 text-[#1F2937] text-[14px]"
-                                                placeholder="Ex. 8:00 AM"
-                                                placeholderTextColor="#9CA3AF"
-                                                value={form.time}
-                                                onChangeText={(text) => setForm({ ...form, time: text })}
-                                            />
-                                            <Ionicons name="chevron-down" size={18} color="#9CA3AF" />
-                                        </View>
+                                        <TouchableOpacity
+                                            className={`w-full h-[46px] border rounded-[10px] px-3 flex-row items-center justify-between bg-white ${form.time ? 'border-[#1D4ED8]' : 'border-gray-200'}`}
+                                            activeOpacity={0.7}
+                                            onPress={() => setShowTimePicker(true)}
+                                        >
+                                            <Text className={`text-[14px] ${form.time ? 'text-[#1C274C] font-semibold' : 'text-gray-400'}`}>
+                                                {form.time || 'Ex. 8:00 AM'}
+                                            </Text>
+                                            <Ionicons name="time-outline" size={18} color={form.time ? '#1D4ED8' : '#9CA3AF'} />
+                                        </TouchableOpacity>
                                     </View>
                                 </View>
 
@@ -265,6 +267,14 @@ export default function BookConsultationModal({ visible, onClose, onSubmit }: Bo
                 onSelect={(date) => setForm(prev => ({ ...prev, date }))}
                 onClose={() => setShowDatePicker(false)}
                 minDaysFromNow={2}
+            />
+
+            {/* Time Picker */}
+            <TimePickerModal
+                visible={showTimePicker}
+                selectedTime={form.time}
+                onSelect={(time) => setForm(prev => ({ ...prev, time }))}
+                onClose={() => setShowTimePicker(false)}
             />
         </>
     );
