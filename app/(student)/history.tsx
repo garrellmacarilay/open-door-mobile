@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
+import HistoryModal from '../../components/student/HistoryModal';
 
 // Dummy Data
 const HISTORY_DATA = [
     {
         id: '21 - 0007/IMTC',
         title: 'Student Organization',
-        date: '2026-2-20',
+        date: '2026-02-20',
         time: '10:00 AM',
         status: 'approved'
     },
@@ -22,14 +23,14 @@ const HISTORY_DATA = [
     {
         id: '23 - 0007/IMTC',
         title: 'Student Publication',
-        date: '2026-14-20',
+        date: '2026-04-20',
         time: '10:00 AM',
         status: 'declined'
     },
     {
         id: '23 - 0007/IMTC',
         title: 'Medical Services',
-        date: '2026-14-20',
+        date: '2026-04-20',
         time: '10:00 AM',
         status: 'completed'
     }
@@ -39,6 +40,7 @@ type FilterStatus = 'all' | 'pending' | 'approved' | 'completed' | 'declined';
 
 export default function History() {
     const [activeFilter, setActiveFilter] = useState<FilterStatus>('all');
+    const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
 
     const getStatusStyle = (status: string) => {
         switch (status) {
@@ -140,7 +142,10 @@ export default function History() {
                             </View>
 
                             {/* View Appointment Button */}
-                            <TouchableOpacity className="bg-[#1C2A48] rounded-xl py-3 flex-row items-center justify-center gap-2">
+                            <TouchableOpacity
+                                className="bg-[#1C2A48] rounded-xl py-3 flex-row items-center justify-center gap-2"
+                                onPress={() => setSelectedAppointment(item)}
+                            >
                                 <Text className="text-white text-sm font-semibold" style={{ fontFamily: 'Poppins-SemiBold' }}>
                                     View Appointment
                                 </Text>
@@ -160,8 +165,14 @@ export default function History() {
                 )}
 
                 {/* Padding for bottom nav */}
-                <View className="h-20" />
+                <View className="h-24" />
             </ScrollView>
+
+            <HistoryModal
+                visible={!!selectedAppointment}
+                appointment={selectedAppointment}
+                onClose={() => setSelectedAppointment(null)}
+            />
         </View>
     );
 }

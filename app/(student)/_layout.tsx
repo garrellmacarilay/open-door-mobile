@@ -16,7 +16,6 @@ export default function StudentLayout() {
                     }}
                 >
                     <Tabs.Screen name="dashboard" options={{ title: 'Dashboard' }} />
-                    <Tabs.Screen name="consultation" options={{ title: 'Booking' }} />
                     <Tabs.Screen name="history" options={{ title: 'History' }} />
                     <Tabs.Screen name="faqs" options={{ title: 'FAQs' }} />
                 </Tabs>
