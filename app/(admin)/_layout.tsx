@@ -12,6 +12,7 @@ export default function AdminLayout() {
             <DashboardHeader
                 user={{ name: 'Admin User', email: 'admin@example.com' }}
                 onProfilePress={() => router.push('/(admin)/settings')}
+                hideNotification
             />
             <View className="flex-1 bg-gray-50">
                 <Tabs
