@@ -1,44 +1,46 @@
-// Mock API utility
+import * as SecureStore from 'expo-secure-store';
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000/api";
+// 1. Move the URL check inside or use a reliable fallback
+const getBaseUrl = () => {
+  return process.env.EXPO_PUBLIC_API_URL || "http://192.168.137.1:8000/api";
+};
 
 const api = {
-    post: async (endpoint: string, data: any) => {
-        console.log(`POST request to ${BASE_URL}${endpoint}`, data);
-        
-        try {
-            const res = await fetch(`${BASE_URL}${endpoint}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json' 
-                },
-                body: JSON.stringify(data)
-            });
-            const result = await res.json();
-            return {data: result, status: res.status};
-        } catch (error) {
-            console.error(`Error occurred while making POST request to ${BASE_URL}${endpoint}:`, error);
-            throw error;
-        }
-    },
-    get: async (endpoint: string) => {
-        console.log(`GET request to ${BASE_URL}${endpoint}`);
-        try {
-            const res = await fetch(`${BASE_URL}${endpoint}`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            })
-            const result = await res.json();
-            return { data: result, status: res.status };
+  // 1. Update request to accept an optional 'options' object
+  request: async (method: 'GET' | 'POST', endpoint: string, data: any = null, options: any = {}) => {
+    const url = `${getBaseUrl()}${endpoint}`;
+    const token = await SecureStore.getItemAsync('userToken');
 
-        } catch (error) {
-            console.error(`Error occurred while making GET request to ${BASE_URL}${endpoint}:`, error);
-            throw error;
-        }
+    // Handle AbortController for timeouts
+    const controller = new AbortController();
+    const id = options.timeout ? setTimeout(() => controller.abort(), options.timeout) : null;
+
+    try {
+      const res = await fetch(url, {
+        method,
+        signal: controller.signal, // Connect the abort signal
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+          ...options.headers, // Allow overriding headers
+        },
+        body: method === 'POST' ? JSON.stringify(data) : undefined,
+      });
+
+      if (id) clearTimeout(id); // Clear timeout if request succeeds
+
+      const result = await res.json().catch(() => ({}));
+      return { data: result, status: res.status };
+    } catch (error: any) {
+      if (error.name === 'AbortError') console.error("❌ [API] Request timed out");
+      return { data: { error: "Network failed" }, status: 0 };
     }
+  },
+
+  // 2. Update these to pass the 3rd argument (options) through
+  get: (endpoint: string, options: any = {}) => api.request('GET', endpoint, null, options),
+  post: (endpoint: string, data: any, options: any = {}) => api.request('POST', endpoint, data, options),
 };
 
 export default api;
