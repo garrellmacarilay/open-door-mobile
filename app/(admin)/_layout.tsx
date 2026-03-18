@@ -23,7 +23,7 @@ export default function AdminLayout() {
                     <Tabs.Screen name="index" options={{ href: null }} />
                     <Tabs.Screen name="dashboard" options={{ title: 'Dashboard' }} />
                     <Tabs.Screen name="history" options={{ title: 'History' }} />
-                    <Tabs.Screen name="faqs" options={{ title: 'FAQs' }} />
+                    <Tabs.Screen name="offices" options={{ title: 'Offices' }} />
                     <Tabs.Screen name="notifications" options={{ title: 'Notifications' }} />
                     <Tabs.Screen name="settings" options={{ href: null }} />
                 </Tabs>
