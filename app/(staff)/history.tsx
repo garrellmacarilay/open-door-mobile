@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import HistoryModal from '../../components/student/HistoryModal';
+import HistoryModal from '../../components/staff/StaffHistoryModal';
 
 const HISTORY_DATA = [
     {
