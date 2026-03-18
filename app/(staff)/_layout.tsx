@@ -11,7 +11,7 @@ export default function StaffLayout() {
         <SafeAreaView className="flex-1 bg-[#18233D]" edges={['top', 'left', 'right']}>
             <DashboardHeader
                 user={{ name: "Staff Member", email: "office@example.com" }}
-                onProfilePress={() => {}}
+                onProfilePress={() => router.push('/(staff)/settings')}
                 onNotificationPress={() => router.push('/(staff)/notifications')}
             />
             <View className="flex-1 bg-gray-50">
@@ -24,6 +24,7 @@ export default function StaffLayout() {
                     <Tabs.Screen name="history" options={{ title: 'History' }} />
                     <Tabs.Screen name="faqs" options={{ title: 'FAQs' }} />
                     <Tabs.Screen name="notifications" options={{ href: null }} />
+                    <Tabs.Screen name="settings" options={{ href: null }} />
                 </Tabs>
             </View>
         </SafeAreaView>
