@@ -132,7 +132,7 @@ export default function StaffHistory() {
 
                             {/* View Appointment Button */}
                             <TouchableOpacity
-                                className="bg-[#0F766E] rounded-xl py-3 flex-row items-center justify-center gap-2"
+                                className="bg-[#18233D] rounded-xl py-3 flex-row items-center justify-center gap-2"
                                 onPress={() => setSelectedAppointment(item)}
                             >
                                 <Text className="text-white text-sm font-semibold">View Appointment</Text>
