@@ -71,7 +71,7 @@ export default function CalendarWidget({
                 const fadeDay = dayNumber <= 0 ? prevMonthDays + dayNumber : dayNumber - daysInMonth;
 
                 days.push(
-                    <View key={`empty-${i}`} className="w-[14.28%] aspect-square flex items-center justify-start pt-2 mb-3">
+                    <View key={`empty-${i}`} className="w-[14.28%] aspect-square flex items-center justify-center">
                         <Text className="text-[13px] font-bold text-gray-300">
                             {fadeDay}
                         </Text>
@@ -87,27 +87,29 @@ export default function CalendarWidget({
             days.push(
                 <TouchableOpacity
                     key={dayNumber}
-                    className="w-[14.28%] aspect-square items-center justify-start pt-2 mb-3 relative"
+                    className="w-[14.28%] aspect-square items-center justify-center relative"
                     onPress={() => {
                         setSelectedDate(cellDate);
                         onDateSelect?.(cellDate);
                     }}
                     activeOpacity={0.6}
                 >
-                    <Text className={`text-[13px] font-bold ${isWeekend ? 'text-[#3B82F6]' : 'text-[#1C274C]'}`}>
+                    <Text className={`text-[14px] font-bold ${isWeekend ? 'text-[#3B82F6]' : 'text-[#1C274C]'}`}>
                         {dayNumber}
                     </Text>
 
-                    {/* Render mini pills for events */}
+                    {/* Status indicator dots */}
                     {dayEvents.length > 0 && (
-                        <View className="absolute bottom-1 w-full items-center gap-0.5">
-                            {dayEvents.slice(0, 2).map((evt, idx) => (
-                                <View key={idx} className={`rounded-sm px-1 ${evt.details?.status === 'approved' ? 'bg-[#DCFCE7]' : 'bg-[#DBEAFE]'}`}>
-                                    <Text className="text-[6px] font-bold text-gray-800" numberOfLines={1}>
-                                        {evt.time || '11:00 AM'}
-                                    </Text>
-                                </View>
-                            ))}
+                        <View className="absolute bottom-1 flex-row gap-1">
+                            {dayEvents.slice(0, 3).map((evt, idx) => {
+                                let dotColor = '#3B82F6'; // Events default
+                                if (evt.details?.status === 'pending') dotColor = '#EAB308'; // Yellow
+                                else if (evt.details?.status === 'approved') dotColor = '#22C55E'; // Green
+                                else if (evt.details?.status === 'declined') dotColor = '#EF4444'; // Red
+                                return (
+                                    <View key={idx} className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: dotColor }} />
+                                );
+                            })}
                         </View>
                     )}
                 </TouchableOpacity>
@@ -165,14 +167,14 @@ export default function CalendarWidget({
             </View>
 
             {/* Calendar Body */}
-            <View className="px-4 pt-4 pb-7">
+            <View className="px-4 pt-4 pb-3">
                 {/* Weekdays */}
-                <View className="flex-row justify-between mb-3">
+                <View className="flex-row justify-between mb-2">
                     {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => {
                         const isWeekend = index === 0 || index === 6;
                         return (
                             <View key={index} className="w-[14.28%] items-center">
-                                <Text className={`text-[11px] font-bold ${isWeekend ? 'text-[#3B82F6]' : 'text-[#9CA3AF]'}`}>
+                                <Text className={`text-[12px] font-bold ${isWeekend ? 'text-[#3B82F6]' : 'text-[#9CA3AF]'}`}>
                                     {day}
                                 </Text>
                             </View>
@@ -181,26 +183,26 @@ export default function CalendarWidget({
                 </View>
 
                 {/* Grid */}
-                <View className="flex-row flex-wrap mb-1">
+                <View className="flex-row flex-wrap mb-3">
                     {renderDays()}
                 </View>
 
                 {/* Color Legend */}
-                <View className="flex-row justify-center items-center gap-x-5 px-2">
-                    <View className="flex-row items-center gap-1.5">
-                        <View className="w-2.5 h-2.5 rounded-full bg-[#EAB308]" />
+                <View className="flex-row justify-center items-center gap-x-4 px-2">
+                    <View className="flex-row items-center gap-1">
+                        <View className="w-2 h-2 rounded-full bg-[#EAB308]" />
                         <Text className="text-[10px] font-bold text-[#6B7280]">Pending</Text>
                     </View>
-                    <View className="flex-row items-center gap-1.5">
-                        <View className="w-2.5 h-2.5 rounded-full bg-[#22C55E]" />
+                    <View className="flex-row items-center gap-1">
+                        <View className="w-2 h-2 rounded-full bg-[#22C55E]" />
                         <Text className="text-[10px] font-bold text-[#6B7280]">Approved</Text>
                     </View>
-                    <View className="flex-row items-center gap-1.5">
-                        <View className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" />
+                    <View className="flex-row items-center gap-1">
+                        <View className="w-2 h-2 rounded-full bg-[#EF4444]" />
                         <Text className="text-[10px] font-bold text-[#6B7280]">Declined</Text>
                     </View>
-                    <View className="flex-row items-center gap-1.5">
-                        <View className="w-2.5 h-2.5 rounded-full bg-[#3B82F6]" />
+                    <View className="flex-row items-center gap-1">
+                        <View className="w-2 h-2 rounded-full bg-[#3B82F6]" />
                         <Text className="text-[10px] font-bold text-[#6B7280]">Events</Text>
                     </View>
                 </View>

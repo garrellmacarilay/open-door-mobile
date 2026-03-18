@@ -53,7 +53,8 @@ export default function StaffTabBar({ state, descriptors, navigation }: BottomTa
                                 className="items-center justify-center flex-1"
                             >
                                 <View
-                                    className={`items-center justify-center rounded-xl w-[50px] h-[50px] ${isFocused ? 'bg-[#0F766E]' : 'bg-transparent'}`}
+                                    className={`items-center justify-center ${isFocused ? 'bg-[#0F766E]' : 'bg-transparent'}`}
+                                    style={{ width: 50, height: 50, borderRadius: 25 }}
                                 >
                                     <IconComponent
                                         size={24}
