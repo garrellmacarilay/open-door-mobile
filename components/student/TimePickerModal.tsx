@@ -9,18 +9,19 @@ interface TimePickerModalProps {
     onClose: () => void;
 }
 
-const HOURS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
-const MINUTES = ['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'];
+const HOURS_AM = ['8', '9', '10', '11',];
+const HOURS_PM = ['1', '2', '3', '4', '5'];
+const MINUTES = ['00', '30'];
 
 function parseTime(str: string): { hour: string; minute: string; period: 'AM' | 'PM' } {
     if (!str) return { hour: '8', minute: '00', period: 'AM' };
     const match = str.match(/^(\d+):(\d+)\s*(AM|PM)$/i);
     if (!match) return { hour: '8', minute: '00', period: 'AM' };
-    return {
-        hour: match[1],
-        minute: match[2],
-        period: match[3].toUpperCase() as 'AM' | 'PM',
-    };
+    const period = match[3].toUpperCase() as 'AM' | 'PM';
+    const validHours = period === 'AM' ? HOURS_AM : HOURS_PM;
+    const hour = validHours.includes(match[1]) ? match[1] : validHours[0];
+    const minute = ['00', '30'].includes(match[2]) ? match[2] : '00';
+    return { hour, minute, period };
 }
 
 export default function TimePickerModal({ visible, selectedTime, onSelect, onClose }: TimePickerModalProps) {
@@ -106,7 +107,10 @@ export default function TimePickerModal({ visible, selectedTime, onSelect, onClo
                             {/* AM / PM Toggle Box */}
                             <View className="ml-2 w-16 h-20 border border-gray-100 rounded-[14px] bg-gray-50 overflow-hidden shadow-sm">
                                 <TouchableOpacity
-                                    onPress={() => setPeriod('AM')}
+                                    onPress={() => {
+                                        setPeriod('AM');
+                                        if (!HOURS_AM.includes(hour)) setHour(HOURS_AM[0]);
+                                    }}
                                     className={`flex-1 items-center justify-center ${period === 'AM' ? 'bg-[#1D4ED8]' : 'bg-transparent'}`}
                                     activeOpacity={0.8}
                                 >
@@ -114,7 +118,10 @@ export default function TimePickerModal({ visible, selectedTime, onSelect, onClo
                                 </TouchableOpacity>
                                 <View className="h-[1px] bg-gray-200" />
                                 <TouchableOpacity
-                                    onPress={() => setPeriod('PM')}
+                                    onPress={() => {
+                                        setPeriod('PM');
+                                        if (!HOURS_PM.includes(hour)) setHour(HOURS_PM[0]);
+                                    }}
                                     className={`flex-1 items-center justify-center ${period === 'PM' ? 'bg-[#1D4ED8]' : 'bg-transparent'}`}
                                     activeOpacity={0.8}
                                 >
@@ -129,7 +136,7 @@ export default function TimePickerModal({ visible, selectedTime, onSelect, onClo
                                 <View>
                                     <Text className="text-gray-400 text-[12px] font-bold uppercase tracking-wider mb-4 mx-1">Select Hour</Text>
                                     <View className="flex-row flex-wrap gap-2 justify-between">
-                                        {HOURS.map((h) => {
+                                        {(period === 'AM' ? HOURS_AM : HOURS_PM).map((h) => {
                                             const isSelected = h === hour;
                                             return (
                                                 <TouchableOpacity
@@ -149,14 +156,14 @@ export default function TimePickerModal({ visible, selectedTime, onSelect, onClo
                             ) : (
                                 <View>
                                     <Text className="text-gray-400 text-[12px] font-bold uppercase tracking-wider mb-4 mx-1">Select Minute</Text>
-                                    <View className="flex-row flex-wrap gap-2 justify-between">
+                                    <View className="flex-row gap-2">
                                         {MINUTES.map((m) => {
                                             const isSelected = m === minute;
                                             return (
                                                 <TouchableOpacity
                                                     key={m}
                                                     onPress={() => setMinute(m)}
-                                                    className={`w-[23%] h-12 rounded-[12px] items-center justify-center mb-1 ${isSelected ? 'bg-[#1D4ED8]' : 'bg-gray-50 border border-gray-100'}`}
+                                                    className={`flex-1 h-12 rounded-[12px] items-center justify-center ${isSelected ? 'bg-[#1D4ED8]' : 'bg-gray-50 border border-gray-100'}`}
                                                     activeOpacity={0.7}
                                                 >
                                                     <Text className={`text-[16px] font-bold ${isSelected ? 'text-white' : 'text-[#4B5563]'}`}>
