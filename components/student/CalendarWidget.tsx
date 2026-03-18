@@ -1,18 +1,20 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react-native';
 
 interface CalendarWidgetProps {
     currentDate?: Date;
     events?: any[];
     onDateSelect?: (date: Date) => void;
     onBookPress?: () => void;
+    onAddEvent?: () => void;
 }
 
 export default function CalendarWidget({
     currentDate: initialDate = new Date(),
     events = [],
     onDateSelect,
+    onAddEvent,
 }: CalendarWidgetProps) {
     const [viewDate, setViewDate] = useState(initialDate);
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -138,9 +140,16 @@ export default function CalendarWidget({
                         </Text>
                     </View>
 
-                    <TouchableOpacity onPress={() => navigateMonth('next')} className="p-2" activeOpacity={0.7}>
-                        <ChevronRight size={20} color="#FFFFFF" strokeWidth={2.5} />
-                    </TouchableOpacity>
+                    <View className="flex-row items-center">
+                        <TouchableOpacity onPress={() => navigateMonth('next')} className="p-2" activeOpacity={0.7}>
+                            <ChevronRight size={20} color="#FFFFFF" strokeWidth={2.5} />
+                        </TouchableOpacity>
+                        {onAddEvent && (
+                            <TouchableOpacity onPress={onAddEvent} className="p-2 ml-0.5" activeOpacity={0.7}>
+                                <Plus size={20} color="#FFFFFF" strokeWidth={2.5} />
+                            </TouchableOpacity>
+                        )}
+                    </View>
                 </View>
             </View>
 

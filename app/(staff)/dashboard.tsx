@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AppointmentCard from '../../components/student/AppointmentCard';
 import CalendarWidget from '../../components/student/CalendarWidget';
@@ -32,7 +32,39 @@ const DUMMY_APPOINTMENTS = [
 ];
 
 export default function OfficeDashboard() {
-    const [appointments] = useState(DUMMY_APPOINTMENTS);
+    const [appointments, setAppointments] = useState(DUMMY_APPOINTMENTS);
+    const [showAddEventModal, setShowAddEventModal] = useState(false);
+    const [eventTitle, setEventTitle] = useState('');
+    const [eventDate, setEventDate] = useState('');
+    const [eventTime, setEventTime] = useState('');
+    const [eventDescription, setEventDescription] = useState('');
+
+    const handleAddEvent = () => {
+        if (!eventTitle.trim() || !eventDate.trim()) {
+            alert('Please fill in Event Title and Date');
+            return;
+        }
+
+        const newEvent = {
+            id: Math.random(),
+            title: eventTitle,
+            details: {
+                student: "Current Office",
+                office: "Current Office",
+                status: "pending",
+                service_type: eventDescription || eventTitle
+            },
+            dateString: eventDate,
+            time: eventTime || "TBD"
+        };
+
+        setAppointments([...appointments, newEvent]);
+        setEventTitle('');
+        setEventDate('');
+        setEventTime('');
+        setEventDescription('');
+        setShowAddEventModal(false);
+    };
 
     const filteredAppointments = appointments;
 
@@ -46,9 +78,6 @@ export default function OfficeDashboard() {
                         <Text className="text-[#1C274C] text-[24px] font-extrabold tracking-[-0.5px]">
                             Office Dashboard
                         </Text>
-                        <TouchableOpacity activeOpacity={0.7} className="p-1">
-                            <Ionicons name="grid" size={24} color="#1C274C" />
-                        </TouchableOpacity>
                     </View>
                     <Text className="text-[#6B7280] text-[15px] font-semibold">
                         Office Consultation Overview
@@ -59,6 +88,7 @@ export default function OfficeDashboard() {
                     {/* Calendar */}
                     <CalendarWidget
                         events={appointments}
+                        onAddEvent={() => setShowAddEventModal(true)}
                     />
 
                     {/* Appointment Feed */}
@@ -69,12 +99,12 @@ export default function OfficeDashboard() {
                             </Text>
                         </View>
 
-                        {filteredAppointments.map(apt => (
+                        {appointments.map(apt => (
                             // @ts-ignore
                             <AppointmentCard key={apt.id} appointment={apt} />
                         ))}
 
-                        {filteredAppointments.length === 0 && (
+                        {appointments.length === 0 && (
                             <View className="bg-white rounded-xl p-8 items-center">
                                 <Ionicons name="search-outline" size={48} color="#D1D5DB" />
                                 <Text className="text-gray-400 text-center mt-3 font-semibold">
@@ -87,6 +117,91 @@ export default function OfficeDashboard() {
                     <View className="h-24" />
                 </View>
             </ScrollView>
+
+            {/* Add Event Modal */}
+            <Modal
+                animationType="slide"
+                transparent
+                visible={showAddEventModal}
+                onRequestClose={() => setShowAddEventModal(false)}
+            >
+                <View className="flex-1 bg-black/40 justify-center px-6">
+                    <View className="bg-white rounded-[24px] p-6 shadow-xl">
+                        <Text className="text-[#1C274C] text-[22px] font-extrabold mb-6">
+                            Add Event
+                        </Text>
+
+                        {/* Event Title */}
+                        <View className="mb-5">
+                            <Text className="text-gray-500 text-[13px] font-bold mb-2 ml-1">Event Title</Text>
+                            <TextInput
+                                value={eventTitle}
+                                onChangeText={setEventTitle}
+                                placeholder="Internship Preparation"
+                                placeholderTextColor="#9CA3AF"
+                                className="w-full border border-gray-300 rounded-[12px] px-4 py-3.5 text-gray-800 text-[15px]"
+                            />
+                        </View>
+
+                        {/* Date and Time Row */}
+                        <View className="flex-row gap-3 mb-5">
+                            <View className="flex-1">
+                                <Text className="text-gray-500 text-[13px] font-bold mb-2 ml-1">Date</Text>
+                                <TextInput
+                                    value={eventDate}
+                                    onChangeText={setEventDate}
+                                    placeholder="mm/dd/yyyy"
+                                    placeholderTextColor="#9CA3AF"
+                                    className="border border-gray-300 rounded-[12px] px-4 py-3.5 text-gray-800 text-[15px]"
+                                />
+                            </View>
+                            <View className="flex-1">
+                                <Text className="text-gray-500 text-[13px] font-bold mb-2 ml-1">Time</Text>
+                                <TextInput
+                                    value={eventTime}
+                                    onChangeText={setEventTime}
+                                    placeholder="--:--"
+                                    placeholderTextColor="#9CA3AF"
+                                    className="border border-gray-300 rounded-[12px] px-4 py-3.5 text-gray-800 text-[15px]"
+                                />
+                            </View>
+                        </View>
+
+                        {/* Description */}
+                        <View className="mb-6">
+                            <Text className="text-gray-500 text-[13px] font-bold mb-2 ml-1">Description</Text>
+                            <TextInput
+                                value={eventDescription}
+                                onChangeText={setEventDescription}
+                                placeholder="Event details..."
+                                placeholderTextColor="#9CA3AF"
+                                multiline
+                                numberOfLines={4}
+                                textAlignVertical="top"
+                                className="border border-gray-300 rounded-[12px] px-4 py-3.5 text-gray-800 text-[15px]"
+                            />
+                        </View>
+
+                        {/* Buttons */}
+                        <View className="flex-row gap-3">
+                            <TouchableOpacity
+                                onPress={() => setShowAddEventModal(false)}
+                                className="flex-1 border border-gray-300 rounded-[12px] py-3.5 items-center"
+                                activeOpacity={0.7}
+                            >
+                                <Text className="text-gray-600 font-bold text-[15px]">Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={handleAddEvent}
+                                className="flex-1 bg-[#1C274C] rounded-[12px] py-3.5 items-center"
+                                activeOpacity={0.8}
+                            >
+                                <Text className="text-white font-bold text-[15px]">Create Event</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }
