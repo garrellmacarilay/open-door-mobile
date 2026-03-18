@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity, Dimensions } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { LayoutDashboard, FileClock, Bell, Building2 } from 'lucide-react-native';
+import { LayoutDashboard, FileClock, Building2 } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -9,7 +9,6 @@ const ICONS: Record<string, React.ElementType> = {
     dashboard: LayoutDashboard,
     history: FileClock,
     offices: Building2,
-    notifications: Bell,
 };
 
 export default function AdminTabBar({ state, descriptors, navigation }: BottomTabBarProps) {

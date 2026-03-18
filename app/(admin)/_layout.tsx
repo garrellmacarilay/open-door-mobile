@@ -12,7 +12,7 @@ export default function AdminLayout() {
             <DashboardHeader
                 user={{ name: 'Admin User', email: 'admin@example.com' }}
                 onProfilePress={() => router.push('/(admin)/settings')}
-                hideNotification
+                onNotificationPress={() => router.push('/(admin)/notifications')}
             />
             <View className="flex-1 bg-gray-50">
                 <Tabs
@@ -25,7 +25,7 @@ export default function AdminLayout() {
                     <Tabs.Screen name="dashboard" options={{ title: 'Dashboard' }} />
                     <Tabs.Screen name="history" options={{ title: 'History' }} />
                     <Tabs.Screen name="offices" options={{ title: 'Offices' }} />
-                    <Tabs.Screen name="notifications" options={{ title: 'Notifications' }} />
+                    <Tabs.Screen name="notifications" options={{ href: null }} />
                     <Tabs.Screen name="settings" options={{ href: null }} />
                 </Tabs>
             </View>
