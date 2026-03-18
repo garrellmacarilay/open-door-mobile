@@ -12,7 +12,7 @@ export default function StaffLayout() {
             <DashboardHeader
                 user={{ name: "Staff Member", email: "office@example.com" }}
                 onProfilePress={() => router.push('/(staff)/settings')}
-                onNotificationPress={() => router.push('/(staff)/notifications')}
+                hideNotification
             />
             <View className="flex-1 bg-gray-50">
                 <Tabs
@@ -23,7 +23,7 @@ export default function StaffLayout() {
                     <Tabs.Screen name="dashboard" options={{ title: 'Dashboard' }} />
                     <Tabs.Screen name="history" options={{ title: 'History' }} />
                     <Tabs.Screen name="faqs" options={{ title: 'FAQs' }} />
-                    <Tabs.Screen name="notifications" options={{ href: null }} />
+                    <Tabs.Screen name="notifications" options={{ title: 'Notifications' }} />
                     <Tabs.Screen name="settings" options={{ href: null }} />
                 </Tabs>
             </View>

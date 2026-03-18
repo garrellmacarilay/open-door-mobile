@@ -13,6 +13,7 @@ interface DashboardHeaderProps {
     onProfilePress?: () => void;
     onNotificationPress?: () => void;
     onPlusPress?: () => void;
+    hideNotification?: boolean;
 }
 
 export default function DashboardHeader({
@@ -20,7 +21,8 @@ export default function DashboardHeader({
     user,
     onProfilePress,
     onNotificationPress,
-    onPlusPress
+    onPlusPress,
+    hideNotification = false,
 }: DashboardHeaderProps) {
     const router = useRouter();
 
@@ -50,13 +52,15 @@ export default function DashboardHeader({
 
             <View className="flex-row items-center gap-4">
                 {/* Notification Icon */}
-                <TouchableOpacity
-                    onPress={handleNotificationPress}
-                    className="items-center justify-center p-1"
-                    activeOpacity={0.7}
-                >
-                    <Bell size={24} color="#FFFFFF" strokeWidth={2.5} />
-                </TouchableOpacity>
+                {!hideNotification && (
+                    <TouchableOpacity
+                        onPress={handleNotificationPress}
+                        className="items-center justify-center p-1"
+                        activeOpacity={0.7}
+                    >
+                        <Bell size={24} color="#FFFFFF" strokeWidth={2.5} />
+                    </TouchableOpacity>
+                )}
 
                 {/* Profile Icon */}
                 <TouchableOpacity

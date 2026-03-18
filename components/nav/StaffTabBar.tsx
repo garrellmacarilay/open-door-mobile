@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity, Dimensions } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { LayoutDashboard, FileClock, CircleHelp } from 'lucide-react-native';
+import { LayoutDashboard, FileClock, CircleHelp, Bell } from 'lucide-react-native';
 import Animated from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
@@ -10,6 +10,7 @@ const ICONS: Record<string, React.ElementType> = {
     dashboard: LayoutDashboard,
     history: FileClock,
     faqs: CircleHelp,
+    notifications: Bell,
 };
 
 export default function StaffTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
