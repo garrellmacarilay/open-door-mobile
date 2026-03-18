@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, TouchableOpacity, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface DatePickerModalProps {
     visible: boolean;
@@ -37,6 +38,7 @@ export default function DatePickerModal({
     onClose,
     minDaysFromNow = 2,
 }: DatePickerModalProps) {
+    const insets = useSafeAreaInsets();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -118,8 +120,11 @@ export default function DatePickerModal({
                 onPress={onClose}
             >
                 {/* Prevent close when tapping inside */}
-                <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
-                    <View className="bg-white rounded-t-[28px] pb-10 pt-4 px-4">
+                <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()} className="w-full">
+                    <View
+                        className="w-full bg-white rounded-t-[28px] pt-4 px-4"
+                        style={{ paddingBottom: Math.max(insets.bottom + 12, 24) }}
+                    >
                         {/* Handle */}
                         <View className="w-10 h-1 rounded-full bg-gray-200 self-center mb-5" />
 
