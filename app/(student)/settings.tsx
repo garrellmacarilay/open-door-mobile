@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import LogoutConfirmationModal from '../../components/common/LogoutConfirmationModal';
+import { useLogout } from '@/hooks/authHooks';
 
 export default function UserSettingsPage() {
     const router = useRouter();
@@ -64,9 +65,11 @@ export default function UserSettingsPage() {
     };
 
     // Handle logout
-    const handleLogout = () => {
+    const handleLogoutTrigger = () => {
         setShowLogoutModal(true);
     };
+
+    const { handleLogout: executeLogout, loading: isLoggingOut } = useLogout();
 
     return (
         <View className="flex-1 bg-gray-50">
@@ -214,7 +217,7 @@ export default function UserSettingsPage() {
                         )}
 
                         <TouchableOpacity
-                            onPress={handleLogout}
+                            onPress={handleLogoutTrigger}
                             className="w-full py-4 rounded-full flex-row justify-center items-center bg-[#FEF2F2] border border-[#FECACA]"
                             activeOpacity={0.8}
                         >
@@ -229,10 +232,17 @@ export default function UserSettingsPage() {
 
             <LogoutConfirmationModal
                 visible={showLogoutModal}
-                onCancel={() => setShowLogoutModal(false)}
-                onConfirm={() => {
-                    setShowLogoutModal(false);
-                    router.replace('/(auth)/login');
+                loading={isLoggingOut}
+                onCancel={() => !isLoggingOut && setShowLogoutModal(false)}
+                onConfirm={async () => {
+                    try {
+                        await executeLogout();
+                    } catch (err) {
+                        setShowLogoutModal(false);
+                        Alert.alert("Error", "Could not log out. Please try again.");
+                    }
+                    
+                   
                 }}
             />
         </View>

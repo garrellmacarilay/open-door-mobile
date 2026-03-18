@@ -15,6 +15,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGoogleLogin, useLogin } from '../../hooks/authHooks';
+import { useProfile } from '../../hooks/globalHooks';   
+
+
 
 export default function LoginPage() {
     const [email, setEmail] = useState<string>("");
@@ -24,11 +27,11 @@ export default function LoginPage() {
     const router = useRouter();
 
     const { handleGoogleLogin } = useGoogleLogin();
-    const { handleLogin, loading } = useLogin();
+    const { handleLogin, loading, message, setMessage } = useLogin();
 
     const handleSubmit = async () => {
-        if (!email || !password) {
-            alert("Please fill in all fields");
+        if (!email.trim() || !password.trim()) {
+            setMessage("Please enter both email and password");
             return;
         }
         await handleLogin(email, password);
