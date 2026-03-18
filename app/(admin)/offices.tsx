@@ -68,8 +68,12 @@ const OFFICES_DATA = [
 export default function AdminOfficesPage() {
     const [offices, setOffices] = useState(OFFICES_DATA);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
     const [officeName, setOfficeName] = useState('');
     const [officeEmail, setOfficeEmail] = useState('');
+    const [selectedOfficeForEdit, setSelectedOfficeForEdit] = useState<any>(null);
+    const [editOfficeName, setEditOfficeName] = useState('');
+    const [editOfficeEmail, setEditOfficeEmail] = useState('');
 
     const activeCount = offices.filter((o) => o.status === 'Active').length;
 
@@ -94,7 +98,33 @@ export default function AdminOfficesPage() {
     };
 
     const handleEdit = (id: string) => {
-        Alert.alert('Edit', 'Edit functionality coming soon');
+        const office = offices.find((o) => o.id === id);
+        if (office) {
+            setSelectedOfficeForEdit(office);
+            setEditOfficeName(office.label);
+            setEditOfficeEmail(office.email);
+            setShowEditModal(true);
+        }
+    };
+
+    const handleSaveEdit = () => {
+        if (!editOfficeName.trim() || !editOfficeEmail.trim()) {
+            Alert.alert('Error', 'Please fill in office name and email');
+            return;
+        }
+
+        setOffices(
+            offices.map((o) =>
+                o.id === selectedOfficeForEdit.id
+                    ? { ...o, label: editOfficeName, email: editOfficeEmail }
+                    : o
+            )
+        );
+        setShowEditModal(false);
+        setSelectedOfficeForEdit(null);
+        setEditOfficeName('');
+        setEditOfficeEmail('');
+        Alert.alert('Success', 'Office updated successfully');
     };
 
     const handleDelete = (id: string) => {
@@ -262,6 +292,74 @@ export default function AdminOfficesPage() {
                                 activeOpacity={0.8}
                             >
                                 <Text className="text-white font-bold text-[15px]">Add Office</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Edit Office Modal */}
+            <Modal
+                animationType="slide"
+                transparent
+                visible={showEditModal}
+                onRequestClose={() => setShowEditModal(false)}
+            >
+                <View className="flex-1 bg-black/40 justify-end">
+                    <View className="bg-white rounded-t-[28px] px-6 pt-5 pb-10 shadow-xl">
+                        {/* Drag handle */}
+                        <View className="w-10 h-1 bg-gray-300 rounded-full self-center mb-5" />
+                        <Text className="text-[#1C274C] text-[22px] font-extrabold mb-1">
+                            Edit Office
+                        </Text>
+                        <Text className="text-gray-500 text-[13px] font-semibold mb-6">
+                            Fill in the office details
+                        </Text>
+
+                        {/* Office Name */}
+                        <View className="mb-5">
+                            <Text className="text-gray-700 text-[13px] font-bold mb-2 ml-1">
+                                Office Name
+                            </Text>
+                            <TextInput
+                                value={editOfficeName}
+                                onChangeText={setEditOfficeName}
+                                placeholder="Office name"
+                                placeholderTextColor="#9CA3AF"
+                                className="w-full border border-gray-300 rounded-[12px] px-4 py-3.5 text-gray-800 text-[15px]"
+                            />
+                        </View>
+
+                        {/* Email */}
+                        <View className="mb-6">
+                            <Text className="text-gray-700 text-[13px] font-bold mb-2 ml-1">
+                                Email Address
+                            </Text>
+                            <TextInput
+                                value={editOfficeEmail}
+                                onChangeText={setEditOfficeEmail}
+                                placeholder="email@laverdad.edu.ph"
+                                placeholderTextColor="#9CA3AF"
+                                keyboardType="email-address"
+                                className="w-full border border-gray-300 rounded-[12px] px-4 py-3.5 text-gray-800 text-[15px]"
+                            />
+                        </View>
+
+                        {/* Buttons */}
+                        <View className="flex-row gap-3">
+                            <TouchableOpacity
+                                onPress={() => setShowEditModal(false)}
+                                className="flex-1 border border-gray-300 rounded-[12px] py-3.5 items-center"
+                                activeOpacity={0.7}
+                            >
+                                <Text className="text-gray-600 font-bold text-[15px]">Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={handleSaveEdit}
+                                className="flex-1 bg-[#1C274C] rounded-[12px] py-3.5 items-center"
+                                activeOpacity={0.8}
+                            >
+                                <Text className="text-white font-bold text-[15px]">Save Changes</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
