@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import HistoryModal from '../../components/staff/StaffHistoryModal';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const HISTORY_DATA = [
     {
@@ -37,6 +38,7 @@ const HISTORY_DATA = [
 type FilterStatus = 'all' | 'pending' | 'approved' | 'completed' | 'declined';
 
 export default function AdminHistory() {
+    const insets = useSafeAreaInsets();
     const [activeFilter, setActiveFilter] = useState<FilterStatus>('all');
     const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
 
@@ -154,7 +156,7 @@ export default function AdminHistory() {
                     </View>
                 )}
 
-                <View className="h-24" />
+                <View style={{ height: Math.max(insets.bottom + 80, 112) }} />
             </ScrollView>
 
             <HistoryModal
