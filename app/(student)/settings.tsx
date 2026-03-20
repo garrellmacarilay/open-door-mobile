@@ -213,16 +213,18 @@ export default function UserSettingsPage() {
                             </TouchableOpacity>
                         )}
 
-                        <TouchableOpacity
-                            onPress={handleLogout}
-                            className="w-full py-4 rounded-full flex-row justify-center items-center bg-[#FEF2F2] border border-[#FECACA]"
-                            activeOpacity={0.8}
-                        >
-                            <LogOut size={18} color="#EF4444" />
-                            <Text className="text-[#EF4444] text-center font-bold text-[15px] ml-2">
-                                Logout
-                            </Text>
-                        </TouchableOpacity>
+                        {!isEditing && (
+                            <TouchableOpacity
+                                onPress={handleLogout}
+                                className="w-full py-4 rounded-full flex-row justify-center items-center bg-[#FEF2F2] border border-[#FECACA]"
+                                activeOpacity={0.8}
+                            >
+                                <LogOut size={18} color="#EF4444" />
+                                <Text className="text-[#EF4444] text-center font-bold text-[15px] ml-2">
+                                    Logout
+                                </Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>

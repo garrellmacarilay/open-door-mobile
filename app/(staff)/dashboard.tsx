@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AppointmentCard from '../../components/student/AppointmentCard';
 import CalendarWidget from '../../components/student/CalendarWidget';
 import DatePickerModal from '../../components/student/DatePickerModal';
+import TimePickerModal from '../../components/student/TimePickerModal';
 
 const DUMMY_APPOINTMENTS = [
     {
@@ -36,6 +37,7 @@ export default function OfficeDashboard() {
     const [appointments, setAppointments] = useState(DUMMY_APPOINTMENTS);
     const [showAddEventModal, setShowAddEventModal] = useState(false);
     const [showDatePickerModal, setShowDatePickerModal] = useState(false);
+    const [showTimePickerModal, setShowTimePickerModal] = useState(false);
     const [eventTitle, setEventTitle] = useState('');
     const [eventDate, setEventDate] = useState('');
     const [eventTime, setEventTime] = useState('');
@@ -164,13 +166,16 @@ export default function OfficeDashboard() {
                             </View>
                             <View className="flex-1">
                                 <Text className="text-gray-500 text-[13px] font-bold mb-2 ml-1">Time</Text>
-                                <TextInput
-                                    value={eventTime}
-                                    onChangeText={setEventTime}
-                                    placeholder="--:--"
-                                    placeholderTextColor="#9CA3AF"
-                                    className="border border-gray-300 rounded-[12px] px-4 py-3.5 text-gray-800 text-[15px]"
-                                />
+                                <TouchableOpacity
+                                    onPress={() => setShowTimePickerModal(true)}
+                                    activeOpacity={0.75}
+                                    className="border border-gray-300 rounded-[12px] px-4 py-3.5 flex-row items-center justify-between"
+                                >
+                                    <Text className={`text-[15px] ${eventTime ? 'text-gray-800' : 'text-gray-400'}`}>
+                                        {eventTime || '--:--'}
+                                    </Text>
+                                    <Ionicons name="time-outline" size={18} color="#6B7280" />
+                                </TouchableOpacity>
                             </View>
                         </View>
 
@@ -216,6 +221,13 @@ export default function OfficeDashboard() {
                 onSelect={setEventDate}
                 onClose={() => setShowDatePickerModal(false)}
                 minDaysFromNow={0}
+            />
+
+            <TimePickerModal
+                visible={showTimePickerModal}
+                selectedTime={eventTime}
+                onSelect={setEventTime}
+                onClose={() => setShowTimePickerModal(false)}
             />
         </View>
     );
