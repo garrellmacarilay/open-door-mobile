@@ -15,9 +15,11 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import LogoutConfirmationModal from '../../components/common/LogoutConfirmationModal';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function UserSettingsPage() {
     const router = useRouter();
+    const insets = useSafeAreaInsets();
     const [isEditing, setIsEditing] = useState(false);
     const [name, setName] = useState('Eunice Lugtu');
     const [email] = useState('molud@student.laverdad.edu.ph');
@@ -199,7 +201,10 @@ export default function UserSettingsPage() {
                     </View>
 
                     {/* Bottom Buttons */}
-                    <View className="px-6 pt-8 pb-8 flex-col gap-y-4">
+                    <View
+                        className="px-6 pt-8 mb-20 flex-col gap-y-4"
+                        style={{ paddingBottom: Math.max(insets.bottom + 36, 72) }}
+                    >
                         {isEditing && (
                             <TouchableOpacity
                                 onPress={handleSaveChanges}
