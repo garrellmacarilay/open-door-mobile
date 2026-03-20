@@ -15,18 +15,22 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import LogoutConfirmationModal from '../../components/common/LogoutConfirmationModal';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function AdminSettingsPage() {
     const router = useRouter();
+    const insets = useSafeAreaInsets();
     const [isEditing, setIsEditing] = useState(false);
     const [name, setName] = useState('Admin User');
     const [email] = useState('admin@laverdad.edu.ph');
     const [currentPassword, setCurrentPassword] = useState('password123');
+    const [newPassword, setNewPassword] = useState('password123');
     const [confirmPassword, setConfirmPassword] = useState('password123');
     const [profileImage, setProfileImage] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
 
     const [showCurrent, setShowCurrent] = useState(false);
+    const [showNew, setShowNew] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
 
@@ -171,10 +175,10 @@ export default function AdminSettingsPage() {
                                         </View>
                                     </View>
 
-                                    {/* Password */}
+                                    {/* Current Password */}
                                     <View className="mb-4">
                                         <Text className="text-[13px] font-bold text-gray-500 mb-1.5 ml-1">
-                                            Password
+                                            Current Password
                                         </Text>
                                         <View className="w-full flex-row items-center justify-between border border-gray-300 rounded-[10px] px-4 py-3.5">
                                             <TextInput
@@ -187,6 +191,30 @@ export default function AdminSettingsPage() {
                                                 onPress={() => setShowCurrent(!showCurrent)}
                                             >
                                                 {showCurrent ? (
+                                                    <Eye size={18} color="#6B7280" />
+                                                ) : (
+                                                    <EyeOff size={18} color="#6B7280" />
+                                                )}
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+
+                                    {/* New Password */}
+                                    <View className="mb-4">
+                                        <Text className="text-[13px] font-bold text-gray-500 mb-1.5 ml-1">
+                                            New Password
+                                        </Text>
+                                        <View className="w-full flex-row items-center justify-between border border-gray-300 rounded-[10px] px-4 py-3.5">
+                                            <TextInput
+                                                value={newPassword}
+                                                onChangeText={setNewPassword}
+                                                secureTextEntry={!showNew}
+                                                className="flex-1 text-[#1C274C] font-bold text-[18px] tracking-widest pt-1"
+                                            />
+                                            <TouchableOpacity
+                                                onPress={() => setShowNew(!showNew)}
+                                            >
+                                                {showNew ? (
                                                     <Eye size={18} color="#6B7280" />
                                                 ) : (
                                                     <EyeOff size={18} color="#6B7280" />
@@ -224,7 +252,10 @@ export default function AdminSettingsPage() {
                     </View>
 
                     {/* Bottom Buttons */}
-                    <View className="px-6 pt-8 pb-8 flex-col gap-y-4">
+                    <View
+                        className="px-6 pt-8 mb-20 flex-col gap-y-4"
+                        style={{ paddingBottom: Math.max(insets.bottom + 36, 72) }}
+                    >
                         {isEditing && (
                             <TouchableOpacity
                                 onPress={handleSaveChanges}
@@ -240,16 +271,18 @@ export default function AdminSettingsPage() {
                             </TouchableOpacity>
                         )}
 
-                        <TouchableOpacity
-                            onPress={() => setShowLogoutModal(true)}
-                            className="w-full py-4 rounded-full flex-row justify-center items-center bg-[#FEF2F2] border border-[#FECACA]"
-                            activeOpacity={0.8}
-                        >
-                            <LogOut size={18} color="#EF4444" />
-                            <Text className="text-[#EF4444] text-center font-bold text-[15px] ml-2">
-                                Logout
-                            </Text>
-                        </TouchableOpacity>
+                        {!isEditing && (
+                            <TouchableOpacity
+                                onPress={() => setShowLogoutModal(true)}
+                                className="w-full py-4 rounded-full flex-row justify-center items-center bg-[#FEF2F2] border border-[#FECACA]"
+                                activeOpacity={0.8}
+                            >
+                                <LogOut size={18} color="#EF4444" />
+                                <Text className="text-[#EF4444] text-center font-bold text-[15px] ml-2">
+                                    Logout
+                                </Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
