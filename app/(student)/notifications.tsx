@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const NOTIFICATIONS = [
     {
@@ -33,6 +34,8 @@ const NOTIFICATIONS = [
 ];
 
 export default function NotificationsPage() {
+    const insets = useSafeAreaInsets();
+
     return (
         <View className="flex-1 bg-[#F9FAFB]">
             {/* Header */}
@@ -44,7 +47,10 @@ export default function NotificationsPage() {
 
             {/* List Container */}
             <View className="flex-1 bg-[#D1D5DB] rounded-t-[30px] pt-6 px-4">
-                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ paddingBottom: Math.max(insets.bottom + 56, 96) }}
+                >
                     {NOTIFICATIONS.map((notif) => (
                         <TouchableOpacity
                             key={notif.id}
