@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { Bell } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { useProfile } from '@/hooks/globalHooks';
 
 interface DashboardHeaderProps {
     title?: string;
@@ -40,6 +41,8 @@ export default function DashboardHeader({
         }
     };
 
+    const { preview, profileImageUrl } = useProfile();
+
 
     return (
         <View className="bg-[#18233D] px-6 py-4 flex-row items-center justify-between">
@@ -65,7 +68,7 @@ export default function DashboardHeader({
                     activeOpacity={0.8}
                 >
                     <Image
-                        source={{ uri: user?.avatar || 'https://xsgames.co/randomusers/assets/avatars/female/72.jpg' }}
+                        source={{ uri: preview || 'https://www.freepik.com/free-photos-vectors/default-profile' }}
                         className="w-full h-full"
                         resizeMode="cover"
                     />
