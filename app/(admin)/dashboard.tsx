@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput } from 'reac
 import { Ionicons } from '@expo/vector-icons';
 import AppointmentCard from '../../components/student/AppointmentCard';
 import CalendarWidget from '../../components/student/CalendarWidget';
+import DatePickerModal from '../../components/student/DatePickerModal';
 
 const DUMMY_APPOINTMENTS = [
     {
@@ -34,6 +35,7 @@ const DUMMY_APPOINTMENTS = [
 export default function AdminDashboard() {
     const [appointments, setAppointments] = useState(DUMMY_APPOINTMENTS);
     const [showAddEventModal, setShowAddEventModal] = useState(false);
+    const [showDatePickerModal, setShowDatePickerModal] = useState(false);
     const [eventTitle, setEventTitle] = useState('');
     const [eventDate, setEventDate] = useState('');
     const [eventTime, setEventTime] = useState('');
@@ -133,13 +135,16 @@ export default function AdminDashboard() {
                         <View className="flex-row gap-3 mb-5">
                             <View className="flex-1">
                                 <Text className="text-gray-500 text-[13px] font-bold mb-2 ml-1">Date</Text>
-                                <TextInput
-                                    value={eventDate}
-                                    onChangeText={setEventDate}
-                                    placeholder="mm/dd/yyyy"
-                                    placeholderTextColor="#9CA3AF"
-                                    className="border border-gray-300 rounded-[12px] px-4 py-3.5 text-gray-800 text-[15px]"
-                                />
+                                <TouchableOpacity
+                                    onPress={() => setShowDatePickerModal(true)}
+                                    activeOpacity={0.75}
+                                    className="border border-gray-300 rounded-[12px] px-4 py-3.5 flex-row items-center justify-between"
+                                >
+                                    <Text className={`text-[15px] ${eventDate ? 'text-gray-800' : 'text-gray-400'}`}>
+                                        {eventDate || 'mm/dd/yyyy'}
+                                    </Text>
+                                    <Ionicons name="calendar-outline" size={18} color="#6B7280" />
+                                </TouchableOpacity>
                             </View>
                             <View className="flex-1">
                                 <Text className="text-gray-500 text-[13px] font-bold mb-2 ml-1">Time</Text>
@@ -186,6 +191,14 @@ export default function AdminDashboard() {
                     </View>
                 </View>
             </Modal>
+
+            <DatePickerModal
+                visible={showDatePickerModal}
+                selectedDate={eventDate}
+                onSelect={setEventDate}
+                onClose={() => setShowDatePickerModal(false)}
+                minDaysFromNow={0}
+            />
         </View>
     );
 }
