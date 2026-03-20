@@ -11,6 +11,21 @@ const api = {
     const url = `${getBaseUrl()}${endpoint}`;
     const token = await SecureStore.getItemAsync('userToken');
 
+    //for form data
+    const isFormData = data instanceof FormData;
+
+    //preparing headers dynamically
+    const headers: any = {
+      'Accept': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      ...options.headers, // Allow overriding headers
+    }
+
+    //ONLY add application/json if not file upload
+    if (!isFormData) {
+      headers['Content-Type'] = 'application/json';
+    }
+
     // Handle AbortController for timeouts
     const controller = new AbortController();
     const id = options.timeout ? setTimeout(() => controller.abort(), options.timeout) : null;
@@ -19,13 +34,8 @@ const api = {
       const res = await fetch(url, {
         method,
         signal: controller.signal, // Connect the abort signal
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-          ...options.headers, // Allow overriding headers
-        },
-        body: method === 'POST' ? JSON.stringify(data) : undefined,
+        headers,
+        body: method === 'POST' ? (isFormData ? data : JSON.stringify(data)) : undefined,
       });
 
       if (id) clearTimeout(id); // Clear timeout if request succeeds
