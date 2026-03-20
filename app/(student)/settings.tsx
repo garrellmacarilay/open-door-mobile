@@ -166,7 +166,7 @@ export default function UserSettingsPage() {
 
                                     {/* Current Password */}
                                     <View className="mb-4">
-                                        <Text className="text-[13px] font-bold text-gray-500 mb-1.5 ml-1">Password</Text>
+                                        <Text className="text-[13px] font-bold text-gray-500 mb-1.5 ml-1">Current Password</Text>
                                         <View className="w-full flex-row items-center justify-between border border-gray-300 rounded-[10px] px-4 py-3.5">
                                             <TextInput
                                                 value={currentPassword}
@@ -176,6 +176,22 @@ export default function UserSettingsPage() {
                                             />
                                             <TouchableOpacity onPress={() => setShowCurrent(!showCurrent)}>
                                                 {showCurrent ? <Eye size={18} color="#6B7280" /> : <EyeOff size={18} color="#6B7280" />}
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+
+                                    {/* New Password */}
+                                    <View className="mb-4">
+                                        <Text className="text-[13px] font-bold text-gray-500 mb-1.5 ml-1">New Password</Text>
+                                        <View className="w-full flex-row items-center justify-between border border-gray-300 rounded-[10px] px-4 py-3.5">
+                                            <TextInput
+                                                value={newPassword}
+                                                onChangeText={setNewPassword}
+                                                secureTextEntry={!showNew}
+                                                className="flex-1 text-[#1C274C] font-bold text-[18px] tracking-widest pt-1"
+                                            />
+                                            <TouchableOpacity onPress={() => setShowNew(!showNew)}>
+                                                {showNew ? <Eye size={18} color="#6B7280" /> : <EyeOff size={18} color="#6B7280" />}
                                             </TouchableOpacity>
                                         </View>
                                     </View>
