@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const STATS = [
     { label: 'Total Appointments', value: '156' },
@@ -29,7 +30,61 @@ const COMMON_REASONS = [
 const MAX_REASON_COUNT = Math.max(...COMMON_REASONS.map((r) => r.count));
 const TOTAL_VISITS = COMMON_REASONS.reduce((sum, r) => sum + r.count, 0);
 
+const OFFICE_FEEDBACK = [
+    {
+        id: 1,
+        office: 'Student Organization',
+        rating: 4.5,
+        reviews: 23,
+        feedback: [
+            'Very helpful and professional staff',
+            'Quick response time and clear guidance',
+        ],
+    },
+    {
+        id: 2,
+        office: 'Student Internship',
+        rating: 4.5,
+        reviews: 23,
+        feedback: [
+            'Very helpful and professional staff',
+            'Quick response time and clear guidance',
+        ],
+    },
+    {
+        id: 3,
+        office: 'Medical Services',
+        rating: 4.5,
+        reviews: 23,
+        feedback: [
+            'Very helpful and professional staff',
+            'Quick response time and clear guidance',
+        ],
+    },
+];
+
+function StarRating({ rating }: { rating: number }) {
+    return (
+        <View className="flex-row gap-0.5">
+            {[1, 2, 3, 4, 5].map((star) => {
+                const filled = rating >= star;
+                const half = !filled && rating >= star - 0.5;
+                return (
+                    <Ionicons
+                        key={star}
+                        name={filled ? 'star' : half ? 'star-half' : 'star-outline'}
+                        size={16}
+                        color="#F59E0B"
+                    />
+                );
+            })}
+        </View>
+    );
+}
+
 export default function AdminAnalyticsPage() {
+    const insets = useSafeAreaInsets();
+
     const handleExportPDF = () => {
         Alert.alert('Export PDF', 'PDF export functionality coming soon');
     };
@@ -177,7 +232,7 @@ export default function AdminAnalyticsPage() {
                     </View>
 
                     {/* Common Reasons for Visit */}
-                    <View className="bg-white rounded-[16px] p-5 mb-8 border border-gray-100">
+                    <View className="bg-white rounded-[16px] p-5 mb-6 border border-gray-100">
                         <Text className="text-[#1C274C] text-[16px] font-extrabold mb-1">
                             Common Reasons for Visit
                         </Text>
@@ -227,6 +282,64 @@ export default function AdminAnalyticsPage() {
                             </Text>
                         </View>
                     </View>
+                    {/* Office Feedback */}
+                    <View className="mb-6">
+                        <View className="flex-row items-center gap-2 mb-4">
+                            <View className="w-1 h-5 bg-[#F59E0B] rounded-full" />
+                            <Text className="text-[#1C274C] text-[18px] font-extrabold">
+                                Office Feedback
+                            </Text>
+                        </View>
+
+                        {OFFICE_FEEDBACK.map((item) => (
+                            <View
+                                key={item.id}
+                                className="bg-white rounded-[16px] p-5 mb-4 border border-gray-100"
+                                style={{
+                                    shadowColor: '#000',
+                                    shadowOffset: { width: 0, height: 1 },
+                                    shadowOpacity: 0.04,
+                                    shadowRadius: 4,
+                                    elevation: 1,
+                                }}
+                            >
+                                {/* Office Name */}
+                                <Text className="text-[#1C274C] text-[15px] font-extrabold mb-2">
+                                    {item.office}
+                                </Text>
+
+                                {/* Stars + Rating + Review Count */}
+                                <View className="flex-row items-center gap-2 mb-3">
+                                    <StarRating rating={item.rating} />
+                                    <Text className="text-[#1C274C] text-[13px] font-bold">
+                                        {item.rating.toFixed(1)}
+                                    </Text>
+                                    <Text className="text-gray-400 text-[12px] font-medium">
+                                        ({item.reviews} reviews)
+                                    </Text>
+                                </View>
+
+                                {/* Recent Feedback Label */}
+                                <Text className="text-[#1C274C] text-[13px] font-bold mb-2">
+                                    Recent Feedback
+                                </Text>
+
+                                {/* Feedback Quotes */}
+                                {item.feedback.map((text, i) => (
+                                    <View
+                                        key={i}
+                                        className="bg-gray-50 border border-gray-100 rounded-[10px] px-4 py-3 mb-2"
+                                    >
+                                        <Text className="text-gray-600 text-[12px] font-medium">
+                                            {text}
+                                        </Text>
+                                    </View>
+                                ))}
+                            </View>
+                        ))}
+                    </View>
+
+                    <View style={{ height: Math.max(insets.bottom + 80, 112) }} />
                 </View>
             </ScrollView>
         </View>
