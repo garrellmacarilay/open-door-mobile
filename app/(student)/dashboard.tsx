@@ -1,26 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Modal, FlatList } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Modal, FlatList, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AppointmentCard from '../../components/student/AppointmentCard';
 import CalendarWidget from '../../components/student/CalendarWidget';
 import BookConsultationModal from '../../components/student/BookConsultationModal';
 import BookingInfoModal from '../../components/student/BookingInfoModal';
 import BookingSuccessModal from '../../components/student/BookingSuccessModal';
-
-// Office list from contactInfo in Landingpage.jsx
-const OFFICES = [
-    { id: 'all', label: 'All Offices' },
-    { id: '1', label: 'Prefect and Assistant Prefect' },
-    { id: '2', label: 'Guidance' },
-    { id: '3', label: 'Medical Clinic' },
-    { id: '4', label: 'Sports Development and Management' },
-    { id: '5', label: 'Student Assistance and Experiential Learning' },
-    { id: '6', label: 'Student Discipline' },
-    { id: '7', label: 'Student Internship' },
-    { id: '8', label: 'IT Support Services' },
-    { id: '9', label: 'Student Organizations' },
-    { id: '10', label: 'Student Publications' },
-];
+// 🚀 Using your updated hooks
+import { useUpcomingAppointments, useOffices } from '@/hooks/globalHooks';
+import { useBookings } from '@/hooks/studentHooks';
 
 const STATUSES = [
     { id: 'all', label: 'All Status' },
@@ -30,44 +18,16 @@ const STATUSES = [
     { id: 'declined', label: 'Declined' },
 ];
 
-// Dummy Data
-const DUMMY_APPOINTMENTS = [
-    {
-        id: 1,
-        title: "Academic Advising Session",
-        details: {
-            student: "John Doe",
-            office: "Guidance",
-            status: "pending",
-            service_type: "Academic Consultation"
-        },
-        dateString: "December 15, 2025",
-        time: "10:00 AM"
-    },
-    {
-        id: 2,
-        title: "Career Planning Meeting",
-        details: {
-            student: "Jane Smith",
-            office: "Student Internship",
-            status: "approved",
-            service_type: "Career Guidance"
-        },
-        dateString: "December 16, 2025",
-        time: "2:30 PM"
-    }
-];
-
 interface DropdownModalProps {
     visible: boolean;
     title: string;
     options: { id: string; label: string }[];
-    selected: string;
+    selectedId: string;
     onSelect: (label: string) => void;
     onClose: () => void;
 }
 
-function DropdownModal({ visible, title, options, selected, onSelect, onClose }: DropdownModalProps) {
+function DropdownModal({ visible, title, options, selectedId, onSelect, onClose }: DropdownModalProps) {
     return (
         <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
             <TouchableOpacity
@@ -76,10 +36,7 @@ function DropdownModal({ visible, title, options, selected, onSelect, onClose }:
                 onPress={onClose}
             >
                 <View className="bg-white rounded-t-[28px] pb-8 pt-4">
-                    {/* Handle bar */}
                     <View className="w-10 h-1 rounded-full bg-gray-200 self-center mb-4" />
-
-                    {/* Header */}
                     <View className="flex-row items-center justify-between px-6 mb-4">
                         <Text className="text-[#1C274C] text-[18px] font-extrabold">{title}</Text>
                         <TouchableOpacity onPress={onClose} activeOpacity={0.6}>
@@ -87,19 +44,18 @@ function DropdownModal({ visible, title, options, selected, onSelect, onClose }:
                         </TouchableOpacity>
                     </View>
 
-                    {/* Options */}
                     <FlatList
                         data={options}
                         keyExtractor={(item) => item.id}
                         style={{ maxHeight: 360 }}
                         showsVerticalScrollIndicator={false}
                         renderItem={({ item }) => {
-                            const isSelected = item.label === selected;
+                            const isSelected = item.id === selectedId;
                             return (
                                 <TouchableOpacity
                                     className={`flex-row items-center justify-between mx-4 mb-2 px-4 py-3.5 rounded-[14px] ${isSelected ? 'bg-[#EFF6FF] border border-[#BFDBFE]' : 'bg-gray-50'}`}
                                     activeOpacity={0.7}
-                                    onPress={() => { onSelect(item.label); onClose(); }}
+                                    onPress={() => { onSelect(item.id); onClose(); }}
                                 >
                                     <Text
                                         className={`text-[14px] font-bold flex-1 mr-2 ${isSelected ? 'text-[#1D4ED8]' : 'text-[#374151]'}`}
@@ -121,60 +77,63 @@ function DropdownModal({ visible, title, options, selected, onSelect, onClose }:
 }
 
 export default function StudentDashboard() {
-    const [appointments, setAppointments] = useState(DUMMY_APPOINTMENTS);
+    // 1. Filter and Modal States
     const [showInfoModal, setShowInfoModal] = useState(false);
     const [showBookingModal, setShowBookingModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [selectedOffice, setSelectedOffice] = useState('All Offices');
-    const [selectedStatus, setSelectedStatus] = useState('All Status');
+    const [selectedStatus, setSelectedStatus] = useState('all');
     const [showOfficeDropdown, setShowOfficeDropdown] = useState(false);
     const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+    const [currentDate, setCurrentDate] = useState(new Date())
 
-    // Step 1: FAB pressed → show info modal
+    // 2.  Hook Integration
+    const offices = useOffices(); 
+
+    const { appointments, loading, refresh } = useUpcomingAppointments(
+        selectedOffice, selectedStatus,
+        currentDate.getMonth() + 1,
+        currentDate.getFullYear()
+    );
+
+    const currentStatusLabel = STATUSES.find(s => s.id === selectedStatus)?.label || 'All Status';
+    
+    const { handleSubmit, loading: isSubmitting, offices: office } = useBookings(() => {
+        setShowBookingModal(false);
+        setShowSuccessModal(true);
+        refresh(); 
+    });
+
+    // Transform string array from hook to object array for DropdownModal
+    const dynamicOfficeOptions = offices.map((name) => ({
+        id: name,
+        label: name
+    }));
+
     const handleFabPress = () => {
         setShowInfoModal(true);
     };
 
-    // Step 2: Info modal "Continue" → show booking form
     const handleInfoContinue = () => {
         setShowInfoModal(false);
         setShowBookingModal(true);
     };
 
-    // Step 3: Booking form submitted → show success
-    const handleBookConsultation = (formData: any) => {
-        const newAppointment = {
-            id: Math.random(),
-            title: `${formData.topic || 'New'} Session`,
-            details: {
-                student: "Current User",
-                office: formData.office || "Selected Office",
-                status: "pending",
-                service_type: formData.topic
-            },
-            dateString: formData.date,
-            time: formData.time
-        };
-        // @ts-ignore
-        setAppointments([...appointments, newAppointment]);
-        setShowBookingModal(false);
-        setShowSuccessModal(true);
+    const handleBookConsultation = async (modalFormData: any) => {
+        //Pass data from the modal state directly to the hook's submit
+        await handleSubmit(modalFormData);
     };
 
-    // Filter logic
-    const filteredAppointments = appointments.filter(apt => {
-        const officeMatch = selectedOffice === 'All Offices' || apt.details.office === selectedOffice;
-        const statusMatch = selectedStatus === 'All Status' || apt.details.status.toLowerCase() === selectedStatus.toLowerCase();
-        return officeMatch && statusMatch;
-    });
+    const getStatusLabel = (id: string) => {
+        const found = STATUSES.find(s => s.id === id);
+        return found ? found.label : 'All Status';
+    };
 
-    // Whether the current selected value is the default (for styling)
     const isDefaultOffice = selectedOffice === 'All Offices';
     const isDefaultStatus = selectedStatus === 'All Status';
 
     return (
         <View className="flex-1 bg-gray-50">
-
             <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
                 {/* Title Section */}
                 <View className="px-6 pt-5 pb-4">
@@ -193,16 +152,12 @@ export default function StudentDashboard() {
 
                 {/* Filter Section */}
                 <View className="px-6 flex-row gap-4 mb-6">
-                    {/* Office Dropdown */}
                     <TouchableOpacity
                         className={`flex-1 flex-row items-center justify-between bg-white border rounded-[12px] px-3.5 py-3 shadow-sm ${!isDefaultOffice ? 'border-[#1D4ED8]' : 'border-gray-200'}`}
                         activeOpacity={0.7}
                         onPress={() => setShowOfficeDropdown(true)}
                     >
-                        <Text
-                            className={`text-[12px] font-bold flex-1 mr-1 ${!isDefaultOffice ? 'text-[#1D4ED8]' : 'text-[#1C274C]'}`}
-                            numberOfLines={1}
-                        >
+                        <Text className={`text-[12px] font-bold flex-1 mr-1 ${!isDefaultOffice ? 'text-[#1D4ED8]' : 'text-[#1C274C]'}`} numberOfLines={1}>
                             {selectedOffice}
                         </Text>
                         <View className="bg-gray-100 rounded-md p-0.5">
@@ -210,20 +165,16 @@ export default function StudentDashboard() {
                         </View>
                     </TouchableOpacity>
 
-                    {/* Status Dropdown */}
                     <TouchableOpacity
-                        className={`flex-1 flex-row items-center justify-between bg-white border rounded-[12px] px-3.5 py-3 shadow-sm ${!isDefaultStatus ? 'border-[#1D4ED8]' : 'border-gray-200'}`}
+                        className={`flex-1 flex-row items-center justify-between bg-white border rounded-[12px] px-3.5 py-3 shadow-sm ${selectedStatus !== 'all' ? 'border-[#1D4ED8]' : 'border-gray-200'}`}
                         activeOpacity={0.7}
                         onPress={() => setShowStatusDropdown(true)}
                     >
-                        <Text
-                            className={`text-[13px] font-bold ${!isDefaultStatus ? 'text-[#1D4ED8]' : 'text-[#1C274C]'}`}
-                            numberOfLines={1}
-                        >
-                            {selectedStatus}
+                        <Text className={`text-[13px] font-bold ${selectedStatus !== 'all' ? 'text-[#1D4ED8]' : 'text-[#1C274C]'}`} numberOfLines={1}>
+                            {currentStatusLabel}
                         </Text>
                         <View className="bg-gray-100 rounded-md p-0.5">
-                            <Ionicons name="chevron-down" size={14} color={!isDefaultStatus ? '#1D4ED8' : '#6B7280'} />
+                            <Ionicons name="chevron-down" size={14} color={selectedStatus !== 'all' ? '#1D4ED8' : '#6B7280'} />
                         </View>
                     </TouchableOpacity>
                 </View>
@@ -232,6 +183,7 @@ export default function StudentDashboard() {
                     {/* Calendar Section */}
                     <CalendarWidget
                         events={appointments}
+                        onMonthChange={(date) => setCurrentDate(date)}
                         onBookPress={handleFabPress}
                     />
 
@@ -243,7 +195,7 @@ export default function StudentDashboard() {
                             </Text>
                             {(!isDefaultOffice || !isDefaultStatus) && (
                                 <TouchableOpacity
-                                    onPress={() => { setSelectedOffice('All Offices'); setSelectedStatus('All Status'); }}
+                                    onPress={() => { setSelectedOffice('All Offices'); setSelectedStatus('all'); }}
                                     activeOpacity={0.7}
                                 >
                                     <Text className="text-[#1D4ED8] text-[13px] font-semibold">Clear filters</Text>
@@ -251,76 +203,67 @@ export default function StudentDashboard() {
                             )}
                         </View>
 
-                        {filteredAppointments.map(apt => (
-                            // @ts-ignore
-                            <AppointmentCard key={apt.id} appointment={apt} />
-                        ))}
+                        {/* Loading indicator for dynamic fetch */}
+                        {loading && appointments.length === 0 ? (
+                            <ActivityIndicator size="large" color="#1D4ED8" className="mt-10" />
+                        ) : (
+                            appointments.map((apt: any) => (
+                                <AppointmentCard key={apt.id} appointment={apt} />
+                            ))
+                        )}
 
-                        {filteredAppointments.length === 0 && (
+                        {!loading && appointments.length === 0 && (
                             <View className="bg-white rounded-xl p-8 items-center">
                                 <Ionicons name="search-outline" size={48} color="#D1D5DB" />
-                                <Text className="text-gray-400 text-center mt-3 font-semibold">No appointments match your filters</Text>
+                                <Text className="text-gray-400 text-center mt-3 font-semibold">No appointments found</Text>
                             </View>
                         )}
                     </View>
-
-                    {/* Padding for bottom nav */}
                     <View className="h-24" />
                 </View>
             </ScrollView>
 
-            {/* Office Dropdown Modal */}
             <DropdownModal
                 visible={showOfficeDropdown}
                 title="Select Office"
-                options={OFFICES}
-                selected={selectedOffice}
-                onSelect={setSelectedOffice}
+                options={dynamicOfficeOptions}
+                selectedId={selectedOffice}
+                onSelect={(id) => setSelectedOffice(id)}
                 onClose={() => setShowOfficeDropdown(false)}
             />
 
-            {/* Status Dropdown Modal */}
             <DropdownModal
                 visible={showStatusDropdown}
                 title="Select Status"
                 options={STATUSES}
-                selected={selectedStatus}
-                onSelect={setSelectedStatus}
+                selectedId={selectedStatus}
+                onSelect={(id) => setSelectedStatus(id)}
                 onClose={() => setShowStatusDropdown(false)}
             />
 
-            {/* Step 1: Pre-info modal */}
             <BookingInfoModal
                 visible={showInfoModal}
                 onClose={() => setShowInfoModal(false)}
                 onContinue={handleInfoContinue}
             />
 
-            {/* Step 2: Booking form modal */}
             <BookConsultationModal
                 visible={showBookingModal}
                 onClose={() => setShowBookingModal(false)}
-                onSubmit={handleBookConsultation}
+                onSubmit={handleSubmit}
+                offices={office}
+                isSubmitting={isSubmitting}
             />
 
-            {/* Step 3: Success modal */}
             <BookingSuccessModal
                 visible={showSuccessModal}
                 onClose={() => setShowSuccessModal(false)}
             />
 
-            {/* Floating Action Button */}
             <TouchableOpacity
                 onPress={handleFabPress}
                 activeOpacity={0.8}
-                className="absolute right-7 bottom-[120px] w-[56px] h-[56px] bg-[#18233D] rounded-full items-center justify-center border-[2.5px] border-white z-50"
-                style={{
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.2,
-                    shadowRadius: 8,
-                    elevation: 6,
-                }}
+                className="absolute right-7 bottom-[120px] w-[56px] h-[56px] bg-[#18233D] rounded-full items-center justify-center border-[2.5px] border-white z-50 shadow-lg"
             >
                 <Ionicons name="add" size={30} color="#FFFFFF" />
             </TouchableOpacity>
