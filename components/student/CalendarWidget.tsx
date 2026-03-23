@@ -6,6 +6,7 @@ interface CalendarWidgetProps {
     currentDate?: Date;
     events?: any[];
     onDateSelect?: (date: Date) => void;
+    onMonthChange?: (date: Date) => void;
     onBookPress?: () => void;
 }
 
@@ -13,6 +14,7 @@ export default function CalendarWidget({
     currentDate: initialDate = new Date(),
     events = [],
     onDateSelect,
+    onMonthChange
 }: CalendarWidgetProps) {
     const [viewDate, setViewDate] = useState(initialDate);
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -38,6 +40,7 @@ export default function CalendarWidget({
             newDate.setMonth(currentMonth + 1);
         }
         setViewDate(newDate);
+        onMonthChange?.(newDate)
     };
 
     // Events Mapping
