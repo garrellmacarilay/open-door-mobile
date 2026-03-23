@@ -1,67 +1,133 @@
-import api from '../utils/api';
-import { useState, useEffect, useCallback } from 'react';
-import React from 'react';
+import { useState, useEffect } from "react";
+import { Platform } from "react-native";
+import api from "../utils/api";
 
-//to use booking
-interface BookingForm {
+export interface BookingForm {
     office_id: string;
     service_type: string;
     date: string;
     time: string;
     concern_description: string;
-    uploaded_file_url: string | File;
+    uploaded_file_url: any; // Can be a URI object from Expo
     group_members: string;
 }
 
 export function useBookings(onSuccess?: () => void) {
-    const [offices, setOffices] = useState([])
+    const [offices, setOffices] = useState([]);
     const [errors, setErrors] = useState<Record<string, string[]>>({});
-    const [form, setForm] = useState({
+    const [loading, setLoading] = useState(false);
+    const [form, setForm] = useState<BookingForm>({
         office_id: '',
         service_type: '',
         date: '',
         time: '',
         concern_description: '',
         uploaded_file_url: '',
-        group_members: '' 
+        group_members: ''
     });
 
     useEffect(() => {
         api.get('/offices')
             .then(res => setOffices(res.data))
-            .catch(err => console.error(err));
-    },[])
+            .catch(err => console.error("Error fetching offices:", err));
+    }, []);
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+    const handleSubmit = async (dataOverride?: Partial<BookingForm>) => {
+        // If data is passed directly, use it, otherwise use state
+        const submissionData = { ...form, ...dataOverride };
+        
+        setLoading(true);
+        setErrors({});
 
         try {
             const formData = new FormData();
-            const consultationDate = `${form.date}T${form.time}`;    
+            
+            // 1. Format date for Laravel (Y-m-d H:i:s)
+            let consultationDate = ''
+
+            try {
+                const [m, d, y] = submissionData.date.split('/');
+                const [timeStr, modifier] = submissionData.time.split(' ');
+                let [hours, minutes] = timeStr.split(':');
+
+                let hh = parseInt(hours, 10);
+                if (modifier === 'PM' && hh < 12) hh += 12;
+                if (modifier === 'AM' && hh === 12) hh = 0;
+
+                const isoDate = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+                const isoTime = `${hh.toString().padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+
+                consultationDate = `${isoDate}T${isoTime}`;
+            } catch (e){
+                console.error("Date formatting failed in hook:", e);
+            }
+
             formData.append('consultation_date', consultationDate);
 
-            Object.keys(form).forEach(key => {
-                const value = form[key as keyof BookingForm];
-                if (key === 'date' || key === 'time') return;
-                formData.append(key, value as any);
+            // 2. Append fields
+            Object.keys(submissionData).forEach(key => {
+                if (key === 'date' || key === 'time' || key === 'uploaded_file_url') return;
+                
+                const value = submissionData[key as keyof BookingForm];
+
+                if (value !== undefined && value !== null) {
+                    formData.append(key, value as string);
+                }
             });
 
+            // 3. SPECIAL HANDLING FOR EXPO FILES
+            // Changed key to 'uploaded_file_url' to match your Laravel $request->hasFile check
+            const file = submissionData.uploaded_file_url;
+            
+            if (file && file.uri) {
+                const fileToUpload = {
+                    uri: Platform.OS === 'ios' ? file.uri.replace('file://', '') : file.uri,
+                    type: file.mimeType || 'image/jpeg',
+                    name: file.name || 'upload.jpg',
+                }
+                formData.append('uploaded_file_url', fileToUpload as any);
+            }
+
             const response = await api.post('/bookings', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
+                headers: { 'Content-Type': 'multipart/form-data', 'Accept': 'application/json' }
             });
 
             if (response.data.success) {
                 onSuccess?.();
+                // Reset form on success
+                setForm({
+                    office_id: '',
+                    service_type: '',
+                    date: '',
+                    time: '',
+                    concern_description: '',
+                    uploaded_file_url: '',
+                    group_members: ''
+                });
                 return { success: true };
             }
         } catch (err: any) {
-            if (err.response && err.response.status === 422) {
+            if (err.response?.status === 422) {
                 setErrors(err.response.data.errors);
             } else {
-                alert('Something went wrong. Please try again later.');
+                console.error("Booking submission error:", err);
             }
-        } 
-    }
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    return { form, setForm, errors, offices, handleSubmit };
+    return { form, setForm, errors, offices, handleSubmit, loading };
+}
+
+export function useHistory() {
+
+}
+
+export function useCancel() {
+
+}
+
+export function useReschedule() {
+    
 }

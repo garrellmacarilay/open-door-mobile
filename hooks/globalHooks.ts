@@ -1,5 +1,5 @@
 import api from "../utils/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import React from "react";
 
 // 1. Define the User Shape
@@ -156,36 +156,83 @@ export function useProfile(): UseProfileReturn {
   };
 }
 
-export function useUpcomingAppointments() {
-  const [appointments, setAppointments] = useState([]);
+export function useUpcomingAppointments(office: string, status: string, month?: number, year?: number) {
+  const [rawAppointments, setRawAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const fetchAppointments = async () => {
+  const fetchAppointments = useCallback(async () => {
     setLoading(true);
-    setError(null);
-
     try {
-      const res = await api.get('/calendar/appointments')
+      // We fetch by Month/Year and Office at the API level
+      const params: any = { month, year };
+      if (office && office !== 'All Offices') params.office = office;
+      if (status && status !== 'all') params.status = status;
+
+      const res = await api.get('/calendar/appointments', { params });
 
       if (res.data.success) {
-        setAppointments(res.data.appointments);
-      } else {
-        setError('Failed to load appointments');
+        setRawAppointments(res.data.data);
       }
-
     } catch (err) {
-      setError( 'Failed to load appointments');
+      console.error("Fetch Error:", err);
     } finally {
       setLoading(false);
     }
-  }
+  }, [office, status, month, year]);
 
   useEffect(() => {
     fetchAppointments();
+  }, [fetchAppointments]);
+
+  // INTERNAL FILTERING LOGIC
+  const filteredAppointments = useMemo(() => {
+    let list = [...rawAppointments];
+
+    //filter by office
+    if (office && office !== 'All Offices') {
+      list = list.filter((apt: any) => {
+        const aptOffice = apt.office?.office_name || apt.details?.office;
+        return aptOffice === office;
+      })
+    }
+
+    //filter by status
+    if (status && status !== 'all') {
+      list = list.filter((apt: any) => {
+        const aptStatus = apt.details?.status?.toLowerCase() || apt.status?.toLowerCase();
+        return aptStatus === status.toLowerCase();
+      });
+    }
+
+    return list
+  }, [rawAppointments, status, office]);
+
+  return { 
+    appointments: filteredAppointments, 
+    loading, 
+    refresh: fetchAppointments 
+  };
+}
+
+export function useOffices() {
+  const [offices, setOffices] = useState<string[]>(['All Offices']);
+  
+
+  useEffect(() => {
+    const fetchOffices = async () => {
+      try {
+        const res = await api.get('/offices');
+        // Extract just the names from the Office objects
+        const names = res.data.map((o: any) => o.office_name);
+        setOffices(['All Offices', ...names]);
+      } catch (err) {
+        console.error("Failed to load offices", err);
+      }
+    };
+    fetchOffices();
   }, []);
 
-  return { appointments, loading, error, refresh: fetchAppointments };
+  return offices;
 }
 
 export function useHistory() {
