@@ -6,7 +6,7 @@ import React, { useState } from "react";
 import { Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGoogleLogin } from '../../hooks/authHooks';
-
+import { useAuthRegistration } from '../../hooks/authHooks';
 
 
 export default function SignupPage() {
@@ -17,13 +17,31 @@ export default function SignupPage() {
     const router = useRouter();
 
     const { handleGoogleLogin } = useGoogleLogin();
+    const { register, loading, error} = useAuthRegistration()
 
     const handleSignup = async () => {
         if (!name || !email || !password) {
             alert("Please fill in all fields");
             return;
         }
-        alert("Signup logic would go here!");
+        
+        try {
+            const res = await register({
+                full_name: name,
+                email: email,
+                password: password,
+                password_confirmation: password
+            })
+
+            if (res.success) {
+                router.push({
+                    pathname: '/(auth)/verify-otp',
+                    params: { email: email }
+                })
+            }
+        } catch (err: any) {
+            alert(err.response?.data?.message || "Registration failed");
+        }   
     };
 
     return (
@@ -140,10 +158,11 @@ export default function SignupPage() {
                                 {/* Signup Button */}
                                 <TouchableOpacity
                                     onPress={handleSignup}
+                                    disabled={loading}
                                     className="w-full bg-[#122141] py-4 rounded-xl shadow-lg shadow-blue-600/30 active:bg-blue-700 mt-2"
                                 >
                                     <Text className="text-white text-center font-bold text-lg">
-                                        Sign Up
+                                        {loading ? "Creating Account..." : "Sign Up"}
                                     </Text>
                                 </TouchableOpacity>
 

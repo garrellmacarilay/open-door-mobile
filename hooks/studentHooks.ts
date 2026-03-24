@@ -120,8 +120,52 @@ export function useBookings(onSuccess?: () => void) {
     return { form, setForm, errors, offices, handleSubmit, loading };
 }
 
-export function useHistory() {
+export interface BookingHistory {
+    id: number;
+    student_id: number;
+    office_id: number;
+    reference_code: string;
+    group_members: string;
+    student_name: string;
+    office_name: string;
+    service_type: string;
+    concern_description: string;
+    consultation_date: string;
+    status: string;
+    created_at: string;
+    hasFeedback: boolean;
+    rating: number | null;
+    comment: string | null;
+}
 
+export function useHistory() {
+  const [bookings, setBookings] = useState<BookingHistory[]>([]);
+  const [loading, setLoading] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchHistoryBookings = async (isRefreshing = false) => {
+    try {
+      if (isRefreshing) setRefreshing(true);    
+      else setLoading(true)
+
+      const res = await api.get('/bookings/history')
+      if (res.data.success) {
+        setBookings(res.data.bookings)
+      }
+    } catch (err) {
+      setError('Failed to fetch booking history')
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchHistoryBookings()
+  }, [])
+
+  return { bookings, fetchHistoryBookings, refreshing, loading, error, setError }
 }
 
 export function useCancel() {

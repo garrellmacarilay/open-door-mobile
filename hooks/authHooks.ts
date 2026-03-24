@@ -5,6 +5,99 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 
+export interface RegisterData {
+    full_name: string;
+    email: string;
+    password: string;
+    password_confirmation: string;
+}
+
+export interface VerifyData {
+    email: string;
+    verification_code: string;
+}
+
+interface AuthResponse {
+    success: boolean;
+    message: string;
+    user?: any;
+    token?: string;
+    expires_at?: string;
+}
+
+// --- Hook ---
+
+export function useAuthRegistration() {
+    const [loading, setLoading] = useState(false);
+    const [resendLoading, setResendLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null);
+
+    // 1. Register Logic
+    const register = async (data: RegisterData): Promise<AuthResponse> => {
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await api.post('/register', data);
+            return res.data as AuthResponse;
+        } catch (err: any) {
+            const msg = err.response?.data?.message || "Registration failed";
+            setError(msg);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 2. Verify Email Logic
+    const verifyEmail = async (verifyData: VerifyData): Promise<AuthResponse> => {
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await api.post('/verify-email', verifyData);
+            return res.data as AuthResponse;
+        } catch (err: any) {
+            const msg = err.response?.data?.message || "Verification failed";
+            setError(msg);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const resendOtp = async (email: string) => {
+        setResendLoading(true)
+
+        try {
+            const res = await api.post('/auth/resend-otp', { email })
+
+            return {
+                success: true,
+                message: res.data.message || 'Code resent successfully'
+            }
+
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.message || 'Failed to resend code';
+            return {
+                success: false,
+                message: errorMessage
+            }
+        } finally {
+            setResendLoading(false);
+        }
+    }
+
+    return { 
+        register, 
+        verifyEmail, 
+        loading, 
+        error, 
+        setError,
+        resendOtp,
+        resendLoading,
+         
+    };
+}
+
 interface LoginResponse {
     success: boolean;
     access_token?: string;
@@ -105,3 +198,5 @@ export function useGoogleLogin(): GoogleLoginHook {
 
     return { handleGoogleLogin };
 };
+
+

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Modal, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Modal, FlatList, ActivityIndicator, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AppointmentCard from '../../components/student/AppointmentCard';
 import CalendarWidget from '../../components/student/CalendarWidget';
@@ -77,7 +77,7 @@ function DropdownModal({ visible, title, options, selectedId, onSelect, onClose 
 }
 
 export default function StudentDashboard() {
-    // 1. Filter and Modal States
+    // 1. UI & Filter States
     const [showInfoModal, setShowInfoModal] = useState(false);
     const [showBookingModal, setShowBookingModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -85,57 +85,64 @@ export default function StudentDashboard() {
     const [selectedStatus, setSelectedStatus] = useState('all');
     const [showOfficeDropdown, setShowOfficeDropdown] = useState(false);
     const [showStatusDropdown, setShowStatusDropdown] = useState(false);
-    const [currentDate, setCurrentDate] = useState(new Date())
+    const [viewDate, setViewDate] = useState(new Date());
 
-    // 2.  Hook Integration
+    // 2. Hook Integration
     const offices = useOffices(); 
-
-    const { appointments, loading, refresh } = useUpcomingAppointments(
+    const { 
+        appointments, 
+        loading, 
+        refresh, 
+        hasMore, 
+        loadMore 
+    } = useUpcomingAppointments(
         selectedOffice, selectedStatus,
-        currentDate.getMonth() + 1,
-        currentDate.getFullYear()
+        viewDate.getMonth() + 1,
+        viewDate.getFullYear()
     );
 
-    const currentStatusLabel = STATUSES.find(s => s.id === selectedStatus)?.label || 'All Status';
-    
-    const { handleSubmit, loading: isSubmitting, offices: office } = useBookings(() => {
+    const { handleSubmit, loading: isSubmitting, offices: officeOptions } = useBookings(() => {
         setShowBookingModal(false);
         setShowSuccessModal(true);
         refresh(); 
     });
 
-    // Transform string array from hook to object array for DropdownModal
+    // 3. Helpers
+    const isDefaultOffice = selectedOffice === 'All Offices';
+    const currentStatusLabel = STATUSES.find(s => s.id === selectedStatus)?.label || 'All Status';
+
     const dynamicOfficeOptions = offices.map((name) => ({
         id: name,
         label: name
     }));
 
-    const handleFabPress = () => {
-        setShowInfoModal(true);
+    // 4. Scroll Logic for Pagination
+    const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+        const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+        // Trigger loadMore when 100px from the bottom
+        const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 100;
+
+        if (isCloseToBottom && hasMore && !loading) {
+            loadMore();
+        }
     };
 
+    const handleFabPress = () => setShowInfoModal(true);
+    
     const handleInfoContinue = () => {
         setShowInfoModal(false);
         setShowBookingModal(true);
     };
 
-    const handleBookConsultation = async (modalFormData: any) => {
-        //Pass data from the modal state directly to the hook's submit
-        await handleSubmit(modalFormData);
-    };
-
-    const getStatusLabel = (id: string) => {
-        const found = STATUSES.find(s => s.id === id);
-        return found ? found.label : 'All Status';
-    };
-
-    const isDefaultOffice = selectedOffice === 'All Offices';
-    const isDefaultStatus = selectedStatus === 'All Status';
-
     return (
         <View className="flex-1 bg-gray-50">
-            <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-                {/* Title Section */}
+            <ScrollView 
+                className="flex-1" 
+                showsVerticalScrollIndicator={false}
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
+            >
+                {/* Header Section */}
                 <View className="px-6 pt-5 pb-4">
                     <View className="flex-row items-center justify-between mb-1">
                         <Text className="text-[#1C274C] text-[24px] font-extrabold tracking-[-0.5px]">
@@ -154,7 +161,6 @@ export default function StudentDashboard() {
                 <View className="px-6 flex-row gap-4 mb-6">
                     <TouchableOpacity
                         className={`flex-1 flex-row items-center justify-between bg-white border rounded-[12px] px-3.5 py-3 shadow-sm ${!isDefaultOffice ? 'border-[#1D4ED8]' : 'border-gray-200'}`}
-                        activeOpacity={0.7}
                         onPress={() => setShowOfficeDropdown(true)}
                     >
                         <Text className={`text-[12px] font-bold flex-1 mr-1 ${!isDefaultOffice ? 'text-[#1D4ED8]' : 'text-[#1C274C]'}`} numberOfLines={1}>
@@ -167,7 +173,6 @@ export default function StudentDashboard() {
 
                     <TouchableOpacity
                         className={`flex-1 flex-row items-center justify-between bg-white border rounded-[12px] px-3.5 py-3 shadow-sm ${selectedStatus !== 'all' ? 'border-[#1D4ED8]' : 'border-gray-200'}`}
-                        activeOpacity={0.7}
                         onPress={() => setShowStatusDropdown(true)}
                     >
                         <Text className={`text-[13px] font-bold ${selectedStatus !== 'all' ? 'text-[#1D4ED8]' : 'text-[#1C274C]'}`} numberOfLines={1}>
@@ -183,39 +188,43 @@ export default function StudentDashboard() {
                     {/* Calendar Section */}
                     <CalendarWidget
                         events={appointments}
-                        onMonthChange={(date) => setCurrentDate(date)}
+                        onMonthChange={(date) => setViewDate(new Date(date))}
                         onBookPress={handleFabPress}
                     />
 
-                    {/* Appointment Feed Section */}
+                    {/* Appointment Feed */}
                     <View className="mb-6 mt-4">
                         <View className="flex-row items-center justify-between mb-5">
                             <Text className="text-[#1C274C] text-[22px] font-bold tracking-tight">
                                 Appointment Feed
                             </Text>
-                            {(!isDefaultOffice || !isDefaultStatus) && (
-                                <TouchableOpacity
+                            {(!isDefaultOffice || selectedStatus !== 'all') && (
+                                <TouchableOpacity 
                                     onPress={() => { setSelectedOffice('All Offices'); setSelectedStatus('all'); }}
-                                    activeOpacity={0.7}
                                 >
                                     <Text className="text-[#1D4ED8] text-[13px] font-semibold">Clear filters</Text>
                                 </TouchableOpacity>
                             )}
                         </View>
 
-                        {/* Loading indicator for dynamic fetch */}
-                        {loading && appointments.length === 0 ? (
-                            <ActivityIndicator size="large" color="#1D4ED8" className="mt-10" />
-                        ) : (
-                            appointments.map((apt: any) => (
-                                <AppointmentCard key={apt.id} appointment={apt} />
-                            ))
+                        {/* Appointment List */}
+                        {appointments.map((apt: any) => (
+                            <AppointmentCard key={apt.id} appointment={apt} />
+                        ))}
+
+                        {/* Loading States */}
+                        {loading && (
+                            <View className="py-6">
+                                <ActivityIndicator size="small" color="#1D4ED8" />
+                            </View>
                         )}
 
                         {!loading && appointments.length === 0 && (
-                            <View className="bg-white rounded-xl p-8 items-center">
+                            <View className="bg-white rounded-xl p-8 items-center border border-gray-100">
                                 <Ionicons name="search-outline" size={48} color="#D1D5DB" />
-                                <Text className="text-gray-400 text-center mt-3 font-semibold">No appointments found</Text>
+                                <Text className="text-gray-400 text-center mt-3 font-semibold">
+                                    No upcoming appointments found for {viewDate.toLocaleString('default', { month: 'long' })}
+                                </Text>
                             </View>
                         )}
                     </View>
@@ -223,6 +232,7 @@ export default function StudentDashboard() {
                 </View>
             </ScrollView>
 
+            {/* Modals */}
             <DropdownModal
                 visible={showOfficeDropdown}
                 title="Select Office"
@@ -241,25 +251,17 @@ export default function StudentDashboard() {
                 onClose={() => setShowStatusDropdown(false)}
             />
 
-            <BookingInfoModal
-                visible={showInfoModal}
-                onClose={() => setShowInfoModal(false)}
-                onContinue={handleInfoContinue}
+            <BookingInfoModal visible={showInfoModal} onClose={() => setShowInfoModal(false)} onContinue={handleInfoContinue} />
+            <BookConsultationModal 
+                visible={showBookingModal} 
+                onClose={() => setShowBookingModal(false)} 
+                onSubmit={handleSubmit} 
+                offices={officeOptions} 
+                isSubmitting={isSubmitting} 
             />
+            <BookingSuccessModal visible={showSuccessModal} onClose={() => setShowSuccessModal(false)} />
 
-            <BookConsultationModal
-                visible={showBookingModal}
-                onClose={() => setShowBookingModal(false)}
-                onSubmit={handleSubmit}
-                offices={office}
-                isSubmitting={isSubmitting}
-            />
-
-            <BookingSuccessModal
-                visible={showSuccessModal}
-                onClose={() => setShowSuccessModal(false)}
-            />
-
+            {/* FAB */}
             <TouchableOpacity
                 onPress={handleFabPress}
                 activeOpacity={0.8}

@@ -159,34 +159,58 @@ export function useProfile(): UseProfileReturn {
 export function useUpcomingAppointments(office: string, status: string, month?: number, year?: number) {
   const [rawAppointments, setRawAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
 
-  const fetchAppointments = useCallback(async () => {
+  const fetchAppointments = useCallback(async (isNextPage = false) => {
+    if (loading || (isNextPage && !hasMore)) return;
     setLoading(true);
-    try {
-      // We fetch by Month/Year and Office at the API level
-      const params: any = { month, year };
-      if (office && office !== 'All Offices') params.office = office;
-      if (status && status !== 'all') params.status = status;
 
+    try {
+        const currentPage = isNextPage ? page + 1 : 1;
+
+      // We fetch by Month/Year and Office at the API level
+      const params: any = { 
+        page: currentPage,
+        office: office !== 'All Offices' ? office : undefined,
+        status: status !== 'All' ? status : undefined,
+        month,
+        year
+       };
+    
       const res = await api.get('/calendar/appointments', { params });
 
       if (res.data.success) {
-        setRawAppointments(res.data.data);
+        const newData = res.data.data;
+
+        setRawAppointments(prev => isNextPage ? [...prev, ...newData] : newData);
+        setPage(res.data.meta.current_page);
+        setHasMore(res.data.meta.has_more);
       }
     } catch (err) {
       console.error("Fetch Error:", err);
     } finally {
       setLoading(false);
     }
-  }, [office, status, month, year]);
+  }, [office, status, month, year, page, hasMore, loading]);
 
   useEffect(() => {
-    fetchAppointments();
-  }, [fetchAppointments]);
+    setRawAppointments([]);
+    setPage(1);
+    setHasMore(true);
+    fetchAppointments(false);
+  }, [office, status, month, year]);
 
   // INTERNAL FILTERING LOGIC
   const filteredAppointments = useMemo(() => {
     let list = [...rawAppointments];
+
+    if (month && year) {
+      list = list.filter((apt: any) => {
+        const d = new Date(apt.start);
+        return (d.getMonth() + 1) === month && d.getFullYear() === year;
+      });
+    }
 
     //filter by office
     if (office && office !== 'All Offices') {
@@ -205,12 +229,14 @@ export function useUpcomingAppointments(office: string, status: string, month?: 
     }
 
     return list
-  }, [rawAppointments, status, office]);
+  }, [rawAppointments, status, office, month, year]);
 
   return { 
     appointments: filteredAppointments, 
     loading, 
-    refresh: fetchAppointments 
+    refresh: () => fetchAppointments(false),
+    hasMore,
+    loadMore: () => !loading && hasMore && fetchAppointments(true)
   };
 }
 
@@ -233,28 +259,4 @@ export function useOffices() {
   }, []);
 
   return offices;
-}
-
-export function useHistory() {
-  const [bookings, setBookings] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchHistoryBookings = async () => {
-    try {
-      setLoading(true)
-      const res = await api.get('/bookings/history')
-      setBookings(res.data.bookings)
-    } catch (err) {
-      setError('Failed to fetch booking history')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchHistoryBookings()
-  }, [])
-
-  return { bookings, fetchHistoryBookings, loading, error, setError }
 }

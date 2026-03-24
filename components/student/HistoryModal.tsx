@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import EvaluationModal from './EvaluationModal';
+import { BookingHistory } from '@/hooks/studentHooks';
 
 interface HistoryModalProps {
     visible: boolean;
-    appointment: any;
+    appointment: BookingHistory | null;
     onClose: () => void;
 }
 
@@ -46,7 +47,7 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
                                     </Text>
                                 </View>
                                 <Text className="text-gray-400 text-[13px] font-bold tracking-wider">
-                                    {appointment.id}
+                                    {appointment.reference_code}
                                 </Text>
                             </View>
                             <TouchableOpacity onPress={onClose} className="p-1" activeOpacity={0.6}>
@@ -58,7 +59,7 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
                             {/* Office Category */}
                             <Text className="text-gray-400 text-[14px] font-bold mb-1">Office Category</Text>
                             <Text className="text-[#111827] text-[26px] font-extrabold mb-8 tracking-tight">
-                                {appointment.title}
+                                {appointment.office_name}
                             </Text>
 
                             {/* Date and Time Cards */}
@@ -67,14 +68,26 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
                                     <Text className="text-gray-400 text-[13px] font-bold mb-3">Booked Date</Text>
                                     <View className="flex-row items-center gap-2">
                                         <Ionicons name="calendar-outline" size={18} color="#9CA3AF" />
-                                        <Text className="text-gray-600 font-bold text-[14px]">{appointment.date}</Text>
+                                        <Text className="text-gray-600 font-bold text-[14px]">
+                                            {new Date(appointment.consultation_date).toLocaleDateString('en-US', {
+                                                month: 'long',
+                                                day: 'numeric',
+                                                year: 'numeric'
+                                            })}
+                                        </Text>
                                     </View>
                                 </View>
                                 <View className="flex-1 bg-[#F9FAFB] rounded-[20px] p-5 border border-gray-100">
                                     <Text className="text-gray-400 text-[13px] font-bold mb-3">Booked Time</Text>
                                     <View className="flex-row items-center gap-2">
                                         <Ionicons name="time-outline" size={18} color="#9CA3AF" />
-                                        <Text className="text-gray-600 font-bold text-[14px]">{appointment.time}</Text>
+                                        <Text className="text-gray-600 font-bold text-[14px]">
+                                            {new Date(appointment.consultation_date).toLocaleTimeString('en-US', {
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                hour12: true
+                                            })}
+                                        </Text>
                                     </View>
                                 </View>
                             </View>
@@ -82,7 +95,9 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
                             {/* Detailed Topic */}
                             <Text className="text-gray-400 text-[14px] font-bold mb-3">Detailed Topic</Text>
                             <View className="bg-white border border-gray-100 rounded-[16px] p-5 mb-8 shadow-sm">
-                                <Text className="text-gray-400 font-bold text-[15px]">Internship Preparation</Text>
+                                <Text className="text-gray-400 font-bold text-[15px]">
+                                    { appointment.concern_description }
+                                </Text>
                             </View>
 
                             {/* Members and Files */}
@@ -92,7 +107,7 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
                                         <Ionicons name="people-outline" size={18} color="#9CA3AF" />
                                         <Text className="text-gray-400 font-bold text-[14px]">Members</Text>
                                     </View>
-                                    <Text className="text-gray-300 font-bold text-[13px]">Individual</Text>
+                                    <Text className="text-gray-300 font-bold text-[13px]">{appointment.group_members ?? 'Individual'}</Text>
                                 </View>
                                 <View className="w-[1px] h-12 bg-gray-100" />
                                 <View className="flex-1 items-center justify-center">
@@ -141,7 +156,7 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
             {/* Evaluation Modal - opens on top */}
             <EvaluationModal
                 visible={showEvaluation}
-                appointmentTitle={appointment?.title}
+                appointmentTitle={appointment?.office_name}
                 onClose={() => setShowEvaluation(false)}
             />
         </>
