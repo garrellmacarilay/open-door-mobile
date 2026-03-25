@@ -24,7 +24,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.pogi_123.opendoomobile"
+      "package": "com.pogi_123.opendoomobile",
     },
     "web": {
       "output": "static",
@@ -54,14 +54,13 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "da7bd275-92dd-44a0-b486-7b827a96fde2"
+        "projectId": "09088e89-77d1-4ad4-8095-c3fa1edf35de"
       }
     },
     "runtimeVersion": {
       "policy": "appVersion"
     },
-    "updates": {
-      "url": "https://u.expo.dev/da7bd275-92dd-44a0-b486-7b827a96fde2"
-    }
+    "updates": {},
+    "owner": "vinceaintreadin"
   }
 }
