@@ -8,6 +8,7 @@ interface AuthContextType {
   loading: boolean;
   login: (token: string) => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (userData: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -15,6 +16,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+
+  const updateUser = (userData: User) => {
+    setUser(userData);
+  }
 
   // Load token and user on startup
   useEffect(() => {
@@ -29,6 +34,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           
           if (userData) {
             console.log("3. User data fetched successfully:", userData.full_name);
+            console.log('User role is: ', userData?.role)
             setUser(userData);
           } else {
             console.log("3. User data returned null (Token might be expired)");
@@ -66,7 +72,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -115,10 +115,12 @@ export default function VerifyOTPPage() {
 
             setTimeout(() => {
                 router.replace('/(student)/dashboard')
-            })
+            }, 1500)
         }
-       } catch {
-
+       } catch (err: any) {
+        setVerificationState('error');
+        setOtp(['', '', '', '', '', '']);
+        alert(err.response?.data?.message || "Invalid code. Please try again.");
        }
     };
 

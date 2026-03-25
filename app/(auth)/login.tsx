@@ -192,7 +192,7 @@ export default function LoginPage() {
                         
                             {/* Google Login Button */}
                             <TouchableOpacity
-                                onPress={() => router.push('/(auth)/verify-otp')}
+                                onPress={handleGoogleLogin}
                                 className="flex-row items-center justify-center py-4 rounded-xl border-[1.5px] border-gray-200 bg-white mb-6"
                                 activeOpacity={0.7}
                             >

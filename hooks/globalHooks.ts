@@ -1,14 +1,8 @@
 import api from "../utils/api";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import React from "react";
-
-// 1. Define the User Shape
-interface User {
-  id?: number;
-  full_name: string;
-  profile_picture?: string;
-  profile_picture_url?: string;
-}
+import { useAuth } from "@/context/AuthContext";
+import { User } from "@/utils/auth";
 
 // 2. Define the Hook Return Type
 interface UseProfileReturn {
@@ -28,8 +22,10 @@ interface UseProfileReturn {
 }
 
 export function useProfile(): UseProfileReturn {
-  const [user, setUser] = useState<Partial<User>>({});
-  const [fullName, setFullName] = useState<string>('');
+  const { user: globalUser, updateUser } = useAuth();
+
+  const [user, setUser] = useState<Partial<User>>(globalUser || {});
+  const [fullName, setFullName] = useState<string>(globalUser?.full_name || '');
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [password, setPassword] = useState<string>('');
   const [passwordConfirmation, setPasswordConfirmation] = useState<string>('');
@@ -37,48 +33,34 @@ export function useProfile(): UseProfileReturn {
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [message, setMessage] = useState<string>('');
 
-  // Helper to construct the Image URL (Compatible with Expo)
-  const constructImageUrl = (userData: User): string | null => {
-  // 1. Prioritize the full Cloudinary URL if it exists
-    if (userData.profile_picture && userData.profile_picture.startsWith('http')) {
-      return userData.profile_picture;
-    }
+  const constructImageUrl = useCallback((userData: User): string | null => {
+    if (!userData || !userData.profile_picture) return null;
+    if (userData.profile_picture.startsWith('http')) return userData.profile_picture;
+    
+    const apiBase = process.env.EXPO_PUBLIC_API_URL || "";
+    const base = apiBase.replace(/\/api\/?$/, '');
+    const path = userData.profile_picture.startsWith('/') 
+      ? userData.profile_picture 
+      : `/${userData.profile_picture}`;
 
-    // 2. Handle the relative path from your DB: "avatars/profile_pictures/..."
-    if (userData.profile_picture) {
-      const apiBase = process.env.EXPO_PUBLIC_API_URL || "";
-      // Ensure we have the root URL (e.g., http://192.168.1.x:8000)
-      const base = apiBase.replace(/\/api\/?$/, '');
-      
-      // Ensure there's exactly one slash between base and path
-      const path = userData.profile_picture.startsWith('/') 
-        ? userData.profile_picture 
-        : `/${userData.profile_picture}`;
-
-      return `${base}${path}`;
-    }
-
-    return null;
-  };
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await api.get('/show/user');
-        const fetchedUser: User = res.data.user;
-        
-        setUser(fetchedUser);
-        setFullName(fetchedUser.full_name);
-
-        const url = constructImageUrl(fetchedUser);
-        setPreview(url);
-        setProfileImageUrl(url);
-      } catch (err) {
-        console.error("Error fetching user", err);
-      }
-    };
-    fetchUser();
+    return `${base}${path}`;
   }, []);
+
+  // 🚀 SYNC EFFECT: Keeps the UI (Header & Settings) in sync with AuthContext
+  useEffect(() => {
+    if (globalUser) {
+      setUser(globalUser);
+      setFullName(globalUser.full_name || '');
+      const url = constructImageUrl(globalUser as User);
+      setProfileImageUrl(url);
+
+      // Only sync the preview from the server if the user ISN'T currently 
+      // picking a new unsaved image in the settings page.
+      if (!profilePicture) {
+        setPreview(url);
+      }
+    }
+  }, [globalUser, constructImageUrl, !!profilePicture]);
 
   const setProfileAndPreview = (file: any) => {
     setProfilePicture(file);
@@ -92,18 +74,19 @@ export function useProfile(): UseProfileReturn {
 
     if (password && password !== passwordConfirmation) {
       setMessage("Passwords do not match.");
-      return;
+      throw new Error("Passwords do not match");
     }
 
     const formData = new FormData();
     formData.append('full_name', fullName);
     
     if (profilePicture) {
-      // TypeScript needs the 'any' cast for FormData.append with Files in some environments
-      formData.append('profile_picture', profilePicture, {
+      // We cast to any here because React Native FormData requires an object 
+      // with uri/name/type, which doesn't match the browser 'File' type exactly.
+      formData.append('profile_picture', {
         uri: (profilePicture as any).uri,
-        name: (profilePicture as any).name || 'photo.jpg',
-        type: (profilePicture as any).type || 'image/jpeg',
+        name: (profilePicture as any).fileName || 'photo.jpg',
+        type: (profilePicture as any).mimeType || 'image/jpeg',
       } as any);
     }
 
@@ -121,21 +104,25 @@ export function useProfile(): UseProfileReturn {
         const updatedUser: User = res.data.user;
         const url = constructImageUrl(updatedUser);
 
+        // Update local state and global context
         setPreview(url);
         setProfileImageUrl(url);
         setUser(updatedUser);
+        
+        updateUser(updatedUser); 
+
+        // Reset editing states
         setProfilePicture(null);
         setPassword('');
         setPasswordConfirmation('');
         setMessage('Profile updated successfully!');
       }
     } catch (err: any) {
-      if (err.response?.status === 422) {
-        const errors = err.response.data.errors;
-        setMessage(Object.values(errors).flat().join(' | '));
-      } else {
-        setMessage('Profile update failed. Please try again.');
-      }
+      const errorMsg = err.response?.data?.errors 
+        ? Object.values(err.response.data.errors).flat().join(' | ')
+        : 'Profile update failed.';
+      setMessage(errorMsg);
+      throw err;
     }
   };
 

@@ -63,7 +63,7 @@ export default function UserSettingsPage() {
             quality: 0.7,
         });
 
-        if (!result.canceled && result.assets[0]) {
+        if (!result.canceled) {
             const asset = result.assets[0];
             // Format for FormData compatibility in React Native
             const imageFile = {

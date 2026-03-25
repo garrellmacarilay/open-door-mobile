@@ -10,6 +10,8 @@ import BookingSuccessModal from '../../components/student/BookingSuccessModal';
 import { useUpcomingAppointments, useOffices } from '@/hooks/globalHooks';
 import { useBookings } from '@/hooks/studentHooks';
 
+import { useAuth } from '@/context/AuthContext';
+
 const STATUSES = [
     { id: 'all', label: 'All Status' },
     { id: 'pending', label: 'Pending' },
@@ -87,6 +89,8 @@ export default function StudentDashboard() {
     const [showStatusDropdown, setShowStatusDropdown] = useState(false);
     const [viewDate, setViewDate] = useState(new Date());
 
+    const { user } = useAuth()
+
     // 2. Hook Integration
     const offices = useOffices(); 
     const { 
@@ -133,6 +137,14 @@ export default function StudentDashboard() {
         setShowInfoModal(false);
         setShowBookingModal(true);
     };
+
+    if (!user) {
+        return (
+            <View className="flex-1 bg-gray-50 items-center justify-center">
+                <ActivityIndicator size="large" color="#1D4ED8" />
+            </View>
+        )
+    }
 
     return (
         <View className="flex-1 bg-gray-50">

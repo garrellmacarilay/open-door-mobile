@@ -32,6 +32,8 @@ export function useAuthRegistration() {
     const [resendLoading, setResendLoading] = useState(false)
     const [error, setError] = useState<string | null>(null);
 
+    const { login } = useAuth()
+
     // 1. Register Logic
     const register = async (data: RegisterData): Promise<AuthResponse> => {
         setLoading(true);
@@ -54,7 +56,13 @@ export function useAuthRegistration() {
         setError(null);
         try {
             const res = await api.post('/verify-email', verifyData);
-            return res.data as AuthResponse;
+            const data = res.data
+
+            if (data.success && data.token) {
+                await login(data.token)
+            }
+
+            return data as AuthResponse;
         } catch (err: any) {
             const msg = err.response?.data?.message || "Verification failed";
             setError(msg);
@@ -179,6 +187,8 @@ export const useLogout = () => {
     return { handleLogout, loading };
 };
 
+
+//TODO: update google client
 interface GoogleLoginHook {
     handleGoogleLogin: () => Promise<void>;
 }

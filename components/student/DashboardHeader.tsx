@@ -4,6 +4,8 @@ import { Bell } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useProfile } from '@/hooks/globalHooks';
 
+import { useAuth } from '@/context/AuthContext';
+
 interface DashboardHeaderProps {
     title?: string;
     user?: {
@@ -18,12 +20,15 @@ interface DashboardHeaderProps {
 
 export default function DashboardHeader({
     title = "Dashboard",
-    user,
     onProfilePress,
     onNotificationPress,
     onPlusPress
 }: DashboardHeaderProps) {
     const router = useRouter();
+
+    const { preview } = useProfile() 
+
+    const { user } = useAuth()
 
     const handleProfilePress = () => {
         if (onProfilePress) {
@@ -41,8 +46,23 @@ export default function DashboardHeader({
         }
     };
 
-    const { preview, profileImageUrl } = useProfile();
+    const getProfileImage = () => {
+        if (!user?.profile_picture) {
+            return 'https://www.pngitem.com/pimgs/m/150-1503945_transparent-user-png-default-user-image-png-png.png';
+        }
 
+        if (user.profile_picture.startsWith('http')) {
+            return user.profile_picture;
+        }
+
+        const apiBase = process.env.EXPO_PUBLIC_API_URL || "";
+        const base = apiBase.replace(/\/api\/?$/, '');
+        const path = user.profile_picture.startsWith('/') 
+            ? user.profile_picture 
+            : `/${user.profile_picture}`;
+
+        return `${base}${path}`;
+    }
 
     return (
         <View className="bg-[#18233D] px-6 py-4 flex-row items-center justify-between">
@@ -68,7 +88,7 @@ export default function DashboardHeader({
                     activeOpacity={0.8}
                 >
                     <Image
-                        source={{ uri: preview || 'https://www.freepik.com/free-photos-vectors/default-profile' }}
+                        source={{ uri: preview || 'https://via.placeholder.com/150' }}
                         className="w-full h-full"
                         resizeMode="cover"
                     />

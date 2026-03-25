@@ -1,7 +1,7 @@
 
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useRouter } from "expo-router";
-import { Eye, EyeOff } from "lucide-react-native";
+import { Eye, EyeOff, Lock } from "lucide-react-native";
 import React, { useState } from "react";
 import { Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -13,7 +13,10 @@ export default function SignupPage() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
     const router = useRouter();
 
     const { handleGoogleLogin } = useGoogleLogin();
@@ -22,6 +25,11 @@ export default function SignupPage() {
     const handleSignup = async () => {
         if (!name || !email || !password) {
             alert("Please fill in all fields");
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            alert('Passwords do not match')
             return;
         }
         
@@ -145,6 +153,26 @@ export default function SignupPage() {
                                     </TouchableOpacity>
                                 </View>
 
+                                <View className="relative">
+                                    <TextInput
+                                        placeholder="Confirm Password"
+                                        value={confirmPassword}
+                                        onChangeText={setConfirmPassword}
+                                        secureTextEntry={!showConfirmPassword}
+                                        className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 bg-gray-50 focus:border-blue-500 focus:bg-white pr-12"
+                                        placeholderTextColor="#9CA3AF"
+                                    />
+                                    <TouchableOpacity
+                                        onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute right-4 top-3.5"
+                                    >
+                                        {showConfirmPassword ?
+                                            <EyeOff size={22} color="#9CA3AF" /> :
+                                            <Eye size={22} color="#9CA3AF" />
+                                        }
+                                    </TouchableOpacity>
+                                </View>
+
                                 {/* Terms Checkbox (Optional but good for signup) */}
                                 <View className="flex-row items-start gap-2 mt-1">
                                     <View className="w-5 h-5 rounded border border-blue-600 bg-blue-600 items-center justify-center mt-0.5">
@@ -177,7 +205,7 @@ export default function SignupPage() {
 
                             {/* Google Signup */}
                             <TouchableOpacity
-                                onPress={() => router.push('/(auth)/verify-otp')}
+                                onPress={handleGoogleLogin}
                                 className="flex-row items-center justify-center gap-3 py-3.5 rounded-xl border border-gray-200 bg-white active:bg-gray-50"
                             >
                                 <Image
