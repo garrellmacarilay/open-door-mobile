@@ -12,12 +12,15 @@
       }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://open-door-th8q.onrender.com/api"
+      }
     },
     "production": {
       "autoIncrement": true,
-      "env" : {
-        "EXPO_PUBLIC_API_URL": "https://open-door-th8q.onrender.com"
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://open-door-th8q.onrender.com/api"
       }
     }
   },
