@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "open-doo-mobile",
-    "slug": "open-doo-mobile",
+    "name": "open-door-mobile",
+    "slug": "open-door-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/psaslogo.png",
     "scheme": "opendoomobile",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
