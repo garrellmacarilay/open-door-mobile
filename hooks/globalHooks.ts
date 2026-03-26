@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import React from "react";
 import { useAuth } from "@/context/AuthContext";
 import { User } from "@/utils/auth";
+import { Alert } from "react-native";
 
 // 2. Define the Hook Return Type
 interface UseProfileReturn {
@@ -39,6 +40,7 @@ export function useProfile(): UseProfileReturn {
     
     const apiBase = process.env.EXPO_PUBLIC_API_URL || "";
     const base = apiBase.replace(/\/api\/?$/, '');
+    
     const path = userData.profile_picture.startsWith('/') 
       ? userData.profile_picture 
       : `/${userData.profile_picture}`;
@@ -78,6 +80,7 @@ export function useProfile(): UseProfileReturn {
     }
 
     const formData = new FormData();
+    formData.append('_method', 'POST')
     formData.append('full_name', fullName);
     
     if (profilePicture) {
@@ -246,4 +249,87 @@ export function useOffices() {
   }, []);
 
   return offices;
+}
+
+export interface Notification {
+  id: number;
+  type: string;
+  message: string;
+  booking_id: number | null;
+  booking_reference: string | null;
+  read_at: string | null;
+  created_at: string;
+}
+
+export function useNotifications() {
+  const { user } = useAuth();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const fetchNotifications = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+
+    try {
+      const res = await api.get('/notifications')
+
+      if (res.status === 200 && res.data.success) {
+        setNotifications(res.data.notifications);
+      }
+      
+    } catch (err) {
+      Alert.alert('Failed to fetch notifications')
+      console.error(err)
+    } finally {
+      setLoading(false);
+    }
+  }, [user])
+
+  const fetchUnreadCount = useCallback(async () => {
+    if (!user) return;
+    
+    try {
+      const res = await api.get('/unread-count');
+      if (res.status === 200 && res.data.success) {
+        setUnreadCount(res.data.count);
+      }
+    } catch (err) {
+      Alert.alert('Failed to fetch unread count')
+      console.error(err)
+    }
+  }, [user])
+
+  const markAsRead = async (id: number) => {
+    try {
+      setNotifications(prev => 
+        prev.map(n => n.id === id ? { ...n, read_at: new Date().toISOString() } : n)
+      );
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    
+      await api.request('PATCH', `/notifications/${id}/read`)
+    } catch (err) {
+      Alert.alert('Failed to mark notification as read')
+      console.error(err)
+
+      fetchNotifications()
+      fetchUnreadCount()
+    } 
+  }
+
+  useEffect(() => {
+    if (user) {
+      fetchNotifications();
+      fetchUnreadCount();
+    }
+  }, [user, fetchNotifications, fetchUnreadCount]);
+
+  return {
+    notifications,
+    unreadCount,
+    loading,
+    refresh: fetchNotifications,
+    refreshCount: fetchUnreadCount,
+    markAsRead
+  }
 }

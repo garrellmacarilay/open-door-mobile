@@ -25,6 +25,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
+        console.log("🌐 CONNECTING TO BACKEND:", process.env.EXPO_PUBLIC_API_URL);
         console.log("1. App Started: Checking SecureStore...");
         const token = await SecureStore.getItemAsync('userToken');
         

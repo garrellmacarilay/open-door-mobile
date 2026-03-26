@@ -105,7 +105,11 @@ export default function CalendarWidget({
                             {dayEvents.slice(0, 2).map((evt, idx) => (
                                 <View key={idx} className={`rounded-sm px-1 ${evt.details?.status === 'approved' ? 'bg-[#DCFCE7]' : 'bg-[#DBEAFE]'}`}>
                                     <Text className="text-[6px] font-bold text-gray-800" numberOfLines={1}>
-                                        {evt.time || '11:00 AM'}
+                                        {new Date(evt.dateString).toLocaleTimeString('en-US', {
+                                            hour12: true,
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        }) || 'Pending'}
                                     </Text>
                                 </View>
                             ))}

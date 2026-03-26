@@ -115,7 +115,7 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
                                         <Ionicons name="attach-outline" size={18} color="#9CA3AF" />
                                         <Text className="text-gray-400 font-bold text-[14px]">Files</Text>
                                     </View>
-                                    <Text className="text-gray-300 font-bold text-[13px]">No Upload</Text>
+                                    <Text className="text-gray-300 font-bold text-[13px]">{appointment.attachment_name ?? "No Upload"}</Text>
                                 </View>
                             </View>
 

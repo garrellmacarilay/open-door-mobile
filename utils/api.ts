@@ -7,8 +7,14 @@ const getBaseUrl = () => {
 
 const api = {
   // 1. Update request to accept an optional 'options' object
-  request: async (method: 'GET' | 'POST', endpoint: string, data: any = null, options: any = {}) => {
+  request: async (method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE', endpoint: string, data: any = null, options: any = {}) => {
+    
+    const cleanBaseUrl = getBaseUrl().replace(/\/$/, "");
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
     const url = `${getBaseUrl()}${endpoint}`;
+
+    console.log(`🌐 [API] Calling: ${method} ${url}`);
+    
     const token = await SecureStore.getItemAsync('userToken');
 
     //for form data

@@ -129,6 +129,7 @@ export interface BookingHistory {
     student_name: string;
     office_name: string;
     service_type: string;
+    attachment_name: any;
     concern_description: string;
     consultation_date: string;
     status: string;
