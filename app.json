@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "open-door-mobile",
-    "slug": "open-door-mobile",
+    "name": "OpenDoor",
+    "slug": "open-doo-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/psaslogo.png",
@@ -18,13 +18,13 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/images/psaslogo.png",
+        "backgroundImage": "./assets/images/lvccgate.jpg",
+        "monochromeImage": "./assets/images/psaslogo.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.pogi_123.opendoomobile",
+      "package": "com.pogi_123.opendoomobile"
     },
     "web": {
       "output": "static",
@@ -60,7 +60,9 @@
     "runtimeVersion": {
       "policy": "appVersion"
     },
-    "updates": {},
+    "updates": {
+      "url": "https://u.expo.dev/09088e89-77d1-4ad4-8095-c3fa1edf35de"
+    },
     "owner": "vinceaintreadin"
   }
 }
