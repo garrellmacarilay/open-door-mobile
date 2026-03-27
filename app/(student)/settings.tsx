@@ -27,6 +27,7 @@ export default function UserSettingsPage() {
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [showCurrent, setShowCurrent] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
 
@@ -39,6 +40,8 @@ export default function UserSettingsPage() {
         preview,             // The temporary base64/blob preview
         setProfileAndPreview, 
         message, 
+        currPassword,
+        setCurrPassword,
         password, 
         setPassword, 
         passwordConfirmation, 
@@ -178,17 +181,33 @@ export default function UserSettingsPage() {
                                     </View>
 
                                     <View className="mb-4">
-                                        <Text className="text-[13px] font-bold text-gray-500 mb-1.5 ml-1">New Password</Text>
+                                        <Text className="text-[13px] font-bold text-gray-500 mb-1.5 ml-1">Current Password</Text>
                                         <View className="w-full flex-row items-center justify-between border border-gray-300 rounded-[10px] px-4 py-3.5">
                                             <TextInput
-                                                value={password}
-                                                onChangeText={setPassword}
+                                                value={currPassword}
+                                                onChangeText={setCurrPassword}
                                                 secureTextEntry={!showCurrent}
                                                 placeholder="Enter new password"
                                                 className="flex-1 text-[#1C274C] font-bold text-[16px]"
                                             />
                                             <TouchableOpacity onPress={() => setShowCurrent(!showCurrent)}>
                                                 {showCurrent ? <Eye size={18} color="#6B7280" /> : <EyeOff size={18} color="#6B7280" />}
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+
+
+                                    <View className="mb-4">
+                                        <Text className="text-[13px] font-bold text-gray-500 mb-1.5 ml-1">New Password</Text>
+                                        <View className="w-full flex-row items-center justify-between border border-gray-300 rounded-[10px] px-4 py-3.5">
+                                            <TextInput
+                                                value={password}
+                                                onChangeText={setPassword}
+                                                secureTextEntry={!showPassword}
+                                                className="flex-1 text-[#1C274C] font-bold text-[18px] tracking-widest pt-1"
+                                            />
+                                            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                                                {showPassword ? <Eye size={18} color="#6B7280" /> : <EyeOff size={18} color="#6B7280" />}
                                             </TouchableOpacity>
                                         </View>
                                     </View>

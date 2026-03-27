@@ -11,6 +11,8 @@ interface UseProfileReturn {
   fullName: string;
   setFullName: React.Dispatch<React.SetStateAction<string>>;
   setProfilePicture: React.Dispatch<React.SetStateAction<File | null>>;
+  currPassword: string
+  setCurrPassword: React.Dispatch<React.SetStateAction<string>>;
   password: string;
   setPassword: React.Dispatch<React.SetStateAction<string>>;
   passwordConfirmation: string;
@@ -28,6 +30,7 @@ export function useProfile(): UseProfileReturn {
   const [user, setUser] = useState<Partial<User>>(globalUser || {});
   const [fullName, setFullName] = useState<string>(globalUser?.full_name || '');
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
+  const [currPassword, setCurrPassword] = useState<string>(''); 
   const [password, setPassword] = useState<string>('');
   const [passwordConfirmation, setPasswordConfirmation] = useState<string>('');
   const [preview, setPreview] = useState<string | null>(null);
@@ -74,10 +77,19 @@ export function useProfile(): UseProfileReturn {
   const handleSubmit = async () => {
     setMessage('');
 
-    if (password && password !== passwordConfirmation) {
-      setMessage("Passwords do not match.");
-      throw new Error("Passwords do not match");
+    if (password) {
+      if (!currPassword) {
+        setMessage('Current password is required to set a new one')
+        throw new Error('Missing current password')
+      }
+
+      if (password && password !== passwordConfirmation) {
+        setMessage("Passwords do not match.");
+        throw new Error("Passwords do not match");
+      }
     }
+
+
 
     const formData = new FormData();
     formData.append('_method', 'POST')
@@ -94,6 +106,7 @@ export function useProfile(): UseProfileReturn {
     }
 
     if (password) {
+      formData.append('currPassword', currPassword)
       formData.append('password', password);
       formData.append('password_confirmation', passwordConfirmation);
     }
@@ -116,6 +129,7 @@ export function useProfile(): UseProfileReturn {
 
         // Reset editing states
         setProfilePicture(null);
+        setCurrPassword('');
         setPassword('');
         setPasswordConfirmation('');
         setMessage('Your profile has been updated successfully!');
@@ -139,6 +153,8 @@ export function useProfile(): UseProfileReturn {
     preview,
     message,
     handleSubmit,
+    currPassword,
+    setCurrPassword,
     password,
     setPassword,
     passwordConfirmation,
