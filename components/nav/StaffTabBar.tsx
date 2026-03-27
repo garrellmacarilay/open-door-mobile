@@ -1,20 +1,19 @@
 import React from 'react';
 import { View, TouchableOpacity, Dimensions } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { LayoutDashboard, Calendar, FileClock, CircleHelp } from 'lucide-react-native';
-import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import { LayoutDashboard, FileClock, CircleHelp, Bell } from 'lucide-react-native';
+import Animated from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
 
-// Define icons map
 const ICONS: Record<string, React.ElementType> = {
     dashboard: LayoutDashboard,
-    consultation: Calendar,
     history: FileClock,
     faqs: CircleHelp,
+    notifications: Bell,
 };
 
-export default function StudentTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+export default function StaffTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     return (
         <View className="absolute bottom-8 left-0 right-0 items-center justify-center">
             <View
@@ -30,8 +29,7 @@ export default function StudentTabBar({ state, descriptors, navigation }: Bottom
             >
                 {state.routes
                     .filter(route => Object.keys(ICONS).includes(route.name))
-                    .map((route, index) => {
-                        const { options } = descriptors[route.key];
+                    .map((route) => {
                         const isFocused = state.index === state.routes.findIndex(r => r.key === route.key);
 
                         const onPress = () => {
@@ -40,7 +38,6 @@ export default function StudentTabBar({ state, descriptors, navigation }: Bottom
                                 target: route.key,
                                 canPreventDefault: true,
                             });
-
                             if (!isFocused && !event.defaultPrevented) {
                                 navigation.navigate(route.name);
                             }
@@ -56,7 +53,7 @@ export default function StudentTabBar({ state, descriptors, navigation }: Bottom
                                 className="items-center justify-center flex-1"
                             >
                                 <View
-                                    className={`items-center justify-center ${isFocused ? 'bg-[#5B21B6]' : 'bg-transparent'}`}
+                                    className={`items-center justify-center ${isFocused ? 'bg-[#0F766E]' : 'bg-transparent'}`}
                                     style={{ width: 50, height: 50, borderRadius: 25 }}
                                 >
                                     <IconComponent
