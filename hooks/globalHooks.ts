@@ -118,7 +118,7 @@ export function useProfile(): UseProfileReturn {
         setProfilePicture(null);
         setPassword('');
         setPasswordConfirmation('');
-        setMessage('Profile updated successfully!');
+        setMessage('Your profile has been updated successfully!');
       }
     } catch (err: any) {
       const errorMsg = err.response?.data?.errors 
