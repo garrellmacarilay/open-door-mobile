@@ -119,7 +119,7 @@ export default function AdminDashboard() {
                 onRequestClose={() => setShowAddEventModal(false)}
             >
                 <View className="flex-1 bg-black/40 justify-end">
-                    <View className="bg-white rounded-t-[28px] px-6 pt-5 pb-10 shadow-xl">
+                    <View className="bg-white rounded-t-[28px] px-6 pt-5 pb-4 shadow-xl">
                         <View className="w-10 h-1 bg-gray-300 rounded-full self-center mb-5" />
                         <Text className="text-[#1C274C] text-[22px] font-extrabold mb-6">Add Event</Text>
 
