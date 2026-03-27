@@ -166,6 +166,8 @@ export default function UserSettingsPage() {
                                         <TextInput
                                             value={fullName}
                                             onChangeText={setFullName}
+                                            placeholder='Enter your name'
+                                            placeholderTextColor="#9CA3AF"
                                             className="w-full px-4 py-3.5 border border-gray-300 rounded-[10px] text-[#1C274C] font-semibold text-[15px]"
                                         />
                                     </View>
@@ -187,8 +189,9 @@ export default function UserSettingsPage() {
                                                 value={currPassword}
                                                 onChangeText={setCurrPassword}
                                                 secureTextEntry={!showCurrent}
-                                                placeholder="Enter new password"
-                                                className="flex-1 text-[#1C274C] font-bold text-[16px]"
+                                                placeholder="Enter your current password"
+                                                placeholderTextColor="#9CA3AF"
+                                                className="flex-1 text-[#1C274C] font-bold text-[16px] p-0"
                                             />
                                             <TouchableOpacity onPress={() => setShowCurrent(!showCurrent)}>
                                                 {showCurrent ? <Eye size={18} color="#6B7280" /> : <EyeOff size={18} color="#6B7280" />}
@@ -204,7 +207,9 @@ export default function UserSettingsPage() {
                                                 value={password}
                                                 onChangeText={setPassword}
                                                 secureTextEntry={!showPassword}
-                                                className="flex-1 text-[#1C274C] font-bold text-[18px] tracking-widest pt-1"
+                                                placeholder='Enter your new password'
+                                                placeholderTextColor="#9CA3AF"
+                                                className="flex-1 text-[#1C274C] font-bold text-[16px] p-0"
                                             />
                                             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                                                 {showPassword ? <Eye size={18} color="#6B7280" /> : <EyeOff size={18} color="#6B7280" />}
@@ -220,7 +225,8 @@ export default function UserSettingsPage() {
                                                 onChangeText={setPasswordConfirmation}
                                                 secureTextEntry={!showConfirm}
                                                 placeholder='Confirm new password'
-                                                className="flex-1 text-[#1C274C] font-bold text-[16px]"
+                                                placeholderTextColor="#9CA3AF"
+                                                className="flex-1 text-[#1C274C] font-bold text-[16px] p-0"
                                             />
                                             <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
                                                 {showConfirm ? <Eye size={18} color="#6B7280" /> : <EyeOff size={18} color="#6B7280" />}
