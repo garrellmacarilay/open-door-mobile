@@ -1,15 +1,13 @@
 import React from 'react';
-import { View, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { LayoutDashboard, FileClock, CircleHelp, Bell } from 'lucide-react-native';
-import Animated from 'react-native-reanimated';
+import { House, ClipboardList, Bell } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
 const ICONS: Record<string, React.ElementType> = {
-    dashboard: LayoutDashboard,
-    history: FileClock,
-    faqs: CircleHelp,
+    dashboard: House,
+    history: ClipboardList,
     notifications: Bell,
 };
 
@@ -30,6 +28,7 @@ export default function StaffTabBar({ state, descriptors, navigation }: BottomTa
                 {state.routes
                     .filter(route => Object.keys(ICONS).includes(route.name))
                     .map((route) => {
+                        const { options } = descriptors[route.key];
                         const isFocused = state.index === state.routes.findIndex(r => r.key === route.key);
 
                         const onPress = () => {
@@ -43,7 +42,8 @@ export default function StaffTabBar({ state, descriptors, navigation }: BottomTa
                             }
                         };
 
-                        const IconComponent = ICONS[route.name] || LayoutDashboard;
+                        const IconComponent = ICONS[route.name] || House;
+                        const label = options.title ?? route.name;
 
                         return (
                             <TouchableOpacity
@@ -52,15 +52,18 @@ export default function StaffTabBar({ state, descriptors, navigation }: BottomTa
                                 activeOpacity={0.7}
                                 className="items-center justify-center flex-1"
                             >
-                                <View
-                                    className={`items-center justify-center ${isFocused ? 'bg-[#0F766E]' : 'bg-transparent'}`}
-                                    style={{ width: 50, height: 50, borderRadius: 25 }}
-                                >
+                                <View className="items-center justify-center" style={{ width: 50, height: 50 }}>
                                     <IconComponent
                                         size={24}
-                                        color={isFocused ? 'white' : '#9CA3AF'}
+                                        color={isFocused ? '#4A90E2' : '#9CA3AF'}
+                                        strokeWidth={isFocused ? 2.5 : 1.8}
                                     />
                                 </View>
+                                {isFocused && (
+                                    <Text style={{ color: '#4A90E2', fontSize: 11, fontWeight: '600', marginTop: -4 }}>
+                                        {label}
+                                    </Text>
+                                )}
                             </TouchableOpacity>
                         );
                     })}
