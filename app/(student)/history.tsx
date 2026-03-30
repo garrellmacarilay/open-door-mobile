@@ -85,9 +85,7 @@ export default function History() {
                             Consultation History
                         </Text>
                     </View>
-                    <TouchableOpacity className="w-10 h-10 items-center justify-center bg-[#1C2A48] rounded-lg">
-                        <Ionicons name="calendar-outline" size={20} color="white" />
-                    </TouchableOpacity>
+                   
                 </View>
             </View>
 
