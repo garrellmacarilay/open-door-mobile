@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert, type DimensionValue } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -15,6 +15,12 @@ const APPOINTMENT_STATUS = [
     { label: 'Completed', color: '#3B82F6', count: 21, percentage: 18.3 },
     { label: 'Pending', color: '#F59E0B', count: 25, percentage: 18.0 },
     { label: 'Declined', color: '#EF4444', count: 12, percentage: 9.7 },
+];
+
+const APPOINTMENT_STATUS_CARDS = [
+    { label: 'Approved', color: '#14C7A1', backgroundColor: '#EAF8F1' },
+    { label: 'Completed', color: '#4A7FF7', backgroundColor: '#EEF3FF' },
+    { label: 'Declined', color: '#FF4B5C', backgroundColor: '#FDEEEE' },
 ];
 
 const COMMON_REASONS = [
@@ -84,6 +90,14 @@ function StarRating({ rating }: { rating: number }) {
 
 export default function AdminAnalyticsPage() {
     const insets = useSafeAreaInsets();
+    const appointmentStatusCards = APPOINTMENT_STATUS_CARDS.map((card) => {
+        const status = APPOINTMENT_STATUS.find((item) => item.label === card.label);
+        return {
+            ...card,
+            count: status?.count ?? 0,
+        };
+    });
+    const maxAppointmentStatusCount = Math.max(...appointmentStatusCards.map((item) => item.count), 1);
 
     const handleExportPDF = () => {
         Alert.alert('Export PDF', 'PDF export functionality coming soon');
@@ -131,103 +145,72 @@ export default function AdminAnalyticsPage() {
                     </View>
 
                     {/* Appointments per Status */}
-                    <View className="bg-white rounded-[16px] p-5 mb-6 border border-gray-100">
-                        <Text className="text-[#1C274C] text-[16px] font-extrabold mb-1">
-                            Appointments per Status
-                        </Text>
-                        <Text className="text-gray-500 text-[12px] font-semibold mb-4">
-                            Total of 156 appointments
-                        </Text>
+                    <View
+                        className="bg-white rounded-[22px] p-5 mb-6 border border-[#E5E7EB]"
+                        style={{
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.08,
+                            shadowRadius: 8,
+                            elevation: 2,
+                        }}
+                    >
+                        <View className="flex-row items-start gap-3 mb-2">
+                            <View className="w-1 h-7 rounded-full bg-[#4387FF] mt-0.5" />
+                            <View>
+                                <Text className="text-[#1F2937] text-[16px] font-extrabold mb-1">
+                                    Appointments per status
+                                </Text>
+                                <Text className="text-[#9CA3AF] text-[11px] font-semibold">
+                                    Total of 156 appointments
+                                </Text>
+                            </View>
+                        </View>
 
-                        {/* Status Bar Chart */}
-                        <View className="flex-row gap-1 mb-6 h-6 rounded-full overflow-hidden bg-gray-100">
-                            {APPOINTMENT_STATUS.map((status) => (
+                        <View className="flex-row mb-5 mt-3 h-5 rounded-full overflow-hidden bg-[#F3F4F6]">
+                            {appointmentStatusCards.map((status, index) => (
                                 <View
                                     key={status.label}
                                     style={{
-                                        flex: status.percentage,
+                                        flex: status.count,
                                         backgroundColor: status.color,
+                                        marginRight: index === appointmentStatusCards.length - 1 ? 0 : 1,
                                     }}
-                                    className="rounded-full"
                                 />
                             ))}
                         </View>
 
-                        {/* Status Legend */}
-                        <View className="flex-row flex-wrap gap-6">
-                            <View className="flex-1">
-                                <View className="flex-row items-center gap-2 mb-1">
-                                    <View
-                                        className="w-2 h-2 rounded-full"
-                                        style={{ backgroundColor: '#10B981' }}
-                                    />
-                                    <Text className="text-[#10B981] text-[12px] font-bold uppercase">
-                                        Approved
-                                    </Text>
-                                </View>
-                                <Text className="text-[#1C274C] text-[18px] font-extrabold">
-                                    {APPOINTMENT_STATUS[0].count}
-                                </Text>
-                                <Text className="text-gray-500 text-[11px] font-semibold">
-                                    {APPOINTMENT_STATUS[0].percentage.toFixed(1)}% of total
-                                </Text>
-                            </View>
+                        <View className="flex-row gap-3">
+                            {appointmentStatusCards.map((status) => {
+                                const barWidth: DimensionValue = `${Math.max((status.count / maxAppointmentStatusCount) * 100, 25)}%`;
 
-                            <View className="flex-1">
-                                <View className="flex-row items-center gap-2 mb-1">
+                                return (
                                     <View
-                                        className="w-2 h-2 rounded-full"
-                                        style={{ backgroundColor: '#3B82F6' }}
-                                    />
-                                    <Text className="text-[#3B82F6] text-[12px] font-bold uppercase">
-                                        Completed
-                                    </Text>
-                                </View>
-                                <Text className="text-[#1C274C] text-[18px] font-extrabold">
-                                    {APPOINTMENT_STATUS[1].count}
-                                </Text>
-                                <Text className="text-gray-500 text-[11px] font-semibold">
-                                    {APPOINTMENT_STATUS[1].percentage.toFixed(1)}% of total
-                                </Text>
-                            </View>
-                        </View>
-
-                        <View className="flex-row flex-wrap gap-6 mt-4">
-                            <View className="flex-1">
-                                <View className="flex-row items-center gap-2 mb-1">
-                                    <View
-                                        className="w-2 h-2 rounded-full"
-                                        style={{ backgroundColor: '#F59E0B' }}
-                                    />
-                                    <Text className="text-[#F59E0B] text-[12px] font-bold uppercase">
-                                        Pending
-                                    </Text>
-                                </View>
-                                <Text className="text-[#1C274C] text-[18px] font-extrabold">
-                                    {APPOINTMENT_STATUS[2].count}
-                                </Text>
-                                <Text className="text-gray-500 text-[11px] font-semibold">
-                                    {APPOINTMENT_STATUS[2].percentage.toFixed(1)}% of total
-                                </Text>
-                            </View>
-
-                            <View className="flex-1">
-                                <View className="flex-row items-center gap-2 mb-1">
-                                    <View
-                                        className="w-2 h-2 rounded-full"
-                                        style={{ backgroundColor: '#EF4444' }}
-                                    />
-                                    <Text className="text-[#EF4444] text-[12px] font-bold uppercase">
-                                        Declined
-                                    </Text>
-                                </View>
-                                <Text className="text-[#1C274C] text-[18px] font-extrabold">
-                                    {APPOINTMENT_STATUS[3].count}
-                                </Text>
-                                <Text className="text-gray-500 text-[11px] font-semibold">
-                                    {APPOINTMENT_STATUS[3].percentage.toFixed(1)}% of total
-                                </Text>
-                            </View>
+                                        key={status.label}
+                                        className="flex-1 rounded-[14px] px-3 py-4"
+                                        style={{ backgroundColor: status.backgroundColor }}
+                                    >
+                                        <Text
+                                            className="text-[14px] font-bold mb-3"
+                                            style={{ color: status.color }}
+                                        >
+                                            {status.label}
+                                        </Text>
+                                        <Text className="text-[#111827] text-[20px] font-extrabold mb-4">
+                                            {status.count}
+                                        </Text>
+                                        <View className="h-1.5 bg-white/80 rounded-full overflow-hidden">
+                                            <View
+                                                className="h-full rounded-full"
+                                                style={{
+                                                    width: barWidth,
+                                                    backgroundColor: status.color,
+                                                }}
+                                            />
+                                        </View>
+                                    </View>
+                                );
+                            })}
                         </View>
                     </View>
 
