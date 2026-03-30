@@ -178,24 +178,24 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
 
                             {/* Footer Actions */}
                             {isPending && (
-                                <View className="flex-row gap-3">
+                                <View className="flex-row gap-4">
                                     <TouchableOpacity
                                         activeOpacity={0.8}
-                                        className="flex-1 bg-[#DCFCE7] border border-[#86EFAC] rounded-[14px] py-4 items-center"
+                                        className="flex-1 bg-[#F44336] rounded-[10px] py-3.5 items-center"
+                                        onPress={() => setShowDeclineModal(true)}
+                                    >
+                                        <Text className="text-white font-bold text-[15px]">Decline</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        activeOpacity={0.8}
+                                        className="flex-1 bg-[#45C943] rounded-[10px] py-3.5 items-center"
                                         onPress={() => {
                                             // TODO: approve action
                                             onClose();
                                         }}
                                     >
-                                        <Text className="text-[#16A34A] font-bold text-[15px]">Approve</Text>
-                                    </TouchableOpacity>
-
-                                    <TouchableOpacity
-                                        activeOpacity={0.8}
-                                        className="flex-1 bg-[#FEE2E2] border border-[#FECACA] rounded-[14px] py-4 items-center"
-                                        onPress={() => setShowDeclineModal(true)}
-                                    >
-                                        <Text className="text-[#DC2626] font-bold text-[15px]">Decline</Text>
+                                        <Text className="text-white font-bold text-[15px]">Approve</Text>
                                     </TouchableOpacity>
                                 </View>
                             )}
