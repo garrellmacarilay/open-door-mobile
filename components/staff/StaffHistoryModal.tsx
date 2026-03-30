@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import {
-    View, Text, TouchableOpacity, Modal, ScrollView, TextInput,
+    View, Text, TouchableOpacity, Modal, ScrollView, TextInput, ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import EvaluationModal from '../student/EvaluationModal';
+import { Appointment } from '@/hooks/staffHooks';
+import useUpdateStatus from '@/hooks/staffAdminHooks';
 
 interface StaffHistoryModalProps {
     visible: boolean;
-    appointment: any;
+    appointment: Appointment | null;   
     onClose: () => void;
+    onRefresh: () => void;
 }
 
 function DeclineModal({
@@ -76,9 +79,11 @@ function DeclineModal({
     );
 }
 
-export default function StaffHistoryModal({ visible, appointment, onClose }: StaffHistoryModalProps) {
+export default function StaffHistoryModal({ visible, appointment, onClose, onRefresh }: StaffHistoryModalProps) {
     const [showEvaluation, setShowEvaluation] = useState(false);
     const [showDeclineModal, setShowDeclineModal] = useState(false);
+    const { updateStatus, loading } = useUpdateStatus();
+    const [actionType, setActionType] = useState<'approved' | 'declined' | null>(null);
 
     if (!appointment) return null;
 
@@ -92,10 +97,25 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
         }
     };
 
-    const statusStyle = getStatusStyle(appointment.status);
-    const status = appointment.status.toLowerCase();
+    const statusStyle = getStatusStyle(appointment.details.status);
+    const status = appointment.details.status.toLowerCase();
     const isPending = status === 'pending';
     const isCompleted = status === 'completed';
+
+    const handleAction = async (newStatus: 'approved' | 'declined', reason?: string) => {
+
+        const payload = {
+            status: newStatus,
+            ...(reason ? {declined_reason: reason} : {})
+        }
+        const success = await updateStatus(appointment.id, payload);
+
+        if (success) {
+            onRefresh(); // Refresh the list in the background
+            onClose();   // Close the modal
+        }
+        setActionType(null);
+    };
 
     return (
         <>
@@ -113,11 +133,11 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
                             <View className="flex-row items-center gap-3">
                                 <View className={`px-4 py-1.5 rounded-full border ${statusStyle.bg}`}>
                                     <Text className={`text-[12px] font-bold capitalize ${statusStyle.text}`}>
-                                        {appointment.status}
+                                        {appointment.details.status}
                                     </Text>
                                 </View>
                                 <Text className="text-gray-400 text-[13px] font-bold tracking-wider">
-                                    {appointment.id}
+                                    {appointment.details.reference_code}
                                 </Text>
                             </View>
                             <TouchableOpacity onPress={onClose} className="p-1" activeOpacity={0.6}>
@@ -128,7 +148,7 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
                         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
 
                             {/* Office Category */}
-                            <Text className="text-gray-400 text-[14px] font-bold mb-1">Office Category</Text>
+                            <Text className="text-gray-400 text-[14px] font-bold mb-1">Student Name</Text>
                             <Text className="text-[#111827] text-[26px] font-extrabold mb-8 tracking-tight">
                                 {appointment.title}
                             </Text>
@@ -139,14 +159,24 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
                                     <Text className="text-gray-400 text-[13px] font-bold mb-3">Booked Date</Text>
                                     <View className="flex-row items-center gap-2">
                                         <Ionicons name="calendar-outline" size={18} color="#9CA3AF" />
-                                        <Text className="text-gray-600 font-bold text-[14px]">{appointment.date}</Text>
+                                        <Text className="text-gray-600 font-bold text-[14px]">{new Date(appointment.start).toLocaleDateString('en-US', {
+                                                month: 'long',
+                                                day: 'numeric',
+                                                year: 'numeric'
+                                            })}
+                                        </Text>
                                     </View>
                                 </View>
                                 <View className="flex-1 bg-[#F9FAFB] rounded-[20px] p-5 border border-gray-100">
                                     <Text className="text-gray-400 text-[13px] font-bold mb-3">Booked Time</Text>
                                     <View className="flex-row items-center gap-2">
                                         <Ionicons name="time-outline" size={18} color="#9CA3AF" />
-                                        <Text className="text-gray-600 font-bold text-[14px]">{appointment.time}</Text>
+                                        <Text className="text-gray-600 font-bold text-[14px]">{new Date(appointment.start).toLocaleTimeString('en-US', {
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                hour12: true
+                                            })}
+                                        </Text>
                                     </View>
                                 </View>
                             </View>
@@ -154,7 +184,7 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
                             {/* Detailed Topic */}
                             <Text className="text-gray-400 text-[14px] font-bold mb-3">Detailed Topic</Text>
                             <View className="bg-white border border-gray-100 rounded-[16px] p-5 mb-8 shadow-sm">
-                                <Text className="text-gray-400 font-bold text-[15px]">Internship Preparation</Text>
+                                <Text className="text-gray-400 font-bold text-[15px]">{appointment.details.concern_description}</Text>
                             </View>
 
                             {/* Members and Files */}
@@ -164,7 +194,7 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
                                         <Ionicons name="people-outline" size={18} color="#9CA3AF" />
                                         <Text className="text-gray-400 font-bold text-[14px]">Members</Text>
                                     </View>
-                                    <Text className="text-gray-300 font-bold text-[13px]">Individual</Text>
+                                    <Text className="text-gray-300 font-bold text-[13px]">{appointment.details.group_members ?? 'Individual' }</Text>
                                 </View>
                                 <View className="w-[1px] h-12 bg-gray-100" />
                                 <View className="flex-1 items-center justify-center">
@@ -172,7 +202,7 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
                                         <Ionicons name="attach-outline" size={18} color="#9CA3AF" />
                                         <Text className="text-gray-400 font-bold text-[14px]">Files</Text>
                                     </View>
-                                    <Text className="text-gray-300 font-bold text-[13px]">No Upload</Text>
+                                    <Text className="text-gray-300 font-bold text-[13px]">{appointment.details.attachment_name ?? ''}</Text>
                                 </View>
                             </View>
 
@@ -183,19 +213,32 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
                                         activeOpacity={0.8}
                                         className="flex-1 bg-[#DCFCE7] border border-[#86EFAC] rounded-[14px] py-4 items-center"
                                         onPress={() => {
-                                            // TODO: approve action
-                                            onClose();
+                                            handleAction('approved')
                                         }}
+                                        disabled={loading}
                                     >
-                                        <Text className="text-[#16A34A] font-bold text-[15px]">Approve</Text>
+                                        {loading && actionType === 'approved'? (
+                                            <ActivityIndicator color="#16A34A" />
+                                        ) : (
+                                            <Text className={`text-[#16A34A] font-bold ${loading && actionType === 'declined' ? 'opacity-50' : ''}`}>
+                                                Approve
+                                            </Text>
+                                        )}
                                     </TouchableOpacity>
 
                                     <TouchableOpacity
                                         activeOpacity={0.8}
                                         className="flex-1 bg-[#FEE2E2] border border-[#FECACA] rounded-[14px] py-4 items-center"
                                         onPress={() => setShowDeclineModal(true)}
+                                        disabled={loading}
                                     >
-                                        <Text className="text-[#DC2626] font-bold text-[15px]">Decline</Text>
+                                        {loading && actionType === 'declined' ? (
+                                            <ActivityIndicator color="#DC2626" />
+                                        ) : (
+                                            <Text className={`text-[#DC2626] font-bold ${loading && actionType === 'approved' ? 'opacity-50' : ''}`}>
+                                                Decline
+                                            </Text>
+                                        )}
                                     </TouchableOpacity>
                                 </View>
                             )}
@@ -228,9 +271,9 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
 
             <DeclineModal
                 visible={showDeclineModal}
-                onConfirm={(_reason) => {
+                onConfirm={(reason) => {
                     setShowDeclineModal(false);
-                    onClose();
+                    handleAction('declined', reason);
                 }}
                 onCancel={() => setShowDeclineModal(false)}
             />
