@@ -1,7 +1,7 @@
 
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 
@@ -128,37 +128,49 @@ interface LoginResponse {
     access_token?: string;
     message?: string;
     user?: any;
+    errors?: {
+        email?: string[];
+        password?: string[];
+        general?: string[];
+    }
 }
 export const useLogin = () => {
-    const [message, setMessage] = useState<string>('');
+    const [errors, setErrors] = useState<LoginResponse['errors']>({});
     const [loading, setLoading] = useState<boolean>(false);
     const { login } = useAuth();
     const router = useRouter();
 
     const handleLogin = async (email: string, password: string) => {
         setLoading(true);
-        setMessage('Logging in...');
+        setErrors({});
         try {
             const res = await api.post('/login', {email, password});
-            const { success, access_token, message: apiMessage } = res.data as LoginResponse;
-           
-            if (success && access_token) {
-                await login(access_token);
-                setMessage('Login successful!');
-                router.replace('/'); // Redirect to home or dashboard
-            } else {
-                setMessage(apiMessage || 'Login failed');
+            const responseData = res.data as LoginResponse;
+
+            if (res.status >= 400 || !responseData.success) {
+                setErrors(responseData.errors || { general: [responseData.message || 'Login Failed'] });
+                return false;
             }
+
+            const { access_token } = responseData;
+            if (access_token) {
+                await login(access_token);
+                router.replace('/'); // Redirect to home or dashboard
+                return true;
+            }
+
+            setErrors({ general: ['Login Failed'] });
+            return false;
         } catch (err: any) {
             console.error("Login error:", err);
-            const errorMsg = err.response?.data?.message || "Something went wrong.";
-            setMessage(errorMsg);
+            setErrors({ general: [err.message || 'An unexpected error occurred'] });
+            return false;
         } finally {
             setLoading(false);
         }
     };
 
-    return { handleLogin, loading, message, setMessage };
+    return { handleLogin, loading, errors, setErrors };
 };
 
 export const useLogout = () => {
