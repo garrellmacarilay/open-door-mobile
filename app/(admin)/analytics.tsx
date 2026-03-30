@@ -215,55 +215,67 @@ export default function AdminAnalyticsPage() {
                     </View>
 
                     {/* Common Reasons for Visit */}
-                    <View className="bg-white rounded-[16px] p-5 mb-6 border border-gray-100">
-                        <Text className="text-[#1C274C] text-[16px] font-extrabold mb-1">
-                            Common Reasons for Visit
-                        </Text>
-                        <Text className="text-gray-500 text-[12px] font-semibold mb-5">
-                            Top consultation categories
-                        </Text>
+                    <View
+                        className="bg-white rounded-[22px] p-5 mb-6 border border-[#E5E7EB]"
+                        style={{
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.08,
+                            shadowRadius: 8,
+                            elevation: 2,
+                        }}
+                    >
+                        <View className="flex-row items-start gap-3 mb-5">
+                            <View className="w-1 h-7 rounded-full bg-[#E400D9] mt-0.5" />
+                            <View>
+                                <Text className="text-[#1F2937] text-[16px] font-extrabold mb-1">
+                                    Common Reasons for Visit
+                                </Text>
+                                <Text className="text-[#7B7280] text-[11px] font-semibold">
+                                    Top consultation categories
+                                </Text>
+                            </View>
+                        </View>
 
-                        {/* Reasons List */}
                         {COMMON_REASONS.map((reason, index) => {
-                            const barWidth = (reason.count / MAX_REASON_COUNT) * 100;
+                            const barWidth: DimensionValue = `${Math.max((reason.count / MAX_REASON_COUNT) * 100, 18)}%`;
+
                             return (
-                                <View key={reason.id} className="mb-5">
-                                    <View className="flex-row items-center justify-between mb-2">
-                                        <View className="flex-row items-center gap-2 flex-1">
-                                            <View
-                                                className="w-2.5 h-2.5 rounded-full"
-                                                style={{ backgroundColor: reason.color }}
-                                            />
-                                            <Text className="text-[#1C274C] text-[13px] font-semibold flex-1">
-                                                {reason.label}
+                                <View key={reason.id} className={index === COMMON_REASONS.length - 1 ? '' : 'mb-5'}>
+                                    <View className="flex-row items-start gap-4">
+                                        <View
+                                            className="w-8 h-8 rounded-[10px] items-center justify-center"
+                                            style={{ backgroundColor: reason.color }}
+                                        >
+                                            <Text className="text-white text-[18px] font-extrabold leading-[20px]">
+                                                {index + 1}
                                             </Text>
                                         </View>
-                                        <Text className="text-[#1C274C] text-[12px] font-extrabold">
-                                            {reason.count}
-                                        </Text>
-                                    </View>
-                                    <View className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                                        <View
-                                            style={{
-                                                width: `${barWidth}%`,
-                                                backgroundColor: reason.color,
-                                            }}
-                                            className="h-full rounded-full"
-                                        />
+
+                                        <View className="flex-1 pt-0.5">
+                                            <View className="flex-row items-center justify-between mb-2">
+                                                <Text className="text-[#6B7280] text-[13px] font-extrabold flex-1 pr-3">
+                                                    {reason.label}
+                                                </Text>
+                                                <Text className="text-[#4B5563] text-[13px] font-extrabold">
+                                                    {reason.count}
+                                                </Text>
+                                            </View>
+
+                                            <View className="h-3 bg-[#F1F2F4] rounded-full overflow-hidden">
+                                                <View
+                                                    className="h-full rounded-full"
+                                                    style={{
+                                                        width: barWidth,
+                                                        backgroundColor: reason.color,
+                                                    }}
+                                                />
+                                            </View>
+                                        </View>
                                     </View>
                                 </View>
                             );
                         })}
-
-                        {/* Total Visits */}
-                        <View className="mt-4 pt-4 border-t border-gray-100 flex-row justify-between">
-                            <Text className="text-gray-500 text-[12px] font-semibold">
-                                Total visits tracked
-                            </Text>
-                            <Text className="text-[#1C274C] text-[14px] font-extrabold">
-                                {TOTAL_VISITS}
-                            </Text>
-                        </View>
                     </View>
                     {/* Office Feedback */}
                     <View className="mb-6">
