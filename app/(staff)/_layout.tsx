@@ -12,7 +12,6 @@ export default function StaffLayout() {
             <DashboardHeader
                 user={{ name: "Staff Member", email: "office@example.com" }}
                 onProfilePress={() => router.push('/(staff)/settings')}
-                hideNotification
             />
             <View className="flex-1 bg-gray-50">
                 <Tabs

@@ -28,14 +28,11 @@ export default function StaffSettingsPage() {
     const [isEditing, setIsEditing] = useState(false);
     const [name, setName] = useState('Staff Member');
     const [email] = useState('office@staff.laverdad.edu.ph');
-    const [currentPassword, setCurrentPassword] = useState('password123');
-    const [newPassword, setNewPassword] = useState('password123');
-    const [confirmPassword, setConfirmPassword] = useState('password123');
     const [profileImage, setProfileImage] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
 
     const [showCurrent, setShowCurrent] = useState(false);
-    const [showNew, setShowNew] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
 
@@ -50,6 +47,8 @@ export default function StaffSettingsPage() {
         message, 
         password, 
         setPassword, 
+        currPassword,
+        setCurrPassword,
         passwordConfirmation, 
         setPasswordConfirmation, 
         handleSubmit 
@@ -69,6 +68,7 @@ export default function StaffSettingsPage() {
             aspect: [1, 1],
             quality: 0.8,
         });
+
         if (!result.canceled) {
             const asset = result.assets[0];
 
@@ -77,7 +77,7 @@ export default function StaffSettingsPage() {
                 name: asset.fileName || 'profile.jpg',
                 type: asset.mimeType || 'image/jpeg',
             }
-            setProfileImage(imageFile as any);
+            setProfileAndPreview(imageFile as any);
         }
     };
 
@@ -134,7 +134,6 @@ export default function StaffSettingsPage() {
                                     <TouchableOpacity
                                         onPress={() => setIsEditing(true)}
                                         className="w-9 h-9 bg-gray-100 rounded-[10px] items-center justify-center border border-gray-200"
-                                        activeOpacity={0.7}
                                     >
                                         <Pencil size={16} color="#9CA3AF" />
                                     </TouchableOpacity>
@@ -145,16 +144,19 @@ export default function StaffSettingsPage() {
                             <View className="items-center mb-8">
                                 <View className="relative">
                                     <View className="w-28 h-28 rounded-full overflow-hidden border-[3px] border-[#0F766E] bg-gray-100 flex items-center justify-center">
-                                        {profileImage ? (
-                                            <Image source={{ uri: profileImage }} className="w-full h-full" resizeMode="cover" />
+                                        {(preview || profileImageUrl) ? (
+                                            <Image 
+                                                source={{ uri: preview || profileImageUrl || '' }} 
+                                                className="w-full h-full" 
+                                                resizeMode="cover" 
+                                            />
                                         ) : (
-                                            <User size={48} color="#9CA3AF" strokeWidth={1.5} />
+                                            <User size={48} color="#9CA3AF" /> 
                                         )}
                                     </View>
                                     <TouchableOpacity
                                         onPress={handleImagePicker}
                                         className="absolute -bottom-1 -right-1 w-[34px] h-[34px] rounded-full bg-[#0F766E] border-2 border-white flex items-center justify-center"
-                                        activeOpacity={0.8}
                                     >
                                         <Camera size={16} color="#FFF" />
                                     </TouchableOpacity>
@@ -203,7 +205,7 @@ export default function StaffSettingsPage() {
                                         <Text className="text-[13px] font-bold text-gray-500 mb-1.5 ml-1">Current Password</Text>
                                         <View className="w-full flex-row items-center justify-between border border-gray-300 rounded-[10px] px-4 py-3.5">
                                             <TextInput
-                                                value={password}
+                                                value={currPassword}
                                                 onChangeText={setPassword}
                                                 secureTextEntry={!showCurrent}
                                                 placeholder='Enter new password'
@@ -220,33 +222,34 @@ export default function StaffSettingsPage() {
                                         <Text className="text-[13px] font-bold text-gray-500 mb-1.5 ml-1">New Password</Text>
                                         <View className="w-full flex-row items-center justify-between border border-gray-300 rounded-[10px] px-4 py-3.5">
                                             <TextInput
-                                                value={passwordConfirmation}
-                                                onChangeText={setPasswordConfirmation}
-                                                secureTextEntry={!showConfirm}
-                                                placeholder='Confirm new password'
+                                                value={password}
+                                                onChangeText={setPassword}
+                                                secureTextEntry={!showPassword}
+                                                placeholder='Enter your new password'
                                                 className="flex-1 text-[#1C274C] font-bold text-[18px] tracking-widest pt-1"
                                             />
-                                            <TouchableOpacity onPress={() => setShowNew(!showNew)}>
+                                            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                                                 {showConfirm ? <Eye size={18} color="#6B7280" /> : <EyeOff size={18} color="#6B7280" />}
                                             </TouchableOpacity>
                                         </View>
                                     </View>
 
                                     {/* Confirm Password */}
-                                    {/* <View>
+                                    <View>
                                         <Text className="text-[13px] font-bold text-gray-500 mb-1.5 ml-1">Confirm Password</Text>
                                         <View className="w-full flex-row items-center justify-between border border-gray-300 rounded-[10px] px-4 py-3.5">
                                             <TextInput
-                                                value={confirmPassword}
-                                                onChangeText={setConfirmPassword}
+                                                value={passwordConfirmation}
+                                                onChangeText={setPasswordConfirmation}
                                                 secureTextEntry={!showConfirm}
+                                                placeholder='Confirm new password'
                                                 className="flex-1 text-[#1C274C] font-bold text-[18px] tracking-widest pt-1"
                                             />
                                             <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
                                                 {showConfirm ? <Eye size={18} color="#6B7280" /> : <EyeOff size={18} color="#6B7280" />}
                                             </TouchableOpacity>
                                         </View>
-                                    </View> */}
+                                    </View>
                                 </View>
                             )}
                         </View>

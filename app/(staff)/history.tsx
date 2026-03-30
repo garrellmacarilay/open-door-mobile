@@ -1,39 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import HistoryModal from '../../components/staff/StaffHistoryModal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-const HISTORY_DATA = [
-    {
-        id: '21 - 0007/IMTC',
-        title: 'Student Organization',
-        date: '2026-02-20',
-        time: '10:00 AM',
-        status: 'approved'
-    },
-    {
-        id: '22 - 0007/IMTC',
-        title: 'Student Internship',
-        date: '2026-12-10',
-        time: '10:00 AM',
-        status: 'pending'
-    },
-    {
-        id: '23 - 0007/IMTC',
-        title: 'Student Publication',
-        date: '2026-04-20',
-        time: '10:00 AM',
-        status: 'declined'
-    },
-    {
-        id: '24 - 0007/IMTC',
-        title: 'Medical Services',
-        date: '2026-04-20',
-        time: '10:00 AM',
-        status: 'completed'
-    }
-];
+import { useOfficeUpcomingAppointments } from '@/hooks/staffHooks';
 
 type FilterStatus = 'all' | 'pending' | 'approved' | 'completed' | 'declined';
 
@@ -42,8 +12,13 @@ export default function StaffHistory() {
     const [activeFilter, setActiveFilter] = useState<FilterStatus>('all');
     const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
 
+    // 1. Hook Integration
+    const { appointments, loading, refresh } = useOfficeUpcomingAppointments();
+
     const getStatusStyle = (status: string) => {
-        switch (status) {
+        // Ensure lowercase comparison to match backend strings
+        const s = status?.toLowerCase();
+        switch (s) {
             case 'pending':   return { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Pending' };
             case 'approved':  return { bg: 'bg-green-100',  text: 'text-green-700',  label: 'Approved' };
             case 'completed': return { bg: 'bg-blue-100',   text: 'text-blue-700',   label: 'Completed' };
@@ -52,9 +27,11 @@ export default function StaffHistory() {
         }
     };
 
-    const filteredData = activeFilter === 'all'
-        ? HISTORY_DATA
-        : HISTORY_DATA.filter(item => item.status === activeFilter);
+    // 2. Filter logic for the UI tabs
+    const filteredData = useMemo(() => {
+        if (activeFilter === 'all') return appointments;
+        return appointments.filter(item => item.details.status.toLowerCase() === activeFilter);
+    }, [appointments, activeFilter]);
 
     const FilterButton = ({ label, value }: { label: string; value: FilterStatus }) => {
         const isActive = activeFilter === value;
@@ -73,7 +50,7 @@ export default function StaffHistory() {
     return (
         <View className="flex-1 bg-gray-50">
 
-            {/* Header */}
+            {/* Header - Identical UI */}
             <View className="bg-white px-5 pt-4 pb-4 border-b border-gray-100">
                 <View className="flex-row items-start justify-between mb-1">
                     <View className="flex-1">
@@ -90,7 +67,7 @@ export default function StaffHistory() {
                 </View>
             </View>
 
-            {/* Filter Tabs */}
+            {/* Filter Tabs - Identical UI */}
             <View className="bg-white px-5 py-3 border-b border-gray-100">
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                     <FilterButton label="All" value="all" />
@@ -101,17 +78,24 @@ export default function StaffHistory() {
                 </ScrollView>
             </View>
 
-            {/* History List */}
-            <ScrollView className="flex-1 px-5 pt-4" showsVerticalScrollIndicator={false}>
+            {/* History List - Kept as ScrollView with exact mapping UI */}
+            <ScrollView 
+                className="flex-1 px-5 pt-4" 
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl refreshing={loading} onRefresh={refresh} color="#0F766E" />
+                }
+            >
                 {filteredData.map((item, index) => {
-                    const statusStyle = getStatusStyle(item.status);
+                    const statusStyle = getStatusStyle(item.details.status);
                     return (
                         <View key={index} className="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-gray-100">
                             {/* Header with ID and Status */}
                             <View className="flex-row items-start justify-between mb-3">
                                 <View className="flex-1">
-                                    <Text className="text-gray-500 text-xs mb-1">{item.id}</Text>
-                                    <Text className="text-[#1C2A48] text-base font-bold">{item.title}</Text>
+                                    {/* reference_code used for the ID text */}
+                                    <Text className="text-gray-500 text-xs mb-1">{item.details.reference_code}</Text>
+                                    <Text className="text-[#1C2A48] text-base font-bold">{item.details.student}</Text>
                                 </View>
                                 <View className={`px-3 py-1.5 rounded-full ${statusStyle.bg}`}>
                                     <Text className={`text-xs font-semibold ${statusStyle.text}`}>
@@ -124,11 +108,21 @@ export default function StaffHistory() {
                             <View className="flex-row items-center gap-4 mb-4">
                                 <View className="flex-row items-center gap-1.5">
                                     <Ionicons name="calendar-outline" size={14} color="#6B7280" />
-                                    <Text className="text-gray-600 text-xs">{item.date}</Text>
+                                    <Text className="text-gray-600 text-xs">{new Date(item.start).toLocaleDateString('en-US', {
+                                        month: 'long',
+                                        day: 'numeric',
+                                        year: 'numeric'
+                                    })}
+                                    </Text>
                                 </View>
                                 <View className="flex-row items-center gap-1.5">
                                     <Ionicons name="time-outline" size={14} color="#6B7280" />
-                                    <Text className="text-gray-600 text-xs">{item.time}</Text>
+                                    <Text className="text-gray-600 text-xs">{new Date(item.start).toLocaleTimeString('en-US', {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: true
+                                    })}
+                                    </Text>
                                 </View>
                             </View>
 
@@ -144,7 +138,8 @@ export default function StaffHistory() {
                     );
                 })}
 
-                {filteredData.length === 0 && (
+                {/* Empty State */}
+                {!loading && filteredData.length === 0 && (
                     <View className="bg-white rounded-2xl p-12 items-center">
                         <Ionicons name="document-text-outline" size={48} color="#D1D5DB" />
                         <Text className="text-gray-400 text-center mt-3">No records found</Text>
@@ -158,6 +153,7 @@ export default function StaffHistory() {
                 visible={!!selectedAppointment}
                 appointment={selectedAppointment}
                 onClose={() => setSelectedAppointment(null)}
+                onRefresh={refresh}
             />
         </View>
     );

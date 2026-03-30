@@ -1,40 +1,22 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput, ActivityIndicator, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AppointmentCard from '../../components/student/AppointmentCard';
 import CalendarWidget from '../../components/student/CalendarWidget';
 import DatePickerModal from '../../components/student/DatePickerModal';
 import TimePickerModal from '../../components/student/TimePickerModal';
+import { useOfficeUpcomingAppointments } from '@/hooks/staffHooks';
 
-const DUMMY_APPOINTMENTS = [
-    {
-        id: 1,
-        title: "Academic Advising Session",
-        details: {
-            student: "John Doe",
-            office: "Guidance",
-            status: "pending",
-            service_type: "Academic Consultation"
-        },
-        dateString: "December 15, 2025",
-        time: "10:00 AM"
-    },
-    {
-        id: 2,
-        title: "Career Planning Meeting",
-        details: {
-            student: "Jane Smith",
-            office: "Student Internship",
-            status: "approved",
-            service_type: "Career Guidance"
-        },
-        dateString: "December 16, 2025",
-        time: "2:30 PM"
-    }
-];
 
 export default function OfficeDashboard() {
-    const [appointments, setAppointments] = useState(DUMMY_APPOINTMENTS);
+
+    const now = new Date();
+    const [currentMonth, setCurrentMonth] = useState(now.getMonth() + 1);
+    const [currentYear, setCurrentYear] = useState(now.getFullYear())
+    const [viewDate, setViewDate] = useState(new Date());
+
+    const { appointments, loading, refresh } = useOfficeUpcomingAppointments(currentMonth, currentYear);
+
     const [showAddEventModal, setShowAddEventModal] = useState(false);
     const [showDatePickerModal, setShowDatePickerModal] = useState(false);
     const [showTimePickerModal, setShowTimePickerModal] = useState(false);
@@ -43,38 +25,41 @@ export default function OfficeDashboard() {
     const [eventTime, setEventTime] = useState('');
     const [eventDescription, setEventDescription] = useState('');
 
-    const handleAddEvent = () => {
-        if (!eventTitle.trim() || !eventDate.trim()) {
-            alert('Please fill in Event Title and Date');
-            return;
-        }
+    // const handleAddEvent = () => {
+    //     if (!eventTitle.trim() || !eventDate.trim()) {
+    //         alert('Please fill in Event Title and Date');
+    //         return;
+    //     }
 
-        const newEvent = {
-            id: Math.random(),
-            title: eventTitle,
-            details: {
-                student: "Current Office",
-                office: "Current Office",
-                status: "pending",
-                service_type: eventDescription || eventTitle
-            },
-            dateString: eventDate,
-            time: eventTime || "TBD"
-        };
+    //     const newEvent = {
+    //         id: Math.random(),
+    //         title: eventTitle,
+    //         details: {
+    //             student: "Current Office",
+    //             office: "Current Office",
+    //             status: "pending",
+    //             service_type: eventDescription || eventTitle
+    //         },
+    //         dateString: eventDate,
+    //         time: eventTime || "TBD"
+    //     };
 
-        setAppointments([...appointments, newEvent]);
-        setEventTitle('');
-        setEventDate('');
-        setEventTime('');
-        setEventDescription('');
-        setShowAddEventModal(false);
-    };
-
-    const filteredAppointments = appointments;
+    //     setAppointments([...appointments, newEvent]);
+    //     setEventTitle('');
+    //     setEventDate('');
+    //     setEventTime('');
+    //     setEventDescription('');
+    //     setShowAddEventModal(false);
+    // };
 
     return (
         <View className="flex-1 bg-gray-50">
-            <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+            <ScrollView className="flex-1" 
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl refreshing={loading} onRefresh={refresh} />
+                }
+            >
 
                 {/* Title Section */}
                 <View className="px-6 pt-5 pb-4">
@@ -82,6 +67,7 @@ export default function OfficeDashboard() {
                         <Text className="text-[#1C274C] text-[24px] font-extrabold tracking-[-0.5px]">
                             Office Dashboard
                         </Text>
+                        {loading && <ActivityIndicator size="small" color="#1C274C" />}
                     </View>
                     <Text className="text-[#6B7280] text-[15px] font-semibold">
                         Office Consultation Overview
@@ -92,7 +78,14 @@ export default function OfficeDashboard() {
                     {/* Calendar */}
                     <CalendarWidget
                         events={appointments}
-                        onAddEvent={() => setShowAddEventModal(true)}
+                        onMonthChange={(date) => {
+                        const d = new Date(date);
+                        setViewDate(d);
+                        
+                        setCurrentMonth(d.getMonth() + 1);
+                        setCurrentYear(d.getFullYear());
+                    }}
+                        // onAddEvent={() => setShowAddEventModal(true)}
                     />
 
                     {/* Appointment Feed */}
@@ -108,7 +101,7 @@ export default function OfficeDashboard() {
                             <AppointmentCard key={apt.id} appointment={apt} />
                         ))}
 
-                        {appointments.length === 0 && (
+                        {!loading && appointments.length === 0 && (
                             <View className="bg-white rounded-xl p-8 items-center">
                                 <Ionicons name="search-outline" size={48} color="#D1D5DB" />
                                 <Text className="text-gray-400 text-center mt-3 font-semibold">
@@ -204,7 +197,7 @@ export default function OfficeDashboard() {
                                 <Text className="text-gray-600 font-bold text-[15px]">Cancel</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
-                                onPress={handleAddEvent}
+                                // onPress={handleAddEvent}
                                 className="flex-1 bg-[#1C274C] rounded-[12px] py-3.5 items-center"
                                 activeOpacity={0.8}
                             >
