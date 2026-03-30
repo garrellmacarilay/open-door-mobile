@@ -7,61 +7,61 @@ const OFFICES_DATA = [
         id: '1',
         label: 'Prefect and Assistant Prefect',
         email: 'prefect@laverdad.edu.ph',
-        status: 'Active',
+        status: 'Available',
     },
     {
         id: '2',
         label: 'Guidance',
         email: 'prefect.guidance@laverdad.edu.ph',
-        status: 'Active',
+        status: 'Available',
     },
     {
         id: '3',
         label: 'Medical Clinic',
         email: 'prefect.medical@laverdad.edu.ph',
-        status: 'Active',
+        status: 'Available',
     },
     {
         id: '4',
         label: 'Sports Development and Management',
         email: 'prefect.sports@laverdad.edu.ph',
-        status: 'Inactive',
+        status: 'Unavailable',
     },
     {
         id: '5',
         label: 'Student Assistance and Experiential Learning',
         email: 'prefect.studentassist@laverdad.edu.ph',
-        status: 'Active',
+        status: 'Available',
     },
     {
         id: '6',
         label: 'Student Discipline',
         email: 'prefect.discipline@laverdad.edu.ph',
-        status: 'Active',
+        status: 'Available',
     },
     {
         id: '7',
         label: 'Student Internship',
         email: 'prefect.internship@laverdad.edu.ph',
-        status: 'Active',
+        status: 'Available',
     },
     {
         id: '8',
         label: 'IT Support Services',
         email: 'prefect.itsupport@laverdad.edu.ph',
-        status: 'Active',
+        status: 'Available',
     },
     {
         id: '9',
         label: 'Student Organizations',
         email: 'prefect.organizations@laverdad.edu.ph',
-        status: 'Active',
+        status: 'Available',
     },
     {
         id: '10',
         label: 'Student Publications',
         email: 'prefect.publications@laverdad.edu.ph',
-        status: 'Active',
+        status: 'Available',
     },
 ];
 
@@ -75,7 +75,7 @@ export default function AdminOfficesPage() {
     const [editOfficeName, setEditOfficeName] = useState('');
     const [editOfficeEmail, setEditOfficeEmail] = useState('');
 
-    const activeCount = offices.filter((o) => o.status === 'Active').length;
+    const availableCount = offices.filter((o) => o.status === 'Available').length;
 
     const handleAddOffice = () => {
         if (!officeName.trim() || !officeEmail.trim()) {
@@ -87,7 +87,7 @@ export default function AdminOfficesPage() {
             id: String(Math.random()),
             label: officeName,
             email: officeEmail,
-            status: 'Active',
+            status: 'Available',
         };
 
         setOffices([...offices, newOffice]);
@@ -151,7 +151,7 @@ export default function AdminOfficesPage() {
                                 Offices
                             </Text>
                             <Text className="text-gray-500 text-[13px] font-semibold">
-                                {activeCount} of {offices.length} available
+                                {availableCount} of {offices.length} available
                             </Text>
                         </View>
                         <TouchableOpacity
@@ -172,47 +172,65 @@ export default function AdminOfficesPage() {
                             key={office.id}
                             className="bg-white rounded-[16px] p-4 mb-4 border border-gray-100 shadow-sm"
                         >
-                            {/* Office Header with Icon and Name */}
-                            <View className="flex-row items-start gap-3 mb-3">
-                                <View className="w-12 h-12 bg-[#1C274C] rounded-[10px] items-center justify-center">
-                                    <Ionicons
-                                        name="home"
-                                        size={24}
-                                        color="white"
-                                    />
-                                </View>
-                                <View className="flex-1">
-                                    <Text className="text-[#1C274C] text-[15px] font-extrabold mb-1">
-                                        {office.label}
-                                    </Text>
-                                    <Text className="text-gray-500 text-[12px] font-semibold">
-                                        {office.email}
-                                    </Text>
-                                </View>
-                                <View className="bg-[#DCFCE7] rounded-full px-3 py-1">
-                                    <Text className="text-[#22C55E] text-[11px] font-bold">
-                                        {office.status}
-                                    </Text>
-                                </View>
-                            </View>
+                            {(() => {
+                                const isAvailable = office.status === 'Available';
 
-                            {/* Action Buttons */}
-                            <View className="flex-row gap-3">
-                                <TouchableOpacity
-                                    onPress={() => handleEdit(office.id)}
-                                    className="flex-1 border border-gray-300 rounded-[10px] py-2.5 items-center"
-                                    activeOpacity={0.7}
-                                >
-                                    <Text className="text-gray-600 font-bold text-[13px]">Edit</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    onPress={() => handleDelete(office.id)}
-                                    className="flex-1 bg-[#EF4444] rounded-[10px] py-2.5 items-center"
-                                    activeOpacity={0.8}
-                                >
-                                    <Text className="text-white font-bold text-[13px]">Delete</Text>
-                                </TouchableOpacity>
-                            </View>
+                                return (
+                                    <>
+                                        {/* Office Header with Icon and Name */}
+                                        <View className="flex-row items-start gap-3 mb-3">
+                                            <View className="w-12 h-12 bg-[#1C274C] rounded-[10px] items-center justify-center">
+                                                <Ionicons
+                                                    name="business-outline"
+                                                    size={24}
+                                                    color="white"
+                                                />
+                                            </View>
+                                            <View className="flex-1">
+                                                <Text className="text-[#1C274C] text-[15px] font-extrabold mb-1">
+                                                    {office.label}
+                                                </Text>
+                                                <Text className="text-gray-500 text-[12px] font-semibold mb-2">
+                                                    {office.email}
+                                                </Text>
+                                                <View
+                                                    className="self-start rounded-full px-3 py-1"
+                                                    style={{
+                                                        backgroundColor: isAvailable ? '#DCFCE7' : '#FEE2E2',
+                                                    }}
+                                                >
+                                                    <Text
+                                                        className="text-[11px] font-bold"
+                                                        style={{
+                                                            color: isAvailable ? '#22C55E' : '#DC2626',
+                                                        }}
+                                                    >
+                                                        {office.status}
+                                                    </Text>
+                                                </View>
+                                            </View>
+                                        </View>
+
+                                        {/* Action Buttons */}
+                                        <View className="flex-row gap-3">
+                                            <TouchableOpacity
+                                                onPress={() => handleEdit(office.id)}
+                                                className="flex-1 border border-gray-300 rounded-[10px] py-2.5 items-center"
+                                                activeOpacity={0.7}
+                                            >
+                                                <Text className="text-gray-600 font-bold text-[13px]">Edit</Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity
+                                                onPress={() => handleDelete(office.id)}
+                                                className="flex-1 bg-[#B91C1C] rounded-[10px] py-2.5 items-center"
+                                                activeOpacity={0.8}
+                                            >
+                                                <Text className="text-white font-bold text-[13px]">Delete</Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </>
+                                );
+                            })()}
                         </View>
                     ))}
 
