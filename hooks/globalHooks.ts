@@ -211,6 +211,7 @@ export function useUpcomingAppointments(office: string, status: string, month?: 
   const filteredAppointments = useMemo(() => {
     let list = [...rawAppointments];
 
+    //filter by month and year
     if (month && year) {
       list = list.filter((apt: any) => {
         const d = new Date(apt.start);
