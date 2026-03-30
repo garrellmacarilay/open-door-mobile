@@ -202,7 +202,7 @@ export default function StaffHistoryModal({ visible, appointment, onClose, onRef
                                         <Ionicons name="attach-outline" size={18} color="#9CA3AF" />
                                         <Text className="text-gray-400 font-bold text-[14px]">Files</Text>
                                     </View>
-                                    <Text className="text-gray-300 font-bold text-[13px]">{appointment.details.attachment_name ?? ''}</Text>
+                                    <Text className="text-gray-300 font-bold text-[13px]">{appointment.details.attachment_name ?? 'No Upload'}</Text>
                                 </View>
                             </View>
 
