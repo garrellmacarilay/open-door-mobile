@@ -6,8 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const STATS = [
     { label: 'Total Appointments', value: '156' },
     { label: 'Approved', value: '98' },
-    { label: 'Completion Rate', value: '62%' },
-    { label: 'Canceled', value: '12' },
+    { label: 'Approved Rate', value: '62%' },
+    { label: 'Declined', value: '12' },
 ];
 
 const APPOINTMENT_STATUS = [
@@ -90,10 +90,10 @@ export default function AdminAnalyticsPage() {
     };
 
     return (
-        <View className="flex-1 bg-gray-50">
+        <View className="flex-1 bg-[#EEF1F5]">
             <ScrollView showsVerticalScrollIndicator={false}>
                 {/* Header */}
-                <View className="bg-white px-6 pt-6 pb-5 border-b border-gray-100 flex-row items-center justify-between">
+                <View className="px-4 pt-4 pb-3 flex-row items-center justify-between">
                     <View>
                         <Text className="text-[#1C274C] text-[26px] font-extrabold mb-1">
                             Analytics
@@ -104,27 +104,27 @@ export default function AdminAnalyticsPage() {
                     </View>
                     <TouchableOpacity
                         onPress={handleExportPDF}
-                        className="bg-[#1C274C] rounded-[8px] px-4 py-2 flex-row items-center gap-2"
+                        className="bg-[#13244F] rounded-[10px] px-4 py-3 flex-row items-center gap-2"
                         activeOpacity={0.8}
                     >
-                        <Ionicons name="download" size={16} color="white" />
-                        <Text className="text-white font-bold text-[12px]">Export PDF</Text>
+                        <Ionicons name="document-text-outline" size={16} color="white" />
+                        <Text className="text-white font-bold text-[14px]">Export PDF</Text>
                     </TouchableOpacity>
                 </View>
 
-                <View className="px-6 pt-6">
+                <View className="px-4 pt-4">
                     {/* Stats Cards */}
-                    <View className="flex-row flex-wrap gap-3 mb-8">
+                    <View className="flex-row gap-2 mb-6">
                         {STATS.map((stat, index) => (
                             <View
                                 key={index}
-                                className="flex-1 min-w-[46%] bg-[#1C274C] rounded-[12px] p-4"
+                                className="flex-1 bg-[#13244F] rounded-[10px] px-2 py-3 items-center"
                             >
-                                <Text className="text-gray-300 text-[12px] font-semibold mb-2">
-                                    {stat.label}
-                                </Text>
-                                <Text className="text-white text-[24px] font-extrabold">
+                                <Text className="text-white text-[30px] leading-[42px] font-extrabold mb-1">
                                     {stat.value}
+                                </Text>
+                                <Text className="text-[#C8D0E3] text-[10px] font-semibold text-center leading-[12px]">
+                                    {stat.label}
                                 </Text>
                             </View>
                         ))}
