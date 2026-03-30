@@ -89,9 +89,7 @@ export default function AdminHistory() {
                         <Text className="text-[#1C2A48] text-2xl font-bold mb-1">Records</Text>
                         <Text className="text-gray-500 text-xs">Consultation History</Text>
                     </View>
-                    <TouchableOpacity className="w-10 h-10 items-center justify-center bg-[#7C3AED] rounded-lg">
-                        <Ionicons name="calendar-outline" size={20} color="white" />
-                    </TouchableOpacity>
+                
                 </View>
             </View>
 
