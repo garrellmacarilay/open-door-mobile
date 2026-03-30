@@ -41,7 +41,7 @@ const api = {
         method,
         signal: controller.signal, // Connect the abort signal
         headers,
-        body: method === 'POST' ? (isFormData ? data : JSON.stringify(data)) : undefined,
+        body: method === 'POST' || method === 'PATCH' || method === 'PUT' ? (isFormData ? data : JSON.stringify(data)) : undefined,
       });
 
       if (id) clearTimeout(id); // Clear timeout if request succeeds
@@ -57,6 +57,7 @@ const api = {
   // 2. Update these to pass the 3rd argument (options) through
   get: (endpoint: string, options: any = {}) => api.request('GET', endpoint, null, options),
   post: (endpoint: string, data: any, options: any = {}) => api.request('POST', endpoint, data, options),
+  patch: (endpoint: string, data: any, options: any = {}) => api.request('PATCH', endpoint, data, options),
 };
 
 export default api;
