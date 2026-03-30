@@ -156,7 +156,7 @@ export default function AdminOfficesPage() {
                         </View>
                         <TouchableOpacity
                             onPress={() => setShowAddModal(true)}
-                            className="bg-[#7C3AED] rounded-[10px] px-4 py-2.5 flex-row items-center gap-1.5"
+                            className="bg-[#1C274C] rounded-[10px] px-4 py-2.5 flex-row items-center gap-1.5"
                             activeOpacity={0.8}
                         >
                             <Ionicons name="add" size={18} color="white" />
