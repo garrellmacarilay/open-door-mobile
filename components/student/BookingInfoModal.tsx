@@ -13,10 +13,12 @@ export default function BookingInfoModal({ visible, onClose, onContinue }: Booki
         <Modal
             animationType="fade"
             transparent={true}
+            statusBarTranslucent
+            navigationBarTranslucent
             visible={visible}
             onRequestClose={onClose}
         >
-            <View className="flex-1 bg-black/40 justify-center items-center px-8">
+            <View className="absolute top-0 left-0 right-0 bottom-0 bg-black/50 justify-center items-center px-8">
                 <View className="bg-white rounded-[20px] w-full overflow-hidden shadow-xl">
                     {/* Close button */}
                     <TouchableOpacity

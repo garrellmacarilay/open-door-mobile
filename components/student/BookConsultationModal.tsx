@@ -58,13 +58,15 @@ export default function BookConsultationModal({ visible, onClose, onSubmit }: Bo
             <Modal
                 animationType="fade"
                 transparent={true}
+                statusBarTranslucent
+                navigationBarTranslucent
                 visible={visible}
                 onRequestClose={onClose}
             >
-                <View className="flex-1 bg-black/40 justify-center items-center py-10 px-4">
+                <View className="absolute top-0 left-0 right-0 bottom-0 bg-black/40 justify-center items-center">
                     <KeyboardAvoidingView
                         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                        className="w-full max-w-sm"
+                        className="w-full max-w-sm px-4 py-10"
                     >
                         <View className="bg-white rounded-[24px] w-full overflow-hidden shadow-lg">
 
@@ -206,6 +208,8 @@ export default function BookConsultationModal({ visible, onClose, onSubmit }: Bo
             <Modal
                 animationType="slide"
                 transparent={true}
+                statusBarTranslucent
+                navigationBarTranslucent
                 visible={showOfficePicker}
                 onRequestClose={() => setShowOfficePicker(false)}
             >
