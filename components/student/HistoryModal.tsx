@@ -27,6 +27,7 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
     const statusStyle = getStatusStyle(appointment.status);
     const isCompleted = appointment.status.toLowerCase() === 'completed';
     const isApproved = appointment.status.toLowerCase() === 'approved';
+    const isDeclined = appointment.status.toLowerCase() === 'declined';
 
     return (
         <>
@@ -139,7 +140,7 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
                                     >
                                         <Text className="text-[#FB7185] font-bold text-[15px]">Cancel Consultation</Text>
                                     </TouchableOpacity>
-                                    {isApproved && (
+                                    {(isApproved || isDeclined) && (
                                         <TouchableOpacity
                                             className="bg-[#16264D] rounded-full py-3.5 flex-row items-center justify-center gap-2"
                                             activeOpacity={0.8}
