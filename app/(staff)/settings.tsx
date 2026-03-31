@@ -98,7 +98,7 @@ export default function StaffSettingsPage() {
                             {/* Profile Image */}
                             <View className="items-center mb-8">
                                 <View className="relative">
-                                    <View className="w-28 h-28 rounded-full overflow-hidden border-[3px] border-[#0F766E] bg-gray-100 flex items-center justify-center">
+                                    <View className="w-28 h-28 rounded-full overflow-hidden border-[3px] border-[#0066FF] bg-gray-100 flex items-center justify-center">
                                         {profileImage ? (
                                             <Image source={{ uri: profileImage }} className="w-full h-full" resizeMode="cover" />
                                         ) : (
@@ -107,7 +107,7 @@ export default function StaffSettingsPage() {
                                     </View>
                                     <TouchableOpacity
                                         onPress={handleImagePicker}
-                                        className="absolute -bottom-1 -right-1 w-[34px] h-[34px] rounded-full bg-[#0F766E] border-2 border-white flex items-center justify-center"
+                                        className="absolute -bottom-1 -right-1 w-[34px] h-[34px] rounded-full bg-[#0066FF] border-2 border-white flex items-center justify-center"
                                         activeOpacity={0.8}
                                     >
                                         <Camera size={16} color="#FFF" />
@@ -124,8 +124,8 @@ export default function StaffSettingsPage() {
                                         <Text className="text-[#9CA3AF] font-bold text-[14px] ml-2">{email}</Text>
                                     </View>
                                     <View className="flex-row items-center justify-center">
-                                        <Ionicons name="briefcase-outline" size={18} color="#0F766E" />
-                                        <Text className="text-[#0F766E] font-extrabold text-[15px] ml-2">Office Staff</Text>
+                                        <Ionicons name="briefcase-outline" size={18} color="#0066FF" />
+                                        <Text className="text-[#0066FF] font-extrabold text-[15px] ml-2">Office Staff</Text>
                                     </View>
                                 </View>
                             ) : (
@@ -215,7 +215,7 @@ export default function StaffSettingsPage() {
                             <TouchableOpacity
                                 onPress={handleSaveChanges}
                                 disabled={isSaving}
-                                className={`w-full py-4 rounded-full flex-row justify-center items-center ${isSaving ? 'bg-[#0F766E]/70' : 'bg-[#0F766E]'}`}
+                                className={`w-full py-4 rounded-full flex-row justify-center items-center ${isSaving ? 'bg-[#0066FF]/70' : 'bg-[#0066FF]'}`}
                                 activeOpacity={0.8}
                             >
                                 <Text className="text-white text-center font-bold text-[15px]">
