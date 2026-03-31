@@ -7,32 +7,32 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // Dummy Data
 const HISTORY_DATA = [
     {
-        id: '21 - 0007/IMTC',
-        title: 'Student Organization',
-        date: '2026-02-20',
+        id: 'APPT-129',
+        title: 'Medical Services',
+        date: '03-10-2026',
         time: '10:00 AM',
-        status: 'approved'
+        status: 'completed'
     },
     {
-        id: '22 - 0007/IMTC',
-        title: 'Student Internship',
-        date: '2026-12-10',
+        id: 'APPT-132',
+        title: 'Student Organization',
+        date: '03-12-2026',
         time: '10:00 AM',
         status: 'pending'
     },
     {
-        id: '23 - 0007/IMTC',
-        title: 'Student Publication',
-        date: '2026-04-20',
+        id: 'APPT-130',
+        title: 'Student Internship',
+        date: '03-14-2026',
         time: '10:00 AM',
         status: 'declined'
     },
     {
-        id: '23 - 0007/IMTC',
-        title: 'Medical Services',
-        date: '2026-04-20',
+        id: 'APPT-131',
+        title: 'Student Publication',
+        date: '03-16-2026',
         time: '10:00 AM',
-        status: 'completed'
+        status: 'approved'
     }
 ];
 
@@ -62,7 +62,7 @@ export default function History() {
         return (
             <TouchableOpacity
                 onPress={() => setActiveFilter(value)}
-                className={`px-4 py-2 rounded-lg ${isActive ? 'bg-[#1C2A48]' : 'bg-white border border-gray-200'}`}
+                className={`px-4 py-2 rounded-full mr-2 ${isActive ? 'bg-[#1C2A48]' : 'bg-white border border-gray-200'}`}
             >
                 <Text className={`text-xs font-semibold ${isActive ? 'text-white' : 'text-gray-600'}`} style={{ fontFamily: 'Inter-SemiBold' }}>
                     {label}
@@ -79,9 +79,9 @@ export default function History() {
                 <View className="flex-row items-start justify-between mb-1">
                     <View className="flex-1">
                         <Text className="text-[#1C2A48] text-2xl font-bold mb-1" style={{ fontFamily: 'Poppins-Bold' }}>
-                            Records
+                            Appointments
                         </Text>
-                        <Text className="text-gray-500 text-xs" style={{ fontFamily: 'Inter-Regular' }}>
+                        <Text className="text-[#1C2A48] text-xs font-bold" style={{ fontFamily: 'Poppins-Bold' }}>
                             Consultation History
                         </Text>
                     </View>

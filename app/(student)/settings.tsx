@@ -21,8 +21,8 @@ export default function UserSettingsPage() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const [isEditing, setIsEditing] = useState(false);
-    const [name, setName] = useState('Eunice Lugtu');
-    const [email] = useState('molud@student.laverdad.edu.ph');
+    const [name, setName] = useState('Garrell Macarilay');
+    const [email] = useState('garrellmacarilay@student.laverdad.edu.ph');
     const [currentPassword, setCurrentPassword] = useState('password123');
     const [newPassword, setNewPassword] = useState('password123');
     const [confirmPassword, setConfirmPassword] = useState('password123');
