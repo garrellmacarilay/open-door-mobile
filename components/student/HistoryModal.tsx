@@ -26,6 +26,7 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
 
     const statusStyle = getStatusStyle(appointment.status);
     const isCompleted = appointment.status.toLowerCase() === 'completed';
+    const isApproved = appointment.status.toLowerCase() === 'approved';
 
     return (
         <>
@@ -128,13 +129,25 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
                                     </TouchableOpacity>
                                 </View>
                             ) : (
-                                <View className="gap-4">
-                                    <View className="bg-[#F9FAFB] rounded-full py-4 flex-row items-center justify-center border border-gray-100">
-                                        <Text className="text-[#D1D5DB] font-bold text-[14px]">Feedback Available Upon Completion</Text>
+                                <View className="gap-3">
+                                    <View className="bg-[#F3F4F6] rounded-full py-3.5 flex-row items-center justify-center border border-gray-200">
+                                        <Text className="text-[#D1D5DB] font-bold text-[13px]">Feedback Available Upon Completion</Text>
                                     </View>
-                                    <TouchableOpacity className="bg-[#FEF2F2] rounded-full py-4 flex-row items-center justify-center border border-[#FECACA]" activeOpacity={0.7}>
-                                        <Text className="text-[#EF4444] font-bold text-[15px]">Cancel Consultation</Text>
+                                    <TouchableOpacity
+                                        className="bg-[#FEE2E2] rounded-full py-3.5 flex-row items-center justify-center border border-[#FCA5A5]"
+                                        activeOpacity={0.7}
+                                    >
+                                        <Text className="text-[#FB7185] font-bold text-[15px]">Cancel Consultation</Text>
                                     </TouchableOpacity>
+                                    {isApproved && (
+                                        <TouchableOpacity
+                                            className="bg-[#16264D] rounded-full py-3.5 flex-row items-center justify-center gap-2"
+                                            activeOpacity={0.8}
+                                        >
+                                            <Ionicons name="refresh" size={16} color="white" />
+                                            <Text className="text-white font-bold text-[16px]">Reschedule</Text>
+                                        </TouchableOpacity>
+                                    )}
                                 </View>
                             )}
                         </ScrollView>

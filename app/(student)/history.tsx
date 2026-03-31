@@ -32,7 +32,9 @@ const HISTORY_DATA = [
         title: 'Student Publication',
         date: '03-16-2026',
         time: '10:00 AM',
-        status: 'approved'
+        status: 'approved',
+        topic: 'Meet with the Paper Adviser',
+        group_members: 'Individual'
     }
 ];
 
