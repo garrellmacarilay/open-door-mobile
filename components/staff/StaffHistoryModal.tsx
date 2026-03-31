@@ -3,7 +3,6 @@ import {
     View, Text, TouchableOpacity, Modal, ScrollView, TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import EvaluationModal from '../student/EvaluationModal';
 
 interface StaffHistoryModalProps {
     visible: boolean;
@@ -77,7 +76,6 @@ function DeclineModal({
 }
 
 export default function StaffHistoryModal({ visible, appointment, onClose }: StaffHistoryModalProps) {
-    const [showEvaluation, setShowEvaluation] = useState(false);
     const [showDeclineModal, setShowDeclineModal] = useState(false);
 
     if (!appointment) return null;
@@ -95,7 +93,6 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
     const statusStyle = getStatusStyle(appointment.status);
     const status = appointment.status.toLowerCase();
     const isPending = status === 'pending';
-    const isCompleted = status === 'completed';
 
     return (
         <>
@@ -200,27 +197,7 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
                                 </View>
                             )}
 
-                            {isCompleted && (
-                                <View>
-                                    <View className="bg-[#F0FDF4] rounded-[20px] p-5 flex-row items-center gap-4 mb-4 border border-[#BBF7D0]">
-                                        <Ionicons name="information-circle-outline" size={26} color="#166534" />
-                                        <View className="flex-1">
-                                            <Text className="text-[#166534] font-bold text-[14px]">Evaluation is Mandatory</Text>
-                                            <Text className="text-[#166534] font-bold text-[14px]">for Completed Services.</Text>
-                                        </View>
-                                    </View>
-                                    <TouchableOpacity
-                                        className="bg-[#0F766E] rounded-full py-4 flex-row items-center justify-center gap-2"
-                                        activeOpacity={0.8}
-                                        onPress={() => setShowEvaluation(true)}
-                                    >
-                                        <Ionicons name="chatbubble-ellipses-outline" size={20} color="white" />
-                                        <Text className="text-white font-bold text-[16px]">Leave Required Feedback</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            )}
-
-                            {/* approved / declined → no footer actions */}
+                            {/* approved / declined / completed -> no footer actions */}
                         </ScrollView>
                     </View>
                 </View>
@@ -233,12 +210,6 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
                     onClose();
                 }}
                 onCancel={() => setShowDeclineModal(false)}
-            />
-
-            <EvaluationModal
-                visible={showEvaluation}
-                appointmentTitle={appointment?.title}
-                onClose={() => setShowEvaluation(false)}
             />
         </>
     );
