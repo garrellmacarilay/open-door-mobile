@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface TimePickerModalProps {
     visible: boolean;
@@ -26,7 +25,6 @@ function parseTime(str: string): { hour: string; minute: string; period: 'AM' | 
 }
 
 export default function TimePickerModal({ visible, selectedTime, onSelect, onClose }: TimePickerModalProps) {
-    const insets = useSafeAreaInsets();
     const [hour, setHour] = useState('8');
     const [minute, setMinute] = useState('00');
     const [period, setPeriod] = useState<'AM' | 'PM'>('AM');
@@ -52,19 +50,19 @@ export default function TimePickerModal({ visible, selectedTime, onSelect, onClo
         <Modal
             animationType="slide"
             transparent
+            statusBarTranslucent
+            navigationBarTranslucent
             visible={visible}
             onRequestClose={onClose}
         >
-            <TouchableOpacity
-                className="flex-1 bg-black/40 justify-end"
-                activeOpacity={1}
-                onPress={onClose}
-            >
-                <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()} className="w-full">
-                    <View
-                        className="w-full bg-white rounded-t-[28px] pt-4"
-                        style={{ paddingBottom: Math.max(insets.bottom + 16, 28) }}
-                    >
+            <View className="absolute top-0 left-0 right-0 bottom-0 bg-black/40">
+                <TouchableOpacity
+                    className="absolute top-0 left-0 right-0 bottom-0"
+                    activeOpacity={1}
+                    onPress={onClose}
+                />
+
+                <View className="absolute bottom-0 left-0 right-0 w-full bg-white rounded-t-[28px] pt-4 pb-4">
                         {/* Handle */}
                         <View className="w-10 h-1 rounded-full bg-gray-200 self-center mb-4" />
 
@@ -202,9 +200,8 @@ export default function TimePickerModal({ visible, selectedTime, onSelect, onClo
                                 </Text>
                             </TouchableOpacity>
                         </View>
-                    </View>
-                </TouchableOpacity>
-            </TouchableOpacity>
+                </View>
+            </View>
         </Modal>
     );
 }
