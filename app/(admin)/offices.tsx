@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const OFFICES_DATA = [
     {
@@ -66,6 +67,7 @@ const OFFICES_DATA = [
 ];
 
 export default function AdminOfficesPage() {
+    const insets = useSafeAreaInsets();
     const [offices, setOffices] = useState(OFFICES_DATA);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
@@ -247,7 +249,7 @@ export default function AdminOfficesPage() {
                         </View>
                     )}
 
-                    <View className="h-24" />
+                    <View style={{ height: Math.max(insets.bottom + 96, 128) }} />
                 </View>
             </ScrollView>
 
@@ -308,7 +310,7 @@ export default function AdminOfficesPage() {
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={handleAddOffice}
-                                className="flex-1 bg-[#7C3AED] rounded-[12px] py-3.5 items-center"
+                                className="flex-1 bg-[#1C274C] rounded-[12px] py-3.5 items-center"
                                 activeOpacity={0.8}
                             >
                                 <Text className="text-white font-bold text-[15px]">Add Office</Text>
