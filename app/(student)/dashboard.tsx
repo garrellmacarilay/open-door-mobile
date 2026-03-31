@@ -69,13 +69,24 @@ interface DropdownModalProps {
 
 function DropdownModal({ visible, title, options, selected, onSelect, onClose }: DropdownModalProps) {
     return (
-        <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
-            <TouchableOpacity
-                className="flex-1 bg-black/40 justify-end"
-                activeOpacity={1}
-                onPress={onClose}
-            >
-                <View className="bg-white rounded-t-[28px] pb-8 pt-4">
+        <Modal
+            animationType="fade"
+            transparent
+            statusBarTranslucent
+            navigationBarTranslucent
+            visible={visible}
+            onRequestClose={onClose}
+        >
+            <View className="absolute top-0 left-0 right-0 bottom-0 bg-black/40">
+                <TouchableOpacity
+                    className="absolute top-0 left-0 right-0 bottom-0"
+                    activeOpacity={1}
+                    onPress={onClose}
+                />
+
+                <View
+                    className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[28px] pt-4 pb-0"
+                >
                     {/* Handle bar */}
                     <View className="w-10 h-1 rounded-full bg-gray-200 self-center mb-4" />
 
@@ -115,7 +126,7 @@ function DropdownModal({ visible, title, options, selected, onSelect, onClose }:
                         }}
                     />
                 </View>
-            </TouchableOpacity>
+            </View>
         </Modal>
     );
 }
