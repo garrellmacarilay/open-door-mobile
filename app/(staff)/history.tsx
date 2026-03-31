@@ -6,31 +6,31 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const HISTORY_DATA = [
     {
-        id: '21 - 0007/IMTC',
-        title: 'Student Organization',
-        date: '2026-02-20',
-        time: '10:00 AM',
+        id: 'APPT-150',
+        title: 'Garrell Macarilay',
+        date: '03-17-2025',
+        time: '1:00 PM',
         status: 'approved'
     },
     {
-        id: '22 - 0007/IMTC',
-        title: 'Student Internship',
-        date: '2026-12-10',
-        time: '10:00 AM',
+        id: 'APPT-149',
+        title: 'Eunice Lugtu',
+        date: '03-16-2025',
+        time: '3:20 PM',
         status: 'pending'
     },
     {
-        id: '23 - 0007/IMTC',
-        title: 'Student Publication',
-        date: '2026-04-20',
-        time: '10:00 AM',
+        id: 'APPT-148',
+        title: 'Margarette Calumpiano',
+        date: '03-16-2025',
+        time: '10:10 AM',
         status: 'declined'
     },
     {
-        id: '24 - 0007/IMTC',
-        title: 'Medical Services',
-        date: '2026-04-20',
-        time: '10:00 AM',
+        id: 'APPT-147',
+        title: 'Vincent Lee Duriga',
+        date: '03-16-2025',
+        time: '10:40 AM',
         status: 'completed'
     }
 ];
@@ -44,10 +44,10 @@ export default function StaffHistory() {
 
     const getStatusStyle = (status: string) => {
         switch (status) {
-            case 'pending':   return { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Pending' };
-            case 'approved':  return { bg: 'bg-green-100',  text: 'text-green-700',  label: 'Approved' };
-            case 'completed': return { bg: 'bg-blue-100',   text: 'text-blue-700',   label: 'Completed' };
-            case 'declined':  return { bg: 'bg-red-100',    text: 'text-red-700',    label: 'Declined' };
+            case 'pending':   return { bg: 'bg-[#FEF3C7]', text: 'text-[#B45309]', label: 'Pending' };
+            case 'approved':  return { bg: 'bg-[#DCFCE7]', text: 'text-[#16A34A]', label: 'Approved' };
+            case 'completed': return { bg: 'bg-[#DBEAFE]', text: 'text-[#4F46E5]', label: 'Completed' };
+            case 'declined':  return { bg: 'bg-[#FEE2E2]', text: 'text-[#EF4444]', label: 'Declined' };
             default:          return { bg: 'bg-gray-100',   text: 'text-gray-700',   label: 'Unknown' };
         }
     };
@@ -61,9 +61,9 @@ export default function StaffHistory() {
         return (
             <TouchableOpacity
                 onPress={() => setActiveFilter(value)}
-                className={`px-4 py-2 rounded-lg mr-2 ${isActive ? 'bg-[#0F766E]' : 'bg-white border border-gray-200'}`}
+                className={`px-4 py-2 rounded-[6px] mr-2 border ${isActive ? 'bg-[#18233D] border-[#18233D]' : 'bg-white border-gray-200'}`}
             >
-                <Text className={`text-xs font-semibold ${isActive ? 'text-white' : 'text-gray-600'}`}>
+                <Text className={`text-[11px] font-semibold ${isActive ? 'text-white' : 'text-gray-600'}`}>
                     {label}
                 </Text>
             </TouchableOpacity>
@@ -78,15 +78,12 @@ export default function StaffHistory() {
                 <View className="flex-row items-start justify-between mb-1">
                     <View className="flex-1">
                         <Text className="text-[#1C2A48] text-2xl font-bold mb-1">
-                            Records
+                            Appointments
                         </Text>
-                        <Text className="text-gray-500 text-xs">
-                            Consultation History
+                        <Text className="text-[#1C2A48] text-xs font-bold">
+                            Appointment History
                         </Text>
                     </View>
-                    <TouchableOpacity className="w-10 h-10 items-center justify-center bg-[#0F766E] rounded-lg">
-                        <Ionicons name="calendar-outline" size={20} color="white" />
-                    </TouchableOpacity>
                 </View>
             </View>
 
@@ -106,12 +103,12 @@ export default function StaffHistory() {
                 {filteredData.map((item, index) => {
                     const statusStyle = getStatusStyle(item.status);
                     return (
-                        <View key={index} className="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-gray-100">
+                        <View key={index} className="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-gray-200">
                             {/* Header with ID and Status */}
                             <View className="flex-row items-start justify-between mb-3">
                                 <View className="flex-1">
-                                    <Text className="text-gray-500 text-xs mb-1">{item.id}</Text>
-                                    <Text className="text-[#1C2A48] text-base font-bold">{item.title}</Text>
+                                    <Text className="text-gray-500 text-[10px] font-semibold mb-1">{item.id}</Text>
+                                    <Text className="text-[#1C2A48] text-[18px] font-bold leading-6">{item.title}</Text>
                                 </View>
                                 <View className={`px-3 py-1.5 rounded-full ${statusStyle.bg}`}>
                                     <Text className={`text-xs font-semibold ${statusStyle.text}`}>
@@ -123,12 +120,12 @@ export default function StaffHistory() {
                             {/* Date and Time */}
                             <View className="flex-row items-center gap-4 mb-4">
                                 <View className="flex-row items-center gap-1.5">
-                                    <Ionicons name="calendar-outline" size={14} color="#6B7280" />
-                                    <Text className="text-gray-600 text-xs">{item.date}</Text>
+                                    <Ionicons name="calendar-outline" size={12} color="#9CA3AF" />
+                                    <Text className="text-gray-500 text-[10px] font-semibold">{item.date}</Text>
                                 </View>
                                 <View className="flex-row items-center gap-1.5">
-                                    <Ionicons name="time-outline" size={14} color="#6B7280" />
-                                    <Text className="text-gray-600 text-xs">{item.time}</Text>
+                                    <Ionicons name="time-outline" size={12} color="#9CA3AF" />
+                                    <Text className="text-gray-500 text-[10px] font-semibold">{item.time}</Text>
                                 </View>
                             </View>
 
