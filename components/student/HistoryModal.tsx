@@ -32,10 +32,12 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
             <Modal
                 animationType="slide"
                 transparent={true}
+                statusBarTranslucent
+                navigationBarTranslucent
                 visible={visible}
                 onRequestClose={onClose}
             >
-                <View className="flex-1 justify-end bg-black/40">
+                <View className="absolute top-0 left-0 right-0 bottom-0 justify-end bg-black/40">
                     <View className="bg-white rounded-t-[32px] p-6 h-[88%] shadow-lg">
                         {/* Header: Status and Close */}
                         <View className="flex-row items-center justify-between mb-8 mt-2">
@@ -54,73 +56,75 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
                             </TouchableOpacity>
                         </View>
 
-                        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+                        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
                             {/* Office Category */}
-                            <Text className="text-gray-400 text-[14px] font-bold mb-1">Office Category</Text>
-                            <Text className="text-[#111827] text-[26px] font-extrabold mb-8 tracking-tight">
+                            <Text className="text-gray-400 text-[23px] font-bold mb-1">Office Category</Text>
+                            <Text className="text-[#111827] text-[40px] font-extrabold mb-8 tracking-tight">
                                 {appointment.title}
                             </Text>
 
                             {/* Date and Time Cards */}
                             <View className="flex-row gap-4 mb-8">
-                                <View className="flex-1 bg-[#F9FAFB] rounded-[20px] p-5 border border-gray-100">
+                                <View className="flex-1 bg-[#F9FAFB] rounded-[14px] p-4 border border-gray-100">
                                     <Text className="text-gray-400 text-[13px] font-bold mb-3">Booked Date</Text>
                                     <View className="flex-row items-center gap-2">
-                                        <Ionicons name="calendar-outline" size={18} color="#9CA3AF" />
-                                        <Text className="text-gray-600 font-bold text-[14px]">{appointment.date}</Text>
+                                        <Ionicons name="calendar-outline" size={14} color="#9CA3AF" />
+                                        <Text className="text-gray-500 font-bold text-[12px]">{appointment.date}</Text>
                                     </View>
                                 </View>
-                                <View className="flex-1 bg-[#F9FAFB] rounded-[20px] p-5 border border-gray-100">
-                                    <Text className="text-gray-400 text-[13px] font-bold mb-3">Booked Time</Text>
+                                <View className="flex-1 bg-[#F9FAFB] rounded-[14px] p-4 border border-gray-100">
+                                    <Text className="text-gray-400 text-[13px] font-bold mb-3">Booked Date</Text>
                                     <View className="flex-row items-center gap-2">
-                                        <Ionicons name="time-outline" size={18} color="#9CA3AF" />
-                                        <Text className="text-gray-600 font-bold text-[14px]">{appointment.time}</Text>
+                                        <Ionicons name="time-outline" size={14} color="#9CA3AF" />
+                                        <Text className="text-gray-500 font-bold text-[12px]">{appointment.time}</Text>
                                     </View>
                                 </View>
                             </View>
 
-                            {/* Detailed Topic */}
-                            <Text className="text-gray-400 text-[14px] font-bold mb-3">Detailed Topic</Text>
-                            <View className="bg-white border border-gray-100 rounded-[16px] p-5 mb-8 shadow-sm">
-                                <Text className="text-gray-400 font-bold text-[15px]">Internship Preparation</Text>
+                            {/* Topic */}
+                            <Text className="text-gray-500 text-[30px] font-bold mb-2">Topic</Text>
+                            <View className="bg-white border border-gray-200 rounded-[12px] px-4 py-3 mb-6">
+                                <Text className="text-gray-400 font-semibold text-[16px]">
+                                    {appointment.topic || 'School Athletes Check Up'}
+                                </Text>
                             </View>
 
                             {/* Members and Files */}
-                            <View className="flex-row mb-12">
-                                <View className="flex-1 items-center justify-center">
-                                    <View className="flex-row items-center gap-2 mb-2">
+                            <View className="flex-row mb-10">
+                                <View className="flex-1 justify-center">
+                                    <View className="flex-row items-center gap-2 mb-1">
                                         <Ionicons name="people-outline" size={18} color="#9CA3AF" />
                                         <Text className="text-gray-400 font-bold text-[14px]">Members</Text>
                                     </View>
-                                    <Text className="text-gray-300 font-bold text-[13px]">Individual</Text>
+                                    <Text className="text-gray-300 font-bold text-[13px]">
+                                        {appointment.group_members || 'Individual'}
+                                    </Text>
                                 </View>
-                                <View className="w-[1px] h-12 bg-gray-100" />
-                                <View className="flex-1 items-center justify-center">
-                                    <View className="flex-row items-center gap-2 mb-2">
+                                <View className="flex-1 justify-center items-start">
+                                    <View className="flex-row items-center gap-2 mb-1">
                                         <Ionicons name="attach-outline" size={18} color="#9CA3AF" />
                                         <Text className="text-gray-400 font-bold text-[14px]">Files</Text>
                                     </View>
-                                    <Text className="text-gray-300 font-bold text-[13px]">No Upload</Text>
+                                    <Text className="text-gray-300 font-bold text-[13px]">----</Text>
                                 </View>
                             </View>
 
                             {/* Footer Actions */}
                             {isCompleted ? (
                                 <View>
-                                    <View className="bg-[#EFF6FF] rounded-[20px] p-5 flex-row items-center gap-4 mb-4 border border-[#DBEAFE]">
-                                        <Ionicons name="information-circle-outline" size={26} color="#1E3A8A" />
-                                        <View className="flex-1">
-                                            <Text className="text-[#1E3A8A] font-bold text-[14px]">Evaluation is Mandatory</Text>
-                                            <Text className="text-[#1E3A8A] font-bold text-[14px]">for Completed Services.</Text>
-                                        </View>
+                                    <View className="bg-[#DBEAFE] rounded-[18px] px-4 py-5 flex-row items-center justify-center gap-1 mb-4 border border-[#93C5FD]">
+                                        <Ionicons name="information-circle-outline" size={16} color="#1E3A8A" />
+                                        <Text className="text-[#1E3A8A] font-bold text-[12px] text-center">
+                                            Feedback is required for completed services.
+                                        </Text>
                                     </View>
                                     <TouchableOpacity
                                         className="bg-[#0066FF] rounded-full py-4 flex-row items-center justify-center gap-2"
                                         activeOpacity={0.8}
                                         onPress={() => setShowEvaluation(true)}
                                     >
-                                        <Ionicons name="chatbubble-ellipses-outline" size={20} color="white" />
-                                        <Text className="text-white font-bold text-[16px]">Leave Required Feedback</Text>
+                                        <Ionicons name="chatbox-ellipses-outline" size={18} color="white" />
+                                        <Text className="text-white font-bold text-[16px]">Leave Feedback</Text>
                                     </TouchableOpacity>
                                 </View>
                             ) : (
