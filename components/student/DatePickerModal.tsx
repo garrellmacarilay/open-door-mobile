@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, TouchableOpacity, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface DatePickerModalProps {
     visible: boolean;
@@ -38,7 +37,6 @@ export default function DatePickerModal({
     onClose,
     minDaysFromNow = 2,
 }: DatePickerModalProps) {
-    const insets = useSafeAreaInsets();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -111,20 +109,19 @@ export default function DatePickerModal({
         <Modal
             animationType="fade"
             transparent
+            statusBarTranslucent
+            navigationBarTranslucent
             visible={visible}
             onRequestClose={onClose}
         >
-            <TouchableOpacity
-                className="flex-1 bg-black/40 justify-end"
-                activeOpacity={1}
-                onPress={onClose}
-            >
-                {/* Prevent close when tapping inside */}
-                <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()} className="w-full">
-                    <View
-                        className="w-full bg-white rounded-t-[28px] pt-4 px-4"
-                        style={{ paddingBottom: Math.max(insets.bottom + 12, 24) }}
-                    >
+            <View className="absolute top-0 left-0 right-0 bottom-0 bg-black/40">
+                <TouchableOpacity
+                    className="absolute top-0 left-0 right-0 bottom-0"
+                    activeOpacity={1}
+                    onPress={onClose}
+                />
+
+                <View className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[28px] pt-4 px-4 pb-4">
                         {/* Handle */}
                         <View className="w-10 h-1 rounded-full bg-gray-200 self-center mb-5" />
 
@@ -216,9 +213,8 @@ export default function DatePickerModal({
                                 </Text>
                             </View>
                         )}
-                    </View>
-                </TouchableOpacity>
-            </TouchableOpacity>
+                </View>
+            </View>
         </Modal>
     );
 }
