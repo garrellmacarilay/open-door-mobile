@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const NOTIFICATIONS = [
     {
@@ -47,49 +48,50 @@ const NOTIFICATIONS = [
 ];
 
 export default function NotificationsPage() {
+    const insets = useSafeAreaInsets();
+    const unreadCount = NOTIFICATIONS.filter(n => !n.read).length;
+
     return (
         <View className="flex-1 bg-[#F9FAFB]">
             {/* Header */}
-            <View className="px-6 pt-6 pb-4 flex-row items-center gap-3">
+            <View className="px-6 pt-6 pb-4">
                 <Text className="text-[#1C274C] text-[28px] font-extrabold tracking-tight">
                     Notifications
+                </Text>
+                <Text className="text-[#6B7280] text-[13px] font-medium mt-0.5">
+                    {unreadCount} unread
                 </Text>
             </View>
 
             {/* List Container */}
-            <View className="flex-1 bg-[#D1D5DB] rounded-t-[30px] pt-6 px-4">
+            <View className="flex-1 bg-white rounded-t-[30px] pt-6 px-4">
                 <ScrollView
                     showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ paddingBottom: 40 }}
+                    contentContainerStyle={{ paddingBottom: Math.max(insets.bottom + 56, 96) }}
                 >
                     {NOTIFICATIONS.map((notif) => (
                         <TouchableOpacity
                             key={notif.id}
                             activeOpacity={0.8}
-                            className={`rounded-[20px] p-5 mb-4 shadow-sm border border-gray-100 ${
-                                notif.read ? 'bg-[#EEEEEE]' : 'bg-white'
-                            }`}
+                            className={`rounded-[16px] p-4 mb-3 border ${notif.read ? 'bg-white border-gray-100' : 'bg-[#EFF6FF] border-[#BFDBFE]'}`}
                         >
                             <View className="flex-row items-start justify-between">
-                                <Text className="flex-1 text-[#1C274C] text-[13px] font-bold leading-5 mr-4" style={{ fontFamily: 'Poppins-Bold' }}>
+                                <Text
+                                    className={`flex-1 text-[13px] font-bold leading-5 mr-3 ${notif.read ? 'text-[#374151]' : 'text-[#1C274C]'}`}
+                                    style={{ fontFamily: 'Poppins-Bold' }}
+                                >
                                     {notif.title}
                                 </Text>
-                                <View
-                                    className={`w-2.5 h-2.5 rounded-full mt-1.5 ${
-                                        notif.read ? 'bg-[#9CA3AF]' : 'bg-[#7C3AED]'
-                                    }`}
-                                />
+                                {!notif.read && (
+                                    <View className="w-2.5 h-2.5 rounded-full mt-1 bg-[#3B82F6]" />
+                                )}
                             </View>
 
-                            {notif.body && (
-                                <View className="mt-3 bg-[#F0FDF4] rounded-[10px] p-3">
-                                    <Text className="text-[#374151] text-[11px] leading-4 font-medium">
-                                        {notif.body}
-                                    </Text>
-                                </View>
-                            )}
+                            <Text className={`mt-1.5 text-[12px] leading-[18px] ${notif.read ? 'text-[#9CA3AF]' : 'text-[#4B5563]'}`}>
+                                {notif.body}
+                            </Text>
 
-                            <Text className="mt-3 text-[11px] font-semibold text-[#9CA3AF]">
+                            <Text className="mt-2.5 text-[11px] font-semibold text-[#9CA3AF]">
                                 {notif.time}
                             </Text>
                         </TouchableOpacity>
