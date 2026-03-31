@@ -6,30 +6,30 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const HISTORY_DATA = [
     {
-        id: '21 - 0007/IMTC',
-        title: 'Student Organization',
-        date: '2026-02-20',
-        time: '10:00 AM',
+        id: 'APPT-254',
+        title: 'Garrell Macarilay',
+        date: '03-20-2025',
+        time: '12:00 PM',
         status: 'approved',
     },
     {
-        id: '22 - 0007/IMTC',
-        title: 'Student Internship',
-        date: '2026-12-10',
-        time: '10:00 AM',
+        id: 'APPT-219',
+        title: 'Eunice Lugtu',
+        date: '03-20-2025',
+        time: '09:00 AM',
         status: 'pending',
     },
     {
-        id: '23 - 0007/IMTC',
-        title: 'Student Publication',
-        date: '2026-04-20',
-        time: '10:00 AM',
+        id: 'APPT-231',
+        title: 'Margarette Calumpiano',
+        date: '03-20-2026',
+        time: '4:00 PM',
         status: 'declined',
     },
     {
-        id: '24 - 0007/IMTC',
-        title: 'Medical Services',
-        date: '2026-04-20',
+        id: 'APPT-202',
+        title: 'Vincent Lee Duriga',
+        date: '03-16-2025',
         time: '10:00 AM',
         status: 'completed',
     },
@@ -45,13 +45,13 @@ export default function AdminHistory() {
     const getStatusStyle = (status: string) => {
         switch (status) {
             case 'pending':
-                return { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Pending' };
+                return { bg: 'bg-[#FEF3C7]', text: 'text-[#B45309]', label: 'Pending' };
             case 'approved':
-                return { bg: 'bg-green-100', text: 'text-green-700', label: 'Approved' };
+                return { bg: 'bg-[#DCFCE7]', text: 'text-[#16A34A]', label: 'Approved' };
             case 'completed':
-                return { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Completed' };
+                return { bg: 'bg-[#DBEAFE]', text: 'text-[#4F46E5]', label: 'Completed' };
             case 'declined':
-                return { bg: 'bg-red-100', text: 'text-red-700', label: 'Declined' };
+                return { bg: 'bg-[#FEE2E2]', text: 'text-[#EF4444]', label: 'Declined' };
             default:
                 return { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Unknown' };
         }
@@ -65,12 +65,12 @@ export default function AdminHistory() {
         return (
             <TouchableOpacity
                 onPress={() => setActiveFilter(value)}
-                className={`px-4 py-2 rounded-lg mr-2 ${
-                    isActive ? 'bg-[#7C3AED]' : 'bg-white border border-gray-200'
+                className={`px-4 py-2 rounded-[6px] mr-2 border ${
+                    isActive ? 'bg-[#18233D] border-[#18233D]' : 'bg-white border-gray-200'
                 }`}
             >
                 <Text
-                    className={`text-xs font-semibold ${
+                    className={`text-[11px] font-semibold ${
                         isActive ? 'text-white' : 'text-gray-600'
                     }`}
                 >
@@ -86,8 +86,8 @@ export default function AdminHistory() {
             <View className="bg-white px-5 pt-4 pb-4 border-b border-gray-100">
                 <View className="flex-row items-start justify-between mb-1">
                     <View className="flex-1">
-                        <Text className="text-[#1C2A48] text-2xl font-bold mb-1">Records</Text>
-                        <Text className="text-gray-500 text-xs">Consultation History</Text>
+                        <Text className="text-[#1C2A48] text-2xl font-bold mb-1">Appointments</Text>
+                        <Text className="text-[#1C2A48] text-xs font-bold">Consultation History</Text>
                     </View>
                 
                 </View>
@@ -109,12 +109,12 @@ export default function AdminHistory() {
                 {filteredData.map((item, index) => {
                     const statusStyle = getStatusStyle(item.status);
                     return (
-                        <View key={index} className="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-gray-100">
+                        <View key={index} className="bg-white rounded-2xl p-4 mb-4 border border-gray-200 shadow-sm">
                             {/* Header with ID and Status */}
                             <View className="flex-row items-start justify-between mb-3">
                                 <View className="flex-1">
-                                    <Text className="text-gray-500 text-xs mb-1">{item.id}</Text>
-                                    <Text className="text-[#1C2A48] text-base font-bold">{item.title}</Text>
+                                    <Text className="text-gray-500 text-[10px] font-semibold mb-1">{item.id}</Text>
+                                    <Text className="text-[#1C2A48] text-[18px] font-bold leading-6">{item.title}</Text>
                                 </View>
                                 <View className={`px-3 py-1.5 rounded-full ${statusStyle.bg}`}>
                                     <Text className={`text-xs font-semibold ${statusStyle.text}`}>
@@ -126,12 +126,12 @@ export default function AdminHistory() {
                             {/* Date and Time */}
                             <View className="flex-row items-center gap-4 mb-4">
                                 <View className="flex-row items-center gap-1.5">
-                                    <Ionicons name="calendar-outline" size={14} color="#6B7280" />
-                                    <Text className="text-gray-600 text-xs">{item.date}</Text>
+                                    <Ionicons name="calendar-outline" size={12} color="#9CA3AF" />
+                                    <Text className="text-gray-500 text-[10px] font-semibold">{item.date}</Text>
                                 </View>
                                 <View className="flex-row items-center gap-1.5">
-                                    <Ionicons name="time-outline" size={14} color="#6B7280" />
-                                    <Text className="text-gray-600 text-xs">{item.time}</Text>
+                                    <Ionicons name="time-outline" size={12} color="#9CA3AF" />
+                                    <Text className="text-gray-500 text-[10px] font-semibold">{item.time}</Text>
                                 </View>
                             </View>
 
