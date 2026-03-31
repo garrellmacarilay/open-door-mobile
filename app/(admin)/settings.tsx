@@ -101,7 +101,7 @@ export default function AdminSettingsPage() {
                             {/* Profile Image */}
                             <View className="items-center mb-8">
                                 <View className="relative">
-                                    <View className="w-28 h-28 rounded-full overflow-hidden border-[3px] border-[#7C3AED] bg-gray-100 flex items-center justify-center">
+                                    <View className="w-28 h-28 rounded-full overflow-hidden border-[3px] border-[#0066FF] bg-gray-100 flex items-center justify-center">
                                         {profileImage ? (
                                             <Image
                                                 source={{ uri: profileImage }}
@@ -114,7 +114,7 @@ export default function AdminSettingsPage() {
                                     </View>
                                     <TouchableOpacity
                                         onPress={handleImagePicker}
-                                        className="absolute -bottom-1 -right-1 w-[34px] h-[34px] rounded-full bg-[#7C3AED] border-2 border-white flex items-center justify-center"
+                                        className="absolute -bottom-1 -right-1 w-[34px] h-[34px] rounded-full bg-[#0066FF] border-2 border-white flex items-center justify-center"
                                         activeOpacity={0.8}
                                     >
                                         <Camera size={16} color="#FFF" />
@@ -138,9 +138,9 @@ export default function AdminSettingsPage() {
                                         <Ionicons
                                             name="shield-checkmark-outline"
                                             size={18}
-                                            color="#7C3AED"
+                                            color="#0066FF"
                                         />
-                                        <Text className="text-[#7C3AED] font-extrabold text-[15px] ml-2">
+                                        <Text className="text-[#0066FF] font-extrabold text-[15px] ml-2">
                                             Administrator
                                         </Text>
                                     </View>
@@ -261,7 +261,7 @@ export default function AdminSettingsPage() {
                                 onPress={handleSaveChanges}
                                 disabled={isSaving}
                                 className={`w-full py-4 rounded-full flex-row justify-center items-center ${
-                                    isSaving ? 'bg-[#7C3AED]/70' : 'bg-[#7C3AED]'
+                                    isSaving ? 'bg-[#0066FF]/70' : 'bg-[#0066FF]'
                                 }`}
                                 activeOpacity={0.8}
                             >
