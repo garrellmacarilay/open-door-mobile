@@ -30,11 +30,24 @@ export default function DashboardHeader({
 
     const { user } = useAuth()
 
+    const getFolderByRole = () => {
+        switch (user?.role) {
+            case 'admin':
+                return '(admin)';
+            case 'staff':
+                return '(staff)';
+            case 'student':
+            default:
+                return '(student)';
+        }
+    };
+
     const handleProfilePress = () => {
         if (onProfilePress) {
             onProfilePress();
         } else {
-            router.push('/(student)/settings');
+            const folder = getFolderByRole();
+            router.push(`/${folder}/settings` as any);
         }
     };
 
@@ -42,7 +55,8 @@ export default function DashboardHeader({
         if (onNotificationPress) {
             onNotificationPress();
         } else {
-            router.push('/(student)/notifications');
+            const folder = getFolderByRole();
+            router.push(`/${folder}/notifications` as any);
         }
     };
 
