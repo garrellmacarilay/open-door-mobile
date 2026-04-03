@@ -10,6 +10,7 @@ interface AppointmentCardProps {
             office: string;
             status: string; // 'pending' | 'approved' | 'rescheduled' | 'cancelled' | 'declined'
             service_type: string;
+            reference_code: string;
         };
         dateString: string;
         time: string;
@@ -79,13 +80,13 @@ export default function AppointmentCard({ appointment, onPress }: AppointmentCar
             {/* Appointment Details */}
             <View className="flex-1 justify-center">
                 <Text className="font-bold text-[#1C274C] text-[15px] mb-1" numberOfLines={1}>
-                    {appointment.title}
+                    {appointment.details.office}
                 </Text>
                 <Text className="text-[12px] font-semibold text-[#9CA3AF]" numberOfLines={1}>
                     {/* Reusing ID or fall back to service_type based on reference data */}
                     {typeof appointment.id === 'string' && appointment.id.includes('-')
                         ? appointment.id
-                        : '21 - 00071MYC'}
+                        : appointment.details.reference_code}
                 </Text>
             </View>
 
