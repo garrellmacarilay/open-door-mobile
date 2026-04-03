@@ -1,9 +1,11 @@
 import api from "./api";
 
+export type UserRole = 'student' | 'admin' | 'staff'
+
 export interface User {
   id: number;
   full_name: string;
-  role: string;
+  role: UserRole;
   email?: string;
   profile_picture?: string;
   // Add any other fields your Laravel backend returns

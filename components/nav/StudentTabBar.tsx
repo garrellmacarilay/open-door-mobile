@@ -1,16 +1,14 @@
 import React from 'react';
-import { View, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { LayoutDashboard, Calendar, FileClock, CircleHelp } from 'lucide-react-native';
-import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import { House, CalendarDays, CircleHelp } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
 // Define icons map
 const ICONS: Record<string, React.ElementType> = {
-    dashboard: LayoutDashboard,
-    consultation: Calendar,
-    history: FileClock,
+    dashboard: House,
+    history: CalendarDays,
     faqs: CircleHelp,
 };
 
@@ -46,7 +44,8 @@ export default function StudentTabBar({ state, descriptors, navigation }: Bottom
                             }
                         };
 
-                        const IconComponent = ICONS[route.name] || LayoutDashboard;
+                        const IconComponent = ICONS[route.name] || House;
+                        const label = options.title ?? route.name;
 
                         return (
                             <TouchableOpacity
@@ -55,15 +54,18 @@ export default function StudentTabBar({ state, descriptors, navigation }: Bottom
                                 activeOpacity={0.7}
                                 className="items-center justify-center flex-1"
                             >
-                                <View
-                                    className={`items-center justify-center ${isFocused ? 'bg-[#5B21B6]' : 'bg-transparent'}`}
-                                    style={{ width: 50, height: 50, borderRadius: 25 }}
-                                >
+                                <View className="items-center justify-center" style={{ width: 50, height: 50 }}>
                                     <IconComponent
                                         size={24}
-                                        color={isFocused ? 'white' : '#9CA3AF'}
+                                        color={isFocused ? '#4A90E2' : '#9CA3AF'}
+                                        strokeWidth={isFocused ? 2.5 : 1.8}
                                     />
                                 </View>
+                                {isFocused && (
+                                    <Text style={{ color: '#4A90E2', fontSize: 11, fontWeight: '600', marginTop: -4 }}>
+                                        {label}
+                                    </Text>
+                                )}
                             </TouchableOpacity>
                         );
                     })}
