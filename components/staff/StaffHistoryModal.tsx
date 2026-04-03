@@ -5,7 +5,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import EvaluationModal from '../student/EvaluationModal';
 import { Appointment } from '@/hooks/staffHooks';
-import useUpdateStatus from '@/hooks/staffAdminHooks';
+import {useUpdateStatus} from '@/hooks/staffAdminHooks';
 
 interface StaffHistoryModalProps {
     visible: boolean;
