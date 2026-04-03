@@ -6,6 +6,8 @@ import CalendarWidget from '../../components/student/CalendarWidget';
 import DatePickerModal from '../../components/student/DatePickerModal';
 import TimePickerModal from '../../components/student/TimePickerModal';
 import { useOfficeUpcomingAppointments } from '@/hooks/staffHooks';
+import { useEvents } from '@/hooks/staffAdminHooks';
+import { useAuth } from '@/context/AuthContext';
 
 
 export default function OfficeDashboard() {
@@ -17,6 +19,8 @@ export default function OfficeDashboard() {
 
     const { appointments, loading, refresh } = useOfficeUpcomingAppointments(currentMonth, currentYear);
 
+    const { setError, error, createEvent, events, refreshEvents} = useEvents()
+
     const [showAddEventModal, setShowAddEventModal] = useState(false);
     const [showDatePickerModal, setShowDatePickerModal] = useState(false);
     const [showTimePickerModal, setShowTimePickerModal] = useState(false);
@@ -25,32 +29,35 @@ export default function OfficeDashboard() {
     const [eventTime, setEventTime] = useState('');
     const [eventDescription, setEventDescription] = useState('');
 
-    // const handleAddEvent = () => {
-    //     if (!eventTitle.trim() || !eventDate.trim()) {
-    //         alert('Please fill in Event Title and Date');
-    //         return;
-    //     }
+    const { user } = useAuth()
 
-    //     const newEvent = {
-    //         id: Math.random(),
-    //         title: eventTitle,
-    //         details: {
-    //             student: "Current Office",
-    //             office: "Current Office",
-    //             status: "pending",
-    //             service_type: eventDescription || eventTitle
-    //         },
-    //         dateString: eventDate,
-    //         time: eventTime || "TBD"
-    //     };
 
-    //     setAppointments([...appointments, newEvent]);
-    //     setEventTitle('');
-    //     setEventDate('');
-    //     setEventTime('');
-    //     setEventDescription('');
-    //     setShowAddEventModal(false);
-    // };
+    const handleAddEvent = async () => {
+        if (!eventTitle.trim() || !eventDate.trim() || !eventTime.trim()) {
+            alert('Please fill in Event Title, Date, and Time');
+            return;
+        }
+
+        const payload = {
+            event_title: eventTitle,
+            description: eventDescription || eventTitle,
+            event_date: eventDate, // Format should be YYYY-MM-DD from DatePicker
+            event_time: eventTime, // Format should be HH:mm from TimePicker
+        };
+
+        const result = await createEvent(payload);
+
+        if (result?.success) {
+            // Reset Form
+            setEventTitle('');
+            setEventDate('');
+            setEventTime('');
+            setEventDescription('');
+            setShowAddEventModal(false);
+        } else {
+            alert(error || 'Failed to create event');
+        }
+    };
 
     return (
         <View className="flex-1 bg-gray-50">
@@ -77,15 +84,19 @@ export default function OfficeDashboard() {
                 <View className="px-6 mt-2">
                     {/* Calendar */}
                     <CalendarWidget
-                        events={appointments}
+                        appointments={appointments}
+                        events={events}
                         onMonthChange={(date) => {
                         const d = new Date(date);
                         setViewDate(d);
-                        
+
                         setCurrentMonth(d.getMonth() + 1);
                         setCurrentYear(d.getFullYear());
+
+                        refreshEvents()
                     }}
-                        // onAddEvent={() => setShowAddEventModal(true)}
+                    onAddEvent={() => setShowAddEventModal(true)}
+                    userRole={user?.role}
                     />
 
                     {/* Appointment Feed */}
@@ -119,10 +130,12 @@ export default function OfficeDashboard() {
             <Modal
                 animationType="slide"
                 transparent
+                statusBarTranslucent
+                navigationBarTranslucent
                 visible={showAddEventModal}
                 onRequestClose={() => setShowAddEventModal(false)}
             >
-                <View className="flex-1 bg-black/40 justify-end">
+                <View className="absolute top-0 left-0 right-0 bottom-0 bg-black/40 justify-end">
                     <View className="bg-white rounded-t-[28px] px-6 pt-5 pb-10 shadow-xl">
                         {/* Drag handle */}
                         <View className="w-10 h-1 bg-gray-300 rounded-full self-center mb-5" />
