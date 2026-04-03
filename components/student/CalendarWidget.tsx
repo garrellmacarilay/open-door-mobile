@@ -1,20 +1,28 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react-native';
+import { UserRole } from '@/utils/auth';
+
 
 interface CalendarWidgetProps {
     currentDate?: Date;
     events?: any[];
+    appointments?: any[];
     onDateSelect?: (date: Date) => void;
     onMonthChange?: (date: Date) => void;
     onBookPress?: () => void;
+    onAddEvent?: () => void;
+    userRole?: UserRole;
 }
 
 export default function CalendarWidget({
     currentDate: initialDate = new Date(),
     events = [],
+    appointments = [],
     onDateSelect,
-    onMonthChange
+    onMonthChange,
+    onAddEvent,
+    userRole
 }: CalendarWidgetProps) {
     const [viewDate, setViewDate] = useState(initialDate);
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -43,19 +51,29 @@ export default function CalendarWidget({
         onMonthChange?.(newDate)
     };
 
-    // Events Mapping
+    // Events Mapping(UPDATED VERSION)
     const eventsByDate = useMemo(() => {
         const map: Record<string, any[]> = {};
-        events.forEach(evt => {
-            if (evt.dateString) {
-                const d = new Date(evt.dateString);
-                const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-                if (!map[key]) map[key] = [];
-                map[key].push(evt);
-            }
-        });
+        
+        // Helper function to safely process arrays
+        const processItems = (items: any[]) => {
+            if (!Array.isArray(items)) return;
+            
+            items.forEach(item => {
+                if (item.dateString) {
+                    const d = new Date(item.dateString);
+                    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+                    if (!map[key]) map[key] = [];
+                    map[key].push(item);
+                }
+            });
+        };
+
+        processItems(appointments);
+        processItems(events);
+        
         return map;
-    }, [events]);
+    }, [appointments, events]);
 
     const renderDays = () => {
         const days = [];
@@ -72,7 +90,7 @@ export default function CalendarWidget({
                 const fadeDay = dayNumber <= 0 ? prevMonthDays + dayNumber : dayNumber - daysInMonth;
 
                 days.push(
-                    <View key={`empty-${i}`} className="w-[14.28%] aspect-square flex items-center justify-start pt-2 mb-3">
+                    <View key={`empty-${i}`} className="w-[14.28%] aspect-square flex items-center justify-center">
                         <Text className="text-[13px] font-bold text-gray-300">
                             {fadeDay}
                         </Text>
@@ -88,31 +106,29 @@ export default function CalendarWidget({
             days.push(
                 <TouchableOpacity
                     key={dayNumber}
-                    className="w-[14.28%] aspect-square items-center justify-start pt-2 mb-3 relative"
+                    className="w-[14.28%] aspect-square items-center justify-center relative"
                     onPress={() => {
                         setSelectedDate(cellDate);
                         onDateSelect?.(cellDate);
                     }}
                     activeOpacity={0.6}
                 >
-                    <Text className={`text-[13px] font-bold ${isWeekend ? 'text-[#3B82F6]' : 'text-[#1C274C]'}`}>
+                    <Text className={`text-[14px] font-bold ${isWeekend ? 'text-[#3B82F6]' : 'text-[#1C274C]'}`}>
                         {dayNumber}
                     </Text>
 
-                    {/* Render mini pills for events */}
+                    {/* Status indicator dots */}
                     {dayEvents.length > 0 && (
-                        <View className="absolute bottom-1 w-full items-center gap-0.5">
-                            {dayEvents.slice(0, 2).map((evt, idx) => (
-                                <View key={idx} className={`rounded-sm px-1 ${evt.details?.status === 'approved' ? 'bg-[#DCFCE7]' : 'bg-[#DBEAFE]'}`}>
-                                    <Text className="text-[6px] font-bold text-gray-800" numberOfLines={1}>
-                                        {new Date(evt.dateString).toLocaleTimeString('en-US', {
-                                            hour12: true,
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        }) || 'Pending'}
-                                    </Text>
-                                </View>
-                            ))}
+                        <View className="absolute bottom-1 flex-row gap-1">
+                            {dayEvents.slice(0, 3).map((evt, idx) => {
+                                let dotColor = '#3B82F6'; // Events default
+                                if (evt.details?.status === 'pending') dotColor = '#EAB308'; // Yellow
+                                else if (evt.details?.status === 'approved') dotColor = '#22C55E'; // Green
+                                else if (evt.details?.status === 'declined') dotColor = '#EF4444'; // Red
+                                return (
+                                    <View key={idx} className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: dotColor }} />
+                                );
+                            })}
                         </View>
                     )}
                 </TouchableOpacity>
@@ -120,6 +136,9 @@ export default function CalendarWidget({
         }
         return days;
     };
+    //helper variable
+
+    const canAddEvent = onAddEvent && (userRole === 'staff' || userRole === 'admin')
 
     return (
         <View className="bg-white rounded-[24px] shadow-sm mb-6 border border-gray-100" style={{
@@ -132,11 +151,7 @@ export default function CalendarWidget({
             {/* Header (Dark Blue) */}
             <View className="bg-[#18233D] rounded-t-[24px] px-6 py-5">
                 <View className="flex-row items-center justify-between">
-                    <TouchableOpacity onPress={() => navigateMonth('prev')} className="p-2" activeOpacity={0.7}>
-                        <ChevronLeft size={20} color="#FFFFFF" strokeWidth={2.5} />
-                    </TouchableOpacity>
-
-                    <View className="items-center">
+                    <View className="flex-1 items-center">
                         <Text className="text-[20px] font-bold text-white tracking-wide">
                             {monthName}
                         </Text>
@@ -145,21 +160,43 @@ export default function CalendarWidget({
                         </Text>
                     </View>
 
-                    <TouchableOpacity onPress={() => navigateMonth('next')} className="p-2" activeOpacity={0.7}>
-                        <ChevronRight size={20} color="#FFFFFF" strokeWidth={2.5} />
-                    </TouchableOpacity>
+                    <View className='flex-row items-center gap-2'>
+                        <TouchableOpacity 
+                            onPress={() => navigateMonth('prev')} 
+                            className="w-9 h-9 rounded-lg bg-white items-center justify-center" 
+                            activeOpacity={0.7}
+                        >
+                            <ChevronLeft size={18} color="#18233D" strokeWidth={2.5} />
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                            onPress={() => navigateMonth('next')} 
+                            className="w-9 h-9 rounded-lg bg-white items-center justify-center" 
+                            activeOpacity={0.7}
+                        >
+                            <ChevronRight size={18} color="#18233D" strokeWidth={2.5} />
+                        </TouchableOpacity>
+                        {canAddEvent && (
+                            <TouchableOpacity
+                                onPress={onAddEvent}
+                                activeOpacity={0.7}
+                                className="w-9 h-9 rounded-lg bg-white items-center justify-center"
+                            >
+                                <Plus size={18} color="#18233D" strokeWidth={2.5} />
+                            </TouchableOpacity>
+                        )}
+                    </View>
                 </View>
             </View>
 
             {/* Calendar Body */}
-            <View className="px-4 pt-4 pb-7">
+            <View className="px-4 pt-4 pb-3">
                 {/* Weekdays */}
-                <View className="flex-row justify-between mb-3">
+                <View className="flex-row justify-between mb-2">
                     {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => {
                         const isWeekend = index === 0 || index === 6;
                         return (
                             <View key={index} className="w-[14.28%] items-center">
-                                <Text className={`text-[11px] font-bold ${isWeekend ? 'text-[#3B82F6]' : 'text-[#9CA3AF]'}`}>
+                                <Text className={`text-[12px] font-bold ${isWeekend ? 'text-[#3B82F6]' : 'text-[#9CA3AF]'}`}>
                                     {day}
                                 </Text>
                             </View>
@@ -168,26 +205,26 @@ export default function CalendarWidget({
                 </View>
 
                 {/* Grid */}
-                <View className="flex-row flex-wrap mb-1">
+                <View className="flex-row flex-wrap mb-3">
                     {renderDays()}
                 </View>
 
                 {/* Color Legend */}
-                <View className="flex-row justify-center items-center gap-x-5 px-2">
-                    <View className="flex-row items-center gap-1.5">
-                        <View className="w-2.5 h-2.5 rounded-full bg-[#EAB308]" />
+                <View className="flex-row justify-center items-center gap-x-4 px-2">
+                    <View className="flex-row items-center gap-1">
+                        <View className="w-2 h-2 rounded-full bg-[#EAB308]" />
                         <Text className="text-[10px] font-bold text-[#6B7280]">Pending</Text>
                     </View>
-                    <View className="flex-row items-center gap-1.5">
-                        <View className="w-2.5 h-2.5 rounded-full bg-[#22C55E]" />
+                    <View className="flex-row items-center gap-1">
+                        <View className="w-2 h-2 rounded-full bg-[#22C55E]" />
                         <Text className="text-[10px] font-bold text-[#6B7280]">Approved</Text>
                     </View>
-                    <View className="flex-row items-center gap-1.5">
-                        <View className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" />
+                    <View className="flex-row items-center gap-1">
+                        <View className="w-2 h-2 rounded-full bg-[#EF4444]" />
                         <Text className="text-[10px] font-bold text-[#6B7280]">Declined</Text>
                     </View>
-                    <View className="flex-row items-center gap-1.5">
-                        <View className="w-2.5 h-2.5 rounded-full bg-[#3B82F6]" />
+                    <View className="flex-row items-center gap-1">
+                        <View className="w-2 h-2 rounded-full bg-[#3B82F6]" />
                         <Text className="text-[10px] font-bold text-[#6B7280]">Events</Text>
                     </View>
                 </View>
