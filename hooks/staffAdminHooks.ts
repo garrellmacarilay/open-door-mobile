@@ -1,10 +1,8 @@
 import api from '@/utils/api'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useAuth } from '@/context/AuthContext'
 
-
-
-export default function useUpdateStatus() {
+export function useUpdateStatus() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
@@ -31,4 +29,69 @@ export default function useUpdateStatus() {
     }, [])
 
     return { loading, error, success, updateStatus };
+}
+
+export function useEvents() {
+    const [events, setEvents] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    // 1. Fetch Events
+    const fetchEvents = useCallback(async () => {
+        setLoading(true);
+        try {
+            const res = await api.get('/calendar/events');
+            if (res.data.success) {
+                // Map the data to match your CalendarWidget 'dateString' requirement
+                const mappedEvents = res.data.data.map((evt: any) => ({
+                    ...evt,
+                    dateString: evt.event_date, // CalendarWidget looks for this
+                }));
+                setEvents(mappedEvents);
+            }
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Failed to load events");
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    // 2. Create Event
+    const createEvent = async (payload: { 
+        event_title: string; 
+        description: string; 
+        event_date: string; 
+        event_time: string; 
+    }) => {
+        setIsSubmitting(true);
+        setError(null);
+        try {
+            const res = await api.post('/create/event', payload);
+            if (res.data.success) {
+                await fetchEvents(); // Refresh list after creating
+                return { success: true };
+            }
+        } catch (err: any) {
+            const msg = err.response?.data?.message || "Failed to create event";
+            setError(msg);
+            return { success: false, message: msg };
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchEvents();
+    }, [fetchEvents]);
+
+    return { 
+        events, 
+        loading, 
+        isSubmitting, 
+        setError,
+        error, 
+        createEvent, 
+        refreshEvents: fetchEvents 
+    };
 }
