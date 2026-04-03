@@ -202,6 +202,7 @@ export default function StudentDashboard() {
                         events={appointments}
                         onMonthChange={(date) => setViewDate(new Date(date))}
                         onBookPress={handleFabPress}
+                        userRole={user?.role}
                     />
 
                     {/* Appointment Feed */}
