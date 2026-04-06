@@ -221,8 +221,8 @@ export default function StudentDashboard() {
                         </View>
 
                         {/* Appointment List */}
-                        {appointments.map((apt: any) => (
-                            <AppointmentCard key={apt.id} appointment={apt} />
+                        {appointments.map((apt: any, index: number) => (
+                            <AppointmentCard key={`${apt.id}-${index}`} appointment={apt} />
                         ))}
 
                         {/* Loading States */}

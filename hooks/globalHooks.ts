@@ -162,8 +162,23 @@ export function useProfile(): UseProfileReturn {
   };
 }
 
+interface Appointment {
+  id: number | string;
+  consultation_date?: string;
+  start?: string;
+  status?: string;
+  office?: {
+    office_name: string;
+  };
+  details?: {
+    status?: string;
+    office?: string;
+  };
+  [key: string]: any; // Allow for other dynamic fields
+}
+
 export function useUpcomingAppointments(office: string, status: string, month?: number, year?: number) {
-  const [rawAppointments, setRawAppointments] = useState([]);
+  const [rawAppointments, setRawAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
@@ -173,23 +188,32 @@ export function useUpcomingAppointments(office: string, status: string, month?: 
     setLoading(true);
 
     try {
-        const currentPage = isNextPage ? page + 1 : 1;
-
-      // We fetch by Month/Year and Office at the API level
-      const params: any = { 
-        page: currentPage,
+      const nextPageNum = isNextPage ? page + 1 : 1;
+      const params = { 
+        page: nextPageNum,
         office: office !== 'All Offices' ? office : undefined,
-        status: status !== 'All' ? status : undefined,
+        status: status !== 'all' ? status : undefined,
         month,
         year
-       };
+      };
     
       const res = await api.get('/calendar/appointments', { params });
 
       if (res.data.success) {
-        const newData = res.data.data;
+        const newData: Appointment[] = res.data.data;
 
-        setRawAppointments(prev => isNextPage ? [...prev, ...newData] : newData);
+        setRawAppointments((prev: Appointment[]) => { 
+          const combined = isNextPage ? [...prev, ...newData] : newData;
+          
+          // Use a Map with types to handle the deduplication
+          const uniqueMap = new Map<string | number, Appointment>();
+          
+          combined.forEach((item: Appointment) => { 
+            uniqueMap.set(item.id, item);
+          });
+          
+          return Array.from(uniqueMap.values());
+        });
         setPage(res.data.meta.current_page);
         setHasMore(res.data.meta.has_more);
       }
@@ -214,11 +238,14 @@ export function useUpcomingAppointments(office: string, status: string, month?: 
     //filter by month and year
     if (month && year) {
       list = list.filter((apt: any) => {
-        const d = new Date(apt.start);
-        return (d.getMonth() + 1) === month && d.getFullYear() === year;
+        const dateStr = apt.start || apt.dateString;
+        if (!dateStr) return false;
+
+        const [y, m] = dateStr.split('-').map(Number);
+        
+        return m === month && y === year;
       });
     }
-
     //filter by office
     if (office && office !== 'All Offices') {
       list = list.filter((apt: any) => {

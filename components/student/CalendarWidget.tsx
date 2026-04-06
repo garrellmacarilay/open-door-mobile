@@ -51,18 +51,23 @@ export default function CalendarWidget({
         onMonthChange?.(newDate)
     };
 
-    // Events Mapping(UPDATED VERSION)
+    // Events Mapping (FIXED VERSION)
     const eventsByDate = useMemo(() => {
         const map: Record<string, any[]> = {};
         
-        // Helper function to safely process arrays
         const processItems = (items: any[]) => {
             if (!Array.isArray(items)) return;
             
             items.forEach(item => {
-                if (item.dateString) {
-                    const d = new Date(item.dateString);
-                    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+                const dateStr = item.dateString || item.start;
+                if (dateStr) {
+                    // dateStr is "2024-05-01 14:30:00" -> split(' ')[0] gets "2024-05-01"
+                    const [year, month, day] = dateStr.split(' ')[0].split('-').map(Number);
+                    
+                    // Match the key format used in renderDays: YYYY-MonthIndex-Day
+                    // Note: Month in split is 1-12, but JS Date months in renderDays are 0-11
+                    const key = `${year}-${month - 1}-${day}`;
+                    
                     if (!map[key]) map[key] = [];
                     map[key].push(item);
                 }
