@@ -52,6 +52,10 @@ export default function VerifyOTPPage() {
         // Only allow numbers
         if (value && !/^\d+$/.test(value)) return;
 
+        if (verificationState === 'error') {
+            setVerificationState('idle');
+        }
+
         const newOtp = [...otp];
         newOtp[index] = value;
         setOtp(newOtp);
@@ -119,8 +123,16 @@ export default function VerifyOTPPage() {
         }
        } catch (err: any) {
         setVerificationState('error');
-        setOtp(['', '', '', '', '', '']);
-        alert(err.response?.data?.message || "Invalid code. Please try again.");
+        triggerShakeAnimation();
+
+        const errorMsg = err.response?.data?.message || "Invalid code. Please try again.";
+
+        setTimeout(() => {
+            setOtp(['', '', '', '', '', '']);
+            inputRefs.current[0]?.focus();
+        }, 1000);
+
+        alert(errorMsg);
        }
     };
 
@@ -272,15 +284,6 @@ export default function VerifyOTPPage() {
                                         }`}
                                 >
                                     {canResend ? 'Resend code' : `Resend code in ${resendTimer}s`}
-                                </Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                onPress={() => router.back()}
-                                activeOpacity={0.7}
-                            >
-                                <Text className="text-[14px] text-blue-600 font-medium">
-                                    Try another way
                                 </Text>
                             </TouchableOpacity>
                         </View>

@@ -6,7 +6,7 @@ import CalendarWidget from '../../components/student/CalendarWidget';
 import BookConsultationModal from '../../components/student/BookConsultationModal';
 import BookingInfoModal from '../../components/student/BookingInfoModal';
 import BookingSuccessModal from '../../components/student/BookingSuccessModal';
-// 🚀 Using your updated hooks
+
 import { useUpcomingAppointments, useOffices } from '@/hooks/globalHooks';
 import { useBookings } from '@/hooks/studentHooks';
 

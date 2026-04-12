@@ -17,19 +17,18 @@ export default function SignupPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string[] }>({})
+
     const router = useRouter();
 
     const { handleGoogleLogin } = useGoogleLogin();
     const { register, loading, error} = useAuthRegistration()
 
     const handleSignup = async () => {
-        if (!name || !email || !password) {
-            alert("Please fill in all fields");
-            return;
-        }
+        setFieldErrors({})
 
         if (password !== confirmPassword) {
-            alert('Passwords do not match')
+            setFieldErrors({ password_confirmation: ['Passwords do not match'] });
             return;
         }
         
@@ -38,7 +37,7 @@ export default function SignupPage() {
                 full_name: name,
                 email: email,
                 password: password,
-                password_confirmation: password
+                password_confirmation: confirmPassword
             })
 
             if (res.success) {
@@ -48,7 +47,16 @@ export default function SignupPage() {
                 })
             }
         } catch (err: any) {
-            alert(err.response?.data?.message || "Registration failed");
+            console.log("🚨 Signup Error Caught:", err);
+            console.log("🚨 Error Response:", err.response);
+            console.log("🚨 Error Data:", err.response?.data);
+            
+            if (err.response?.data?.errors) {
+                console.log("📝 Setting Field Errors:", err.response.data.errors);
+                setFieldErrors(err.response.data.errors);
+            } else {
+                console.log("⚠️ No field errors found in error response");
+            }
         }   
     };
 
@@ -116,9 +124,13 @@ export default function SignupPage() {
                                         placeholder="Full Name"
                                         value={name}
                                         onChangeText={setName}
-                                        className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 bg-gray-50 focus:border-blue-500 focus:bg-white"
+                                        className={`w-full px-4 py-3.5 border rounded-xl text-gray-800 bg-gray-50 focus:bg-white 
+                                             ${fieldErrors.full_name ? 'border-red-500' : 'border-gray-200 focus:border-blue-500'}`}
                                         placeholderTextColor="#9CA3AF"
                                     />
+                                    {fieldErrors.full_name && (
+                                        <Text className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.full_name[0]}</Text>
+                                    )}
                                 </View>
 
                                 <View>
@@ -126,11 +138,14 @@ export default function SignupPage() {
                                         placeholder="Email Address"
                                         value={email}
                                         onChangeText={setEmail}
-                                        className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 bg-gray-50 focus:border-blue-500 focus:bg-white"
-                                        placeholderTextColor="#9CA3AF"
+                                       className={`w-full px-4 py-3.5 border rounded-xl text-gray-800 bg-gray-50 focus:bg-white 
+                                            ${fieldErrors.email ? 'border-red-500' : 'border-gray-200 focus:border-blue-500'}`}
                                         autoCapitalize="none"
                                         keyboardType="email-address"
                                     />
+                                    {fieldErrors.email && (
+                                        <Text className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.email[0]}</Text>
+                                    )}
                                 </View>
 
                                 <View className="relative">
@@ -139,7 +154,8 @@ export default function SignupPage() {
                                         value={password}
                                         onChangeText={setPassword}
                                         secureTextEntry={!showPassword}
-                                        className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 bg-gray-50 focus:border-blue-500 focus:bg-white pr-12"
+                                        className={`w-full px-4 py-3.5 border rounded-xl text-gray-800 bg-gray-50 focus:bg-white pr-12 
+                                            ${fieldErrors.password ? 'border-red-500' : 'border-gray-200 focus:border-blue-500'}`}
                                         placeholderTextColor="#9CA3AF"
                                     />
                                     <TouchableOpacity
@@ -151,6 +167,9 @@ export default function SignupPage() {
                                             <Eye size={22} color="#9CA3AF" />
                                         }
                                     </TouchableOpacity>
+                                    {fieldErrors.password && (
+                                       <Text className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.password[0]}</Text>
+                                    )}
                                 </View>
 
                                 <View className="relative">
@@ -159,7 +178,8 @@ export default function SignupPage() {
                                         value={confirmPassword}
                                         onChangeText={setConfirmPassword}
                                         secureTextEntry={!showConfirmPassword}
-                                        className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 bg-gray-50 focus:border-blue-500 focus:bg-white pr-12"
+                                        className={`w-full px-4 py-3.5 border rounded-xl text-gray-800 bg-gray-50 focus:bg-white pr-12 
+                                            ${fieldErrors.password_confirmation ? 'border-red-500' : 'border-gray-200 focus:border-blue-500'}`}
                                         placeholderTextColor="#9CA3AF"
                                     />
                                     <TouchableOpacity
@@ -171,6 +191,9 @@ export default function SignupPage() {
                                             <Eye size={22} color="#9CA3AF" />
                                         }
                                     </TouchableOpacity>
+                                    {fieldErrors.password_confirmation && (
+                                        <Text className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.password_confirmation[0]}</Text>
+                                    )}
                                 </View>
 
                                 {/* Terms Checkbox (Optional but good for signup) */}
