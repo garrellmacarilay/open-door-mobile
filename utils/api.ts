@@ -2,16 +2,28 @@ import * as SecureStore from 'expo-secure-store';
 
 // 1. Move the URL check inside or use a reliable fallback
 const getBaseUrl = () => {
-  return process.env.EXPO_PUBLIC_API_URL || "http://192.168.137.1:8000/api";
-};
+  const url = process.env.EXPO_PUBLIC_API_URL;
+  if (!url && !__DEV__) {
+    console.error("❌ CRITICAL: API URL is undefined in a non-dev environment!");
+  }
+  return url || "http://192.168.137.1:8000/api"
+}
+  
 
 const api = {
   // 1. Update request to accept an optional 'options' object
   request: async (method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE', endpoint: string, data: any = null, options: any = {}) => {
     
-    const cleanBaseUrl = getBaseUrl().replace(/\/$/, "");
+    const baseUrl = getBaseUrl().replace(/\/$/, "");
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-    const url = `${getBaseUrl()}${endpoint}`;
+
+    let queryString = "";
+    if(method === 'GET' && options.params) {
+      const params = new URLSearchParams(options.params).toString();
+      queryString = `?${params}`;
+    }
+
+    const url = `${baseUrl}${cleanEndpoint}${queryString}`;
 
     console.log(`🌐 [API] Calling: ${method} ${url}`);
     
@@ -70,6 +82,8 @@ const api = {
   get: (endpoint: string, options: any = {}) => api.request('GET', endpoint, null, options),
   post: (endpoint: string, data: any, options: any = {}) => api.request('POST', endpoint, data, options),
   patch: (endpoint: string, data: any, options: any = {}) => api.request('PATCH', endpoint, data, options),
+  put: (endpoint: string, data: any, options: any = {}) => api.request('PUT', endpoint, data, options),
+  delete: (endpoint: string, options: any = {}) => api.request('DELETE', endpoint, null, options),
 };
 
 export default api;
