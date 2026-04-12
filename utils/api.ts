@@ -1,66 +1,67 @@
 import * as SecureStore from 'expo-secure-store';
 
-// 1. Move the URL check inside or use a reliable fallback
 const getBaseUrl = () => {
-  const url = process.env.EXPO_PUBLIC_API_URL;
-  if (!url && !__DEV__) {
-    console.error("❌ CRITICAL: API URL is undefined in a non-dev environment!");
+  const envUrl = process.env.EXPO_PUBLIC_API_URL;
+  // If we are in a production/preview build, force the deployed URL to be safe
+  if (!__DEV__) {
+    return "https://open-door-th8q.onrender.com/api"; 
   }
-  return url || "http://192.168.137.1:8000/api"
-}
-  
+  return envUrl || "http://192.168.137.1:8000/api";
+};
 
 const api = {
-  // 1. Update request to accept an optional 'options' object
-  request: async (method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE', endpoint: string, data: any = null, options: any = {}) => {
-    
+  request: async (method: string, endpoint: string, data: any = null, options: any = {}) => {
     const baseUrl = getBaseUrl().replace(/\/$/, "");
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
 
+    // FIX: This handles the { params } passed from your hooks
     let queryString = "";
-    if(method === 'GET' && options.params) {
-      const params = new URLSearchParams(options.params).toString();
-      queryString = `?${params}`;
+    if (method === 'GET' && options.params) {
+      // Remove null/undefined values so they don't clutter the URL
+      const cleanParams = Object.fromEntries(
+        Object.entries(options.params).filter(([_, v]) => v != null)
+      );
+      const params = new URLSearchParams(cleanParams as any).toString();
+      queryString = params ? `?${params}` : "";
     }
 
     const url = `${baseUrl}${cleanEndpoint}${queryString}`;
-
-    console.log(`🌐 [API] Calling: ${method} ${url}`);
-    
     const token = await SecureStore.getItemAsync('userToken');
-
-    //for form data
     const isFormData = data instanceof FormData;
 
-    //preparing headers dynamically
     const headers: any = {
       'Accept': 'application/json',
       ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-      ...options.headers, // Allow overriding headers
-    }
+      ...options.headers,
+    };
 
-    //ONLY add application/json if not file upload
-    if (!isFormData) {
+    // FIX: Correctly handle Content-Type for JSON vs Files
+    if (isFormData) {
+      // We DELETE this because the browser/runtime must set the 
+      // boundary automatically for multipart/form-data
+      delete headers['Content-Type']; 
+    } else {
       headers['Content-Type'] = 'application/json';
     }
 
-    // Handle AbortController for timeouts
     const controller = new AbortController();
-    const id = options.timeout ? setTimeout(() => controller.abort(), options.timeout) : null;
+    const timeoutId = setTimeout(() => controller.abort(), options.timeout || 15000);
 
     try {
+      console.log(`🌐 [API] ${method} -> ${url}`);
+      
       const res = await fetch(url, {
         method,
-        signal: controller.signal, // Connect the abort signal
+        signal: controller.signal,
         headers,
-        body: method === 'POST' || method === 'PATCH' || method === 'PUT' ? (isFormData ? data : JSON.stringify(data)) : undefined,
+        // GET and HEAD requests cannot have a body
+        body: method !== 'GET' ? (isFormData ? data : JSON.stringify(data)) : undefined,
       });
 
-      if (id) clearTimeout(id); // Clear timeout if request succeeds
+      clearTimeout(timeoutId);
 
       const result = await res.json().catch(() => ({}));
       
-      // Throw error for non-2xx responses so the hook can catch them
       if (!res.ok) {
         const error: any = new Error(`HTTP ${res.status}`);
         error.response = { status: res.status, data: result };
@@ -69,16 +70,15 @@ const api = {
       
       return { data: result, status: res.status };
     } catch (error: any) {
+      clearTimeout(timeoutId);
       if (error.name === 'AbortError') {
-        console.error("❌ [API] Request timed out");
-        return { data: { error: "Network failed" }, status: 0 };
+        return { data: { error: "Network failed or timeout" }, status: 0 };
       }
-      // Re-throw validation errors and other HTTP errors
       throw error;
     }
   },
 
-  // 2. Update these to pass the 3rd argument (options) through
+  // These helper methods just wrap the main request function
   get: (endpoint: string, options: any = {}) => api.request('GET', endpoint, null, options),
   post: (endpoint: string, data: any, options: any = {}) => api.request('POST', endpoint, data, options),
   patch: (endpoint: string, data: any, options: any = {}) => api.request('PATCH', endpoint, data, options),
