@@ -14,8 +14,10 @@ import {
     View,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import LogoutConfirmationModal from '../../components/common/LogoutConfirmationModal';
+import LogoutConfirmationModal from '@/components/common/LogoutConfirmationModal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { useLogout } from '@/hooks/authHooks';
 
 export default function AdminSettingsPage() {
     const router = useRouter();
@@ -32,6 +34,8 @@ export default function AdminSettingsPage() {
     const [showCurrent, setShowCurrent] = useState(false);
     const [showNew, setShowNew] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
+
+    const { handleLogout: executeLogout, loading: isLoggingOut } = useLogout();
     const [showLogoutModal, setShowLogoutModal] = useState(false);
 
     const handleImagePicker = async () => {
@@ -289,10 +293,16 @@ export default function AdminSettingsPage() {
 
             <LogoutConfirmationModal
                 visible={showLogoutModal}
-                onCancel={() => setShowLogoutModal(false)}
-                onConfirm={() => {
-                    setShowLogoutModal(false);
-                    router.replace('/(auth)/login');
+                loading={isLoggingOut}
+                onCancel={() => !isLoggingOut && setShowLogoutModal(false)}
+                onConfirm={async () => {
+                    try {
+                        await executeLogout()
+                    } catch (err) {
+                        setShowLogoutModal(false);
+                        Alert.alert('Error', 'Could not log out')
+                    }
+                    
                 }}
             />
         </View>
