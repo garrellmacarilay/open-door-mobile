@@ -154,6 +154,7 @@ export default function SignupPage() {
                                         value={password}
                                         onChangeText={setPassword}
                                         secureTextEntry={!showPassword}
+                                        contextMenuHidden={true}
                                         className={`w-full px-4 py-3.5 border rounded-xl text-gray-800 bg-gray-50 focus:bg-white pr-12 
                                             ${fieldErrors.password ? 'border-red-500' : 'border-gray-200 focus:border-blue-500'}`}
                                         placeholderTextColor="#9CA3AF"
@@ -178,6 +179,7 @@ export default function SignupPage() {
                                         value={confirmPassword}
                                         onChangeText={setConfirmPassword}
                                         secureTextEntry={!showConfirmPassword}
+                                        contextMenuHidden={true}
                                         className={`w-full px-4 py-3.5 border rounded-xl text-gray-800 bg-gray-50 focus:bg-white pr-12 
                                             ${fieldErrors.password_confirmation ? 'border-red-500' : 'border-gray-200 focus:border-blue-500'}`}
                                         placeholderTextColor="#9CA3AF"

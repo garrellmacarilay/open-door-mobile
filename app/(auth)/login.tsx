@@ -144,6 +144,7 @@ export default function LoginPage() {
                                         if (errors?.password) setErrors({ ...errors, password: undefined });
                                     }}
                                     secureTextEntry={!showPassword}
+                                    contextMenuHidden={true}
                                     className={`w-full px-4 py-4 border-[1.5px] border-gray-200 rounded-xl text-gray-800 bg-gray-50 pr-12 text-[15px] ${
                                         errors?.password ? 'border-red-500' : 'border-gray-200'
                                     }`}
