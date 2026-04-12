@@ -142,6 +142,7 @@ export default function SignupPage() {
                                             ${fieldErrors.email ? 'border-red-500' : 'border-gray-200 focus:border-blue-500'}`}
                                         autoCapitalize="none"
                                         keyboardType="email-address"
+                                        placeholderTextColor="#9CA3AF"
                                     />
                                     {fieldErrors.email && (
                                         <Text className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.email[0]}</Text>
