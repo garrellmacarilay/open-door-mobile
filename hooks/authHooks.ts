@@ -173,8 +173,13 @@ export const useLogin = () => {
             setErrors({ general: ['Login Failed'] });
             return false;
         } catch (err: any) {
-            console.error("Login error:", err);
-            setErrors({ general: [err.message || 'An unexpected error occurred'] });
+            if (err.response?.data?.errors) {
+                setErrors(err.response.data.errors);
+            } else if (err.response?.data?.message) {
+                setErrors({ general: [err.response.data.message] });
+            } else {
+                setErrors({ general: [err.message || 'An unexpected error occurred'] });
+            }
             return false;
         } finally {
             setLoading(false);
