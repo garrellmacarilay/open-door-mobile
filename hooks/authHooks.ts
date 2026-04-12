@@ -42,25 +42,36 @@ export function useAuthRegistration() {
         setLoading(true);
         setError(null);
         try {
-            console.log("📡 2. Sending POST to:", process.env.EXPO_PUBLIC_API_URL + '/register');
+            console.log("2. Sending POST to:", process.env.EXPO_PUBLIC_API_URL + '/register');
 
             const res = await api.post('/register', data);
-
-            if (res.status >= 400) {
-                console.error("❌ 3. Backend rejected request:", res.data);
-                const msg = res.data?.message || res.data?.error || "Registration failed";
-                setError(msg);
-                throw new Error(msg);
-            }
             return res.data as AuthResponse;
         } catch (err: any) {
-            console.error("❌ 4. Registration Error Details:", {
-                message: err.message,
-                status: err.response?.status,
-                data: err.response?.data,
-            });
-            const msg = err.response?.data?.message || "Registration failed";
-            setError(msg);
+            const status = err.response?.status;
+            const errorData = err.response?.data;
+
+            console.log("❌ Error Status:", status);
+            console.log("❌ Error Data:", errorData);
+
+            let displayMessage = "Registration failed";
+
+            if (status === 422) {
+                // Validation errors - pass them through
+                if (errorData?.errors) {
+                    displayMessage = errorData.message || 'Validation failed. Please check all fields.';
+                    console.log("📋 Field Errors:", errorData.errors);
+                } else if (errorData?.message) {
+                    displayMessage = errorData.message
+                }
+                
+            } else if (status === 500) {
+                displayMessage = 'Server error. Please try again later.'
+            } else if (errorData?.message) {
+                displayMessage = errorData.message
+            }
+            
+            setError(displayMessage);
+            console.log("💬 Display Message:", displayMessage);
             throw err;
         } finally {
             setLoading(false);
