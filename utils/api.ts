@@ -47,10 +47,22 @@ const api = {
       if (id) clearTimeout(id); // Clear timeout if request succeeds
 
       const result = await res.json().catch(() => ({}));
+      
+      // Throw error for non-2xx responses so the hook can catch them
+      if (!res.ok) {
+        const error: any = new Error(`HTTP ${res.status}`);
+        error.response = { status: res.status, data: result };
+        throw error;
+      }
+      
       return { data: result, status: res.status };
     } catch (error: any) {
-      if (error.name === 'AbortError') console.error("❌ [API] Request timed out");
-      return { data: { error: "Network failed" }, status: 0 };
+      if (error.name === 'AbortError') {
+        console.error("❌ [API] Request timed out");
+        return { data: { error: "Network failed" }, status: 0 };
+      }
+      // Re-throw validation errors and other HTTP errors
+      throw error;
     }
   },
 
