@@ -10,18 +10,26 @@ import { useGoogleLogin } from '../../hooks/authHooks';
 
 
 export default function SignupPage() {
-    const [name, setName] = useState("");
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [acceptedTerms, setAcceptedTerms] = useState(false);
     const router = useRouter();
 
     const { handleGoogleLogin } = useGoogleLogin();
 
     const handleSignup = async () => {
-        if (!name || !email || !password) {
+        if (!firstName || !lastName || !email || !password || !confirmPassword) {
             alert("Please fill in all fields");
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            alert("Passwords do not match");
             return;
         }
 
@@ -73,9 +81,7 @@ export default function SignupPage() {
                             <Text className="text-3xl font-bold text-white text-center mb-2">
                                 Create an{"\n"}Account
                             </Text>
-                            <Text className="text-blue-100 text-center text-sm">
-                                Sign up to get started
-                            </Text>
+                           
                         </View>
 
                         {/* White Card Section */}
@@ -94,9 +100,9 @@ export default function SignupPage() {
                             <View className="space-y-4 gap-4">
                                 <View>
                                     <TextInput
-                                        placeholder="First Name, Last Name"
-                                        value={name}
-                                        onChangeText={setName}
+                                        placeholder="First Name"
+                                        value={firstName}
+                                        onChangeText={setFirstName}
                                         className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 bg-gray-50 focus:border-blue-500 focus:bg-white"
                                         placeholderTextColor="#9CA3AF"
                                     />
@@ -104,7 +110,17 @@ export default function SignupPage() {
 
                                 <View>
                                     <TextInput
-                                        placeholder="Email Address"
+                                        placeholder="Last Name"
+                                        value={lastName}
+                                        onChangeText={setLastName}
+                                        className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 bg-gray-50 focus:border-blue-500 focus:bg-white"
+                                        placeholderTextColor="#9CA3AF"
+                                    />
+                                </View>
+
+                                <View>
+                                    <TextInput
+                                        placeholder="Email"
                                         value={email}
                                         onChangeText={setEmail}
                                         className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 bg-gray-50 focus:border-blue-500 focus:bg-white"
@@ -128,8 +144,28 @@ export default function SignupPage() {
                                         className="absolute right-4 top-3.5"
                                     >
                                         {showPassword ?
-                                            <EyeOff size={22} color="#9CA3AF" /> :
-                                            <Eye size={22} color="#9CA3AF" />
+                                            <Eye size={22} color="#9CA3AF" /> :
+                                            <EyeOff size={22} color="#9CA3AF" />
+                                        }
+                                    </TouchableOpacity>
+                                </View>
+
+                                <View className="relative">
+                                    <TextInput
+                                        placeholder="Confirm Password"
+                                        value={confirmPassword}
+                                        onChangeText={setConfirmPassword}
+                                        secureTextEntry={!showConfirmPassword}
+                                        className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 bg-gray-50 focus:border-blue-500 focus:bg-white pr-12"
+                                        placeholderTextColor="#9CA3AF"
+                                    />
+                                    <TouchableOpacity
+                                        onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute right-4 top-3.5"
+                                    >
+                                        {showConfirmPassword ?
+                                            <Eye size={22} color="#9CA3AF" /> :
+                                            <EyeOff size={22} color="#9CA3AF" />
                                         }
                                     </TouchableOpacity>
                                 </View>
@@ -146,7 +182,7 @@ export default function SignupPage() {
                                         )}
                                     </TouchableOpacity>
                                     <Text className="text-gray-500 text-xs flex-1">
-                                        By signing up, you agree to our <Text className="text-blue-600 font-semibold" onPress={() => alert("Open Terms of Service")}>Terms of Service</Text> and <Text className="text-blue-600 font-semibold" onPress={() => alert("Open Privacy Policy")}>Privacy Policy</Text>.
+                                        By signing up, you are agree <Text className="text-blue-600 font-semibold" onPress={() => alert("Open Terms of Service")}>Terms of Services</Text> and <Text className="text-blue-600 font-semibold" onPress={() => alert("Open Privacy Policy")}>Privacy Policy</Text>.
                                     </Text>
                                 </View>
 
@@ -165,7 +201,7 @@ export default function SignupPage() {
                             {/* Divider */}
                             <View className="flex-row items-center my-6">
                                 <View className="flex-1 h-[1px] bg-gray-200" />
-                                <Text className="mx-4 text-gray-400 text-sm">Or sign up with</Text>
+                                <Text className="mx-4 text-gray-400 text-sm">Or sign up in with</Text>
                                 <View className="flex-1 h-[1px] bg-gray-200" />
                             </View>
 
@@ -187,7 +223,7 @@ export default function SignupPage() {
                                 <Text className="text-gray-500">Already have an account? </Text>
                                 <Link href="/login" asChild>
                                     <TouchableOpacity>
-                                        <Text className="text-blue-600 font-bold">Sign In</Text>
+                                        <Text className="text-blue-600 font-bold">Log In</Text>
                                     </TouchableOpacity>
                                 </Link>
                             </View>

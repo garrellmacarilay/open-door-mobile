@@ -80,10 +80,6 @@ export default function LoginPage() {
                                 Sign in to your{"\n"}Account
                             </Text>
 
-                            {/* Subtitle */}
-                            <Text className="text-white/90 text-center text-[15px] mt-1">
-                                Enter your email and password to sign up
-                            </Text>
                         </View>
 
                         {/* White Card Section */}
@@ -128,9 +124,9 @@ export default function LoginPage() {
                                     activeOpacity={0.7}
                                 >
                                     {showPassword ? (
-                                        <EyeOff size={20} color="#9CA3AF" />
-                                    ) : (
                                         <Eye size={20} color="#9CA3AF" />
+                                    ) : (
+                                        <EyeOff size={20} color="#9CA3AF" />
                                     )}
                                 </TouchableOpacity>
                             </View>
