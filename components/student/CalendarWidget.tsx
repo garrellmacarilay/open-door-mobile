@@ -22,6 +22,7 @@ export default function CalendarWidget({
 
     const monthName = viewDate.toLocaleDateString('en-US', { month: 'long' });
     const yearString = viewDate.toLocaleDateString('en-US', { year: 'numeric' });
+    const usesSplitHeaderLayout = !onAddEvent;
 
     // Calendar Logic
     const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
@@ -142,42 +143,76 @@ export default function CalendarWidget({
         }}>
             {/* Header (Dark Blue) */}
             <View className="bg-[#18233D] rounded-t-[24px] px-6 py-5">
-                <View className="flex-row items-center justify-between">
-                    <View className="flex-1 items-center">
-                        <Text className="text-[20px] font-bold text-white tracking-wide">
-                            {monthName}
-                        </Text>
-                        <Text className="text-[13px] font-semibold text-[#3B82F6] mt-0.5">
-                            {yearString}
-                        </Text>
-                    </View>
+                {usesSplitHeaderLayout ? (
+                    <View className="relative h-14 items-center justify-center">
 
-                    <View className="flex-row items-center gap-2">
-                        <TouchableOpacity
-                            onPress={() => navigateMonth('prev')}
-                            activeOpacity={0.7}
-                            className="w-9 h-9 rounded-lg bg-white items-center justify-center"
-                        >
-                            <ChevronLeft size={18} color="#18233D" strokeWidth={2.5} />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() => navigateMonth('next')}
-                            activeOpacity={0.7}
-                            className="w-9 h-9 rounded-lg bg-white items-center justify-center"
-                        >
-                            <ChevronRight size={18} color="#18233D" strokeWidth={2.5} />
-                        </TouchableOpacity>
-                        {onAddEvent && (
+                        <View className="absolute left-11 top-0 bottom-0 justify-center">
                             <TouchableOpacity
-                                onPress={onAddEvent}
+                                onPress={() => navigateMonth('prev')}
                                 activeOpacity={0.7}
                                 className="w-9 h-9 rounded-lg bg-white items-center justify-center"
                             >
-                                <Plus size={18} color="#18233D" strokeWidth={2.5} />
+                                <ChevronLeft size={18} color="#18233D" strokeWidth={2.5} />
                             </TouchableOpacity>
-                        )}
+                        </View>
+
+                        <View className="items-center px-12">
+                            <Text className="text-[20px] font-bold text-white tracking-wide">
+                                {monthName}
+                            </Text>
+                            <Text className="text-[13px] font-semibold text-[#3B82F6] mt-0.5">
+                                {yearString}
+                            </Text>
+                        </View>
+
+                        <View className="absolute right-11 top-0 bottom-0 justify-center">
+                            <TouchableOpacity
+                                onPress={() => navigateMonth('next')}
+                                activeOpacity={0.7}
+                                className="w-9 h-9 rounded-lg bg-white items-center justify-center"
+                            >
+                                <ChevronRight size={18} color="#18233D" strokeWidth={2.5} />
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                </View>
+                ) : (
+                    <View className="flex-row items-center justify-between">
+                        <View className="flex-1 items-center">
+                            <Text className="text-[20px] font-bold text-white tracking-wide">
+                                {monthName}
+                            </Text>
+                            <Text className="text-[13px] font-semibold text-[#3B82F6] mt-0.5">
+                                {yearString}
+                            </Text>
+                        </View>
+
+                        <View className="flex-row items-center gap-2">
+                            <TouchableOpacity
+                                onPress={() => navigateMonth('prev')}
+                                activeOpacity={0.7}
+                                className="w-9 h-9 rounded-lg bg-white items-center justify-center"
+                            >
+                                <ChevronLeft size={18} color="#18233D" strokeWidth={2.5} />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => navigateMonth('next')}
+                                activeOpacity={0.7}
+                                className="w-9 h-9 rounded-lg bg-white items-center justify-center"
+                            >
+                                <ChevronRight size={18} color="#18233D" strokeWidth={2.5} />
+                            </TouchableOpacity>
+                            {onAddEvent && (
+                                <TouchableOpacity
+                                    onPress={onAddEvent}
+                                    activeOpacity={0.7}
+                                    className="w-9 h-9 rounded-lg bg-white items-center justify-center"
+                                >
+                                    <Plus size={18} color="#18233D" strokeWidth={2.5} />
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    </View>
+                )}
             </View>
 
             {/* Calendar Body */}
