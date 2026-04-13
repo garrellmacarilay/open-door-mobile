@@ -174,7 +174,7 @@ export default function SignupPage() {
                                 <Text className="text-gray-500">Already have an account? </Text>
                                 <Link href="/login" asChild>
                                     <TouchableOpacity>
-                                        <Text className="text-blue-600 font-bold">Log In</Text>
+                                        <Text className="text-blue-600 font-bold">Sign In</Text>
                                     </TouchableOpacity>
                                 </Link>
                             </View>

@@ -82,7 +82,7 @@ export default function LoginPage() {
 
                             {/* Subtitle */}
                             <Text className="text-white/90 text-center text-[15px] mt-1">
-                                Enter your email and password to log in
+                                Enter your email and password to sign up
                             </Text>
                         </View>
 
@@ -176,14 +176,14 @@ export default function LoginPage() {
                                 }}
                             >
                                 <Text className="text-white text-center font-bold text-[16px]">
-                                    {loading ? "Logging in..." : "Log In"}
+                                    {loading ? "Signing in..." : "Sign In"}
                                 </Text>
                             </TouchableOpacity>
 
                              {/* Divider */}
                             <View className="flex-row items-center mb-6">
                                 <View className="flex-1 h-[1px] bg-gray-200" />
-                                <Text className="mx-4 text-gray-400 text-[13px]">Or login with</Text>
+                                <Text className="mx-4 text-gray-400 text-[13px]">Or sign up with</Text>
                                 <View className="flex-1 h-[1px] bg-gray-200" />
                             </View>
                         
