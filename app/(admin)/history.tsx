@@ -1,39 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import HistoryModal from '../../components/staff/StaffHistoryModal';
+import StaffHistoryModal from '@/components/staff/StaffHistoryModal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const HISTORY_DATA = [
-    {
-        id: 'APPT-254',
-        title: 'Garrell Macarilay',
-        date: '03-20-2025',
-        time: '12:00 PM',
-        status: 'approved',
-    },
-    {
-        id: 'APPT-219',
-        title: 'Eunice Lugtu',
-        date: '03-20-2025',
-        time: '09:00 AM',
-        status: 'pending',
-    },
-    {
-        id: 'APPT-231',
-        title: 'Margarette Calumpiano',
-        date: '03-20-2026',
-        time: '4:00 PM',
-        status: 'declined',
-    },
-    {
-        id: 'APPT-202',
-        title: 'Vincent Lee Duriga',
-        date: '03-16-2025',
-        time: '10:00 AM',
-        status: 'completed',
-    },
-];
+import { useAdminAppointments } from '@/hooks/adminHooks';
 
 type FilterStatus = 'all' | 'pending' | 'approved' | 'completed' | 'declined';
 
@@ -41,6 +12,15 @@ export default function AdminHistory() {
     const insets = useSafeAreaInsets();
     const [activeFilter, setActiveFilter] = useState<FilterStatus>('all');
     const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
+
+    const { 
+        appointments, 
+        loading, 
+        filters, 
+        updateFilter, 
+        loadMore,
+        onRefresh 
+    } = useAdminAppointments();
 
     const getStatusStyle = (status: string) => {
         switch (status) {
@@ -57,25 +37,21 @@ export default function AdminHistory() {
         }
     };
 
-    const filteredData =
-        activeFilter === 'all' ? HISTORY_DATA : HISTORY_DATA.filter((item) => item.status === activeFilter);
-
-    const FilterButton = ({ label, value }: { label: string; value: FilterStatus }) => {
-        const isActive = activeFilter === value;
+ const FilterButton = ({ label, value }: { label: string; value: FilterStatus }) => {
+        const isActive = filters.status === value;
         return (
             <TouchableOpacity
-                onPress={() => setActiveFilter(value)}
-                className={`px-4 py-2 rounded-[6px] mr-2 border ${
+                onPress={() => updateFilter('status', value)}
+                    className={`px-4 py-2 rounded-[6px] mr-2 border ${
                     isActive ? 'bg-[#18233D] border-[#18233D]' : 'bg-white border-gray-200'
                 }`}
             >
-                <Text
+                <Text                     
                     className={`text-[11px] font-semibold ${
                         isActive ? 'text-white' : 'text-gray-600'
                     }`}
-                >
-                    {label}
-                </Text>
+                        >{label}
+                    </Text>
             </TouchableOpacity>
         );
     };
@@ -106,14 +82,14 @@ export default function AdminHistory() {
 
             {/* History List */}
             <ScrollView className="flex-1 px-5 pt-4" showsVerticalScrollIndicator={false}>
-                {filteredData.map((item, index) => {
-                    const statusStyle = getStatusStyle(item.status);
+                {appointments.map((item) => {
+                    const statusStyle = getStatusStyle(item.details.status);
                     return (
-                        <View key={index} className="bg-white rounded-2xl p-4 mb-4 border border-gray-200 shadow-sm">
+                        <View key={item.id} className="bg-white rounded-2xl p-4 mb-4 border border-gray-200 shadow-sm">
                             {/* Header with ID and Status */}
                             <View className="flex-row items-start justify-between mb-3">
                                 <View className="flex-1">
-                                    <Text className="text-gray-500 text-[10px] font-semibold mb-1">{item.id}</Text>
+                                    <Text className="text-gray-500 text-[10px] font-semibold mb-1">{item.details.reference_code}</Text>
                                     <Text className="text-[#1C2A48] text-[18px] font-bold leading-6">{item.title}</Text>
                                 </View>
                                 <View className={`px-3 py-1.5 rounded-full ${statusStyle.bg}`}>
@@ -127,11 +103,21 @@ export default function AdminHistory() {
                             <View className="flex-row items-center gap-4 mb-4">
                                 <View className="flex-row items-center gap-1.5">
                                     <Ionicons name="calendar-outline" size={12} color="#9CA3AF" />
-                                    <Text className="text-gray-500 text-[10px] font-semibold">{item.date}</Text>
+                                    <Text className="text-gray-500 text-[10px] font-semibold">{new Date(item.start).toLocaleDateString('en-US', {
+                                        month: 'long',
+                                        day: 'numeric',
+                                        year: 'numeric'
+                                    })}
+                                    </Text>
                                 </View>
                                 <View className="flex-row items-center gap-1.5">
                                     <Ionicons name="time-outline" size={12} color="#9CA3AF" />
-                                    <Text className="text-gray-500 text-[10px] font-semibold">{item.time}</Text>
+                                    <Text className="text-gray-500 text-[10px] font-semibold">{new Date(item.start).toLocaleTimeString('en-US', {
+                                        hour12: true,
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                    })}
+                                    </Text>
                                 </View>
                             </View>
 
@@ -147,7 +133,9 @@ export default function AdminHistory() {
                     );
                 })}
 
-                {filteredData.length === 0 && (
+                {loading && <ActivityIndicator className="my-4" />}
+
+                {!loading && appointments.length === 0 && (
                     <View className="bg-white rounded-2xl p-12 items-center">
                         <Ionicons name="document-text-outline" size={48} color="#D1D5DB" />
                         <Text className="text-gray-400 text-center mt-3">No records found</Text>
@@ -157,10 +145,11 @@ export default function AdminHistory() {
                 <View style={{ height: Math.max(insets.bottom + 80, 112) }} />
             </ScrollView>
 
-            <HistoryModal
+            <StaffHistoryModal
                 visible={!!selectedAppointment}
                 appointment={selectedAppointment}
                 onClose={() => setSelectedAppointment(null)}
+                onRefresh={onRefresh}
             />
         </View>
     );
