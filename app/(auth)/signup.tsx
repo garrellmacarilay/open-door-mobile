@@ -14,6 +14,7 @@ export default function SignupPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const [acceptedTerms, setAcceptedTerms] = useState(false);
     const router = useRouter();
 
     const { handleGoogleLogin } = useGoogleLogin();
@@ -23,6 +24,12 @@ export default function SignupPage() {
             alert("Please fill in all fields");
             return;
         }
+
+        if (!acceptedTerms) {
+            alert("Please accept Terms of Service and Privacy Policy");
+            return;
+        }
+
         alert("Signup logic would go here!");
     };
 
@@ -129,11 +136,17 @@ export default function SignupPage() {
 
                                 {/* Terms Checkbox (Optional but good for signup) */}
                                 <View className="flex-row items-start gap-2 mt-1">
-                                    <View className="w-5 h-5 rounded border border-blue-600 bg-blue-600 items-center justify-center mt-0.5">
-                                        <View className="w-2.5 h-2.5 bg-white rounded-sm" />
-                                    </View>
+                                    <TouchableOpacity
+                                        onPress={() => setAcceptedTerms(!acceptedTerms)}
+                                        activeOpacity={0.7}
+                                        className={`w-5 h-5 rounded border items-center justify-center mt-0.5 ${acceptedTerms ? 'border-blue-600 bg-blue-600' : 'border-gray-400 bg-white'}`}
+                                    >
+                                        {acceptedTerms && (
+                                            <View className="w-2.5 h-2.5 bg-white rounded-sm" />
+                                        )}
+                                    </TouchableOpacity>
                                     <Text className="text-gray-500 text-xs flex-1">
-                                        By signing up, you agree to our <Text className="text-blue-600 font-semibold">Terms of Service</Text> and <Text className="text-blue-600 font-semibold">Privacy Policy</Text>.
+                                        By signing up, you agree to our <Text className="text-blue-600 font-semibold" onPress={() => alert("Open Terms of Service")}>Terms of Service</Text> and <Text className="text-blue-600 font-semibold" onPress={() => alert("Open Privacy Policy")}>Privacy Policy</Text>.
                                     </Text>
                                 </View>
 
