@@ -8,6 +8,7 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
+    Switch,
     Text,
     TextInput,
     TouchableOpacity,
@@ -33,6 +34,7 @@ export default function StaffSettingsPage() {
     const [showNew, setShowNew] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [isAvailable, setIsAvailable] = useState(true);
 
     const handleImagePicker = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -211,6 +213,36 @@ export default function StaffSettingsPage() {
                         className="px-6 pt-8 mb-20 flex-col gap-y-4"
                         style={{ paddingBottom: Math.max(insets.bottom + 36, 72) }}
                     >
+                        {/* Current Status Card */}
+                        {!isEditing && (
+                            <TouchableOpacity
+                                onPress={() => setIsAvailable(!isAvailable)}
+                                activeOpacity={0.85}
+                                className="w-full bg-white rounded-2xl px-5 py-4 border border-gray-100"
+                                style={{
+                                    shadowColor: '#000',
+                                    shadowOffset: { width: 0, height: 2 },
+                                    shadowOpacity: 0.04,
+                                    shadowRadius: 8,
+                                    elevation: 2,
+                                }}
+                            >
+                                <Text className="text-[12px] font-bold text-gray-400 mb-3">Current Status</Text>
+                                <View className="flex-row items-center justify-between">
+                                    <Text className={`text-[16px] font-bold ${isAvailable ? 'text-[#22C55E]' : 'text-gray-400'}`}>
+                                        {isAvailable ? 'Available' : 'Unavailable'}
+                                    </Text>
+                                    <Switch
+                                        value={isAvailable}
+                                        onValueChange={setIsAvailable}
+                                        trackColor={{ false: '#E5E7EB', true: '#22C55E' }}
+                                        thumbColor="#fff"
+                                        ios_backgroundColor="#E5E7EB"
+                                    />
+                                </View>
+                            </TouchableOpacity>
+                        )}
+
                         {isEditing && (
                             <TouchableOpacity
                                 onPress={handleSaveChanges}
