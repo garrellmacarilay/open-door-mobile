@@ -18,6 +18,7 @@ export default function CalendarWidget({
 }: CalendarWidgetProps) {
     const [viewDate, setViewDate] = useState(initialDate);
     const [selectedDate, setSelectedDate] = useState(new Date());
+    const today = new Date();
 
     const monthName = viewDate.toLocaleDateString('en-US', { month: 'long' });
     const yearString = viewDate.toLocaleDateString('en-US', { year: 'numeric' });
@@ -83,6 +84,14 @@ export default function CalendarWidget({
             const cellDate = new Date(currentYear, currentMonth, dayNumber);
             const dateKey = `${currentYear}-${currentMonth}-${dayNumber}`;
             const dayEvents = eventsByDate[dateKey] || [];
+            const isToday =
+                today.getFullYear() === currentYear &&
+                today.getMonth() === currentMonth &&
+                today.getDate() === dayNumber;
+            const isSelected =
+                selectedDate.getFullYear() === currentYear &&
+                selectedDate.getMonth() === currentMonth &&
+                selectedDate.getDate() === dayNumber;
 
             days.push(
                 <TouchableOpacity
@@ -94,9 +103,14 @@ export default function CalendarWidget({
                     }}
                     activeOpacity={0.6}
                 >
-                    <Text className={`text-[14px] font-bold ${isWeekend ? 'text-[#3B82F6]' : 'text-[#1C274C]'}`}>
-                        {dayNumber}
-                    </Text>
+                    <View
+                        className={`w-9 h-9 rounded-full items-center justify-center ${isSelected ? 'bg-[#18233D]' : ''}`}
+                        style={isToday && !isSelected ? { borderWidth: 2, borderColor: '#3B82F6' } : undefined}
+                    >
+                        <Text className={`text-[14px] font-bold ${isSelected ? 'text-white' : isWeekend ? 'text-[#3B82F6]' : 'text-[#1C274C]'}`}>
+                            {dayNumber}
+                        </Text>
+                    </View>
 
                     {/* Status indicator dots */}
                     {dayEvents.length > 0 && (
@@ -204,6 +218,10 @@ export default function CalendarWidget({
                     <View className="flex-row items-center gap-1">
                         <View className="w-2 h-2 rounded-full bg-[#3B82F6]" />
                         <Text className="text-[10px] font-bold text-[#6B7280]">Events</Text>
+                    </View>
+                    <View className="flex-row items-center gap-1">
+                        <View className="w-3 h-3 rounded-full border-2 border-[#3B82F6]" />
+                        <Text className="text-[10px] font-bold text-[#6B7280]">Today</Text>
                     </View>
                 </View>
             </View>
