@@ -114,7 +114,7 @@ export default function LoginPage() {
                             {/* Password Input */}
                             <View className="relative mb-3">
                                 <TextInput
-                                    placeholder="••••••••"
+                                    placeholder="Password"
                                     value={password}
                                     onChangeText={setPassword}
                                     secureTextEntry={!showPassword}
@@ -155,7 +155,7 @@ export default function LoginPage() {
 
                                 <TouchableOpacity activeOpacity={0.7}>
                                     <Text className="text-blue-600 font-semibold text-[14px]">
-                                        Forgot Password ?
+                                        Forgot Password?
                                     </Text>
                                 </TouchableOpacity>
                             </View>

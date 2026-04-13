@@ -99,10 +99,12 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
             <Modal
                 animationType="slide"
                 transparent
+                statusBarTranslucent
+                navigationBarTranslucent
                 visible={visible}
                 onRequestClose={onClose}
             >
-                <View className="flex-1 justify-end bg-black/40">
+                <View className="absolute top-0 left-0 right-0 bottom-0 justify-end bg-black/40">
                     <View className="bg-white rounded-t-[32px] p-6 h-[88%] shadow-lg">
 
                         {/* Header */}
