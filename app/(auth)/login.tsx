@@ -100,7 +100,7 @@ export default function LoginPage() {
                             {/* Email Input */}
                             <View className="mb-4">
                                 <TextInput
-                                    placeholder="Loisbecket@gmail.com"
+                                    placeholder="Email"
                                     value={email}
                                     onChangeText={setEmail}
                                     className="w-full px-4 py-4 border-[1.5px] border-gray-200 rounded-xl text-gray-800 bg-gray-50 text-[15px]"

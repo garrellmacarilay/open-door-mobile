@@ -94,7 +94,7 @@ export default function SignupPage() {
                             <View className="space-y-4 gap-4">
                                 <View>
                                     <TextInput
-                                        placeholder="Full Name"
+                                        placeholder="First Name, Last Name"
                                         value={name}
                                         onChangeText={setName}
                                         className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 bg-gray-50 focus:border-blue-500 focus:bg-white"

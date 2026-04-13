@@ -14,6 +14,8 @@ export default function LogoutConfirmationModal({ visible, onCancel, onConfirm }
             transparent={true}
             visible={visible}
             onRequestClose={onCancel}
+            statusBarTranslucent
+            navigationBarTranslucent
         >
             <View className="flex-1 bg-black/40 justify-center items-center px-6">
                 <View
@@ -49,11 +51,11 @@ export default function LogoutConfirmationModal({ visible, onCancel, onConfirm }
                         {/* Confirm Button */}
                         <TouchableOpacity
                             onPress={onConfirm}
-                            className="flex-1 h-full items-center justify-center rounded-[8px] bg-[#22C55E]"
+                            className="flex-1 h-full items-center justify-center rounded-[8px] bg-[#EF4444]"
                             activeOpacity={0.8}
                         >
                             <Text className="text-white text-[15px] font-bold">
-                                Confirm
+                                Log Out
                             </Text>
                         </TouchableOpacity>
                     </View>
