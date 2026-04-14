@@ -255,11 +255,19 @@ export function useUpcomingAppointments(office: string, status: string, month?: 
     }
 
     //filter by status
-    if (status && status !== 'all') {
-      list = list.filter((apt: any) => {
-        const aptStatus = apt.details?.status?.toLowerCase() || apt.status?.toLowerCase();
-        return aptStatus === status.toLowerCase();
-      });
+    if (status) {
+      if (status === 'all') {
+        const allowed = ['pending', 'approved', 'completed', 'declined']
+        list = list.filter((apt: any) => {
+          const aptStatus = (apt.details?.status || apt.status)?.toLowerCase();
+          return allowed.includes(aptStatus);
+        });
+      } else {
+        list = list.filter((apt: any) => {
+          const aptStatus = (apt.details?.status || apt.status)?.toLowerCase();
+          return aptStatus === status.toLowerCase();
+        });
+      }
     }
 
     return list
