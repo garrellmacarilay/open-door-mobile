@@ -2,131 +2,155 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAdminOffices, useCreateOffice, useUpdateOffice, useDeleteOffice } from '@/hooks/adminHooks';
 
-const OFFICES_DATA = [
-    {
-        id: '1',
-        label: 'Prefect and Assistant Prefect',
-        email: 'prefect@laverdad.edu.ph',
-        status: 'Available',
-    },
-    {
-        id: '2',
-        label: 'Guidance',
-        email: 'prefect.guidance@laverdad.edu.ph',
-        status: 'Available',
-    },
-    {
-        id: '3',
-        label: 'Medical Clinic',
-        email: 'prefect.medical@laverdad.edu.ph',
-        status: 'Available',
-    },
-    {
-        id: '4',
-        label: 'Sports Development and Management',
-        email: 'prefect.sports@laverdad.edu.ph',
-        status: 'Unavailable',
-    },
-    {
-        id: '5',
-        label: 'Student Assistance and Experiential Learning',
-        email: 'prefect.studentassist@laverdad.edu.ph',
-        status: 'Available',
-    },
-    {
-        id: '6',
-        label: 'Student Discipline',
-        email: 'prefect.discipline@laverdad.edu.ph',
-        status: 'Available',
-    },
-    {
-        id: '7',
-        label: 'Student Internship',
-        email: 'prefect.internship@laverdad.edu.ph',
-        status: 'Available',
-    },
-    {
-        id: '8',
-        label: 'IT Support Services',
-        email: 'prefect.itsupport@laverdad.edu.ph',
-        status: 'Available',
-    },
-    {
-        id: '9',
-        label: 'Student Organizations',
-        email: 'prefect.organizations@laverdad.edu.ph',
-        status: 'Available',
-    },
-    {
-        id: '10',
-        label: 'Student Publications',
-        email: 'prefect.publications@laverdad.edu.ph',
-        status: 'Available',
-    },
-];
+// const OFFICES_DATA = [
+//     {
+//         id: '1',
+//         label: 'Prefect and Assistant Prefect',
+//         email: 'prefect@laverdad.edu.ph',
+//         status: 'Available',
+//     },
+//     {
+//         id: '2',
+//         label: 'Guidance',
+//         email: 'prefect.guidance@laverdad.edu.ph',
+//         status: 'Available',
+//     },
+//     {
+//         id: '3',
+//         label: 'Medical Clinic',
+//         email: 'prefect.medical@laverdad.edu.ph',
+//         status: 'Available',
+//     },
+//     {
+//         id: '4',
+//         label: 'Sports Development and Management',
+//         email: 'prefect.sports@laverdad.edu.ph',
+//         status: 'Unavailable',
+//     },
+//     {
+//         id: '5',
+//         label: 'Student Assistance and Experiential Learning',
+//         email: 'prefect.studentassist@laverdad.edu.ph',
+//         status: 'Available',
+//     },
+//     {
+//         id: '6',
+//         label: 'Student Discipline',
+//         email: 'prefect.discipline@laverdad.edu.ph',
+//         status: 'Available',
+//     },
+//     {
+//         id: '7',
+//         label: 'Student Internship',
+//         email: 'prefect.internship@laverdad.edu.ph',
+//         status: 'Available',
+//     },
+//     {
+//         id: '8',
+//         label: 'IT Support Services',
+//         email: 'prefect.itsupport@laverdad.edu.ph',
+//         status: 'Available',
+//     },
+//     {
+//         id: '9',
+//         label: 'Student Organizations',
+//         email: 'prefect.organizations@laverdad.edu.ph',
+//         status: 'Available',
+//     },
+//     {
+//         id: '10',
+//         label: 'Student Publications',
+//         email: 'prefect.publications@laverdad.edu.ph',
+//         status: 'Available',
+//     },
+// ];
 
 export default function AdminOfficesPage() {
     const insets = useSafeAreaInsets();
-    const [offices, setOffices] = useState(OFFICES_DATA);
+    // const [offices, setOffices] = useState(OFFICES_DATA);
+
+    //TODO: use this 
+    const { offices, loading, error, refetch } = useAdminOffices()
+
+    const { createOffice, isCreating } = useCreateOffice(() => {
+        refetch(); // Automatically refresh list on success
+        setShowAddModal(false);
+        setOfficeName('');
+        setOfficeEmail('');
+    });
+
+    const { updateOffice, isUpdating } = useUpdateOffice(() => {
+        refetch(); // Refresh the list
+        setShowEditModal(false);
+        setSelectedOfficeForEdit(null);
+    });
+
+    const { deleteOffice, isDeleting} = useDeleteOffice(() => {
+        refetch()
+    })
+
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [officeName, setOfficeName] = useState('');
     const [officeEmail, setOfficeEmail] = useState('');
     const [selectedOfficeForEdit, setSelectedOfficeForEdit] = useState<any>(null);
+
     const [editOfficeName, setEditOfficeName] = useState('');
     const [editOfficeEmail, setEditOfficeEmail] = useState('');
 
     const availableCount = offices.filter((o) => o.status === 'Available').length;
 
-    const handleAddOffice = () => {
+    const handleAddOffice = async () => {
         if (!officeName.trim() || !officeEmail.trim()) {
             Alert.alert('Error', 'Please fill in office name and email');
             return;
         }
 
-        const newOffice = {
-            id: String(Math.random()),
-            label: officeName,
-            email: officeEmail,
-            status: 'Available',
-        };
+        const result = await createOffice(officeName, officeEmail)
 
-        setOffices([...offices, newOffice]);
-        setOfficeName('');
-        setOfficeEmail('');
-        setShowAddModal(false);
-        Alert.alert('Success', 'Office added successfully');
+        if (result?.success) {
+            Alert.alert('Success', 'Office created successfully')
+            setShowAddModal(false)
+        } else if (result?.error) {
+            Alert.alert('Error', result.error)
+        }
     };
 
     const handleEdit = (id: string) => {
         const office = offices.find((o) => o.id === id);
         if (office) {
             setSelectedOfficeForEdit(office);
-            setEditOfficeName(office.label);
-            setEditOfficeEmail(office.email);
+            setEditOfficeName(office.office_name    );
+            setEditOfficeEmail(office.contact_email);
             setShowEditModal(true);
         }
     };
 
-    const handleSaveEdit = () => {
-        if (!editOfficeName.trim() || !editOfficeEmail.trim()) {
-            Alert.alert('Error', 'Please fill in office name and email');
+    const handleSaveEdit = async () => {
+        const updates: any = {};
+            
+        if (editOfficeName && editOfficeName.trim() !== selectedOfficeForEdit.label) {
+            updates.office_name = editOfficeName.trim();
+        }
+        
+        if (editOfficeEmail && editOfficeEmail.trim() !== selectedOfficeForEdit.email) {
+            updates.contact_email = editOfficeEmail.trim();
+        }
+        if (Object.keys(updates).length === 0) {
+            Alert.alert('No Changes', 'You haven\'t changed any details.');
             return;
         }
 
-        setOffices(
-            offices.map((o) =>
-                o.id === selectedOfficeForEdit.id
-                    ? { ...o, label: editOfficeName, email: editOfficeEmail }
-                    : o
-            )
-        );
-        setShowEditModal(false);
-        setSelectedOfficeForEdit(null);
-        setEditOfficeName('');
-        setEditOfficeEmail('');
-        Alert.alert('Success', 'Office updated successfully');
+        const result = await updateOffice(selectedOfficeForEdit.id, updates);
+        
+        if (result?.success) {
+            Alert.alert('Success', 'Office updated successfully');
+            setShowEditModal(false); 
+        } else if (result?.error) {
+            Alert.alert('Update Failed', result.error);
+        }
     };
 
     const handleDelete = (id: string) => {
@@ -135,8 +159,13 @@ export default function AdminOfficesPage() {
             {
                 text: 'Delete',
                 style: 'destructive',
-                onPress: () => {
-                    setOffices(offices.filter((o) => o.id !== id));
+                onPress: async () => {
+                    const result = await deleteOffice(id)
+                    if (!result?.success && result?.error) {
+                        Alert.alert('Error', result.error || 'Server Error, Please try again')
+                    } else {
+                        Alert.alert('Deleted', 'Office has been removed')
+                    }
                 },
             },
         ]);
@@ -190,10 +219,10 @@ export default function AdminOfficesPage() {
                                             </View>
                                             <View className="flex-1">
                                                 <Text className="text-[#1C274C] text-[15px] font-extrabold mb-1">
-                                                    {office.label}
+                                                    {office.office_name}
                                                 </Text>
                                                 <Text className="text-gray-500 text-[12px] font-semibold mb-2">
-                                                    {office.email}
+                                                    {office.contact_email}
                                                 </Text>
                                                 <View
                                                     className="self-start rounded-full px-3 py-1"
@@ -303,6 +332,7 @@ export default function AdminOfficesPage() {
                         <View className="flex-row gap-3">
                             <TouchableOpacity
                                 onPress={() => setShowAddModal(false)}
+                                disabled={isCreating}
                                 className="flex-1 border border-gray-300 rounded-[12px] py-3.5 items-center"
                                 activeOpacity={0.7}
                             >
@@ -313,7 +343,7 @@ export default function AdminOfficesPage() {
                                 className="flex-1 bg-[#1C274C] rounded-[12px] py-3.5 items-center"
                                 activeOpacity={0.8}
                             >
-                                <Text className="text-white font-bold text-[15px]">Add Office</Text>
+                                <Text className="text-white font-bold text-[15px]">{isCreating ? 'Creating...' : 'Add Office'}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -380,10 +410,11 @@ export default function AdminOfficesPage() {
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={handleSaveEdit}
+                                disabled={isUpdating}
                                 className="flex-1 bg-[#1C274C] rounded-[12px] py-3.5 items-center"
                                 activeOpacity={0.8}
                             >
-                                <Text className="text-white font-bold text-[15px]">Save Changes</Text>
+                                <Text className="text-white font-bold text-[15px]">{isUpdating ? 'Saving...' : 'Save Changes'}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
