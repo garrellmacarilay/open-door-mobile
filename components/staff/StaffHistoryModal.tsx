@@ -100,6 +100,7 @@ export default function StaffHistoryModal({ visible, appointment, onClose, onRef
     const statusStyle = getStatusStyle(appointment.details.status);
     const status = appointment.details.status.toLowerCase();
     const isPending = status === 'pending';
+    const isApproved = status === 'approved';
     const isCompleted = status === 'completed';
 
     const handleAction = async (newStatus: 'approved' | 'declined', reason?: string) => {
@@ -243,7 +244,7 @@ export default function StaffHistoryModal({ visible, appointment, onClose, onRef
                                 </View>
                             )}
 
-                            {isCompleted && (
+                            {/* {isCompleted && (
                                 <View>
                                     <View className="bg-[#F0FDF4] rounded-[20px] p-5 flex-row items-center gap-4 mb-4 border border-[#BBF7D0]">
                                         <Ionicons name="information-circle-outline" size={26} color="#166534" />
@@ -261,7 +262,7 @@ export default function StaffHistoryModal({ visible, appointment, onClose, onRef
                                         <Text className="text-white font-bold text-[16px]">Leave Required Feedback</Text>
                                     </TouchableOpacity>
                                 </View>
-                            )}
+                            )} */}
 
                             {/* approved / declined → no footer actions */}
                         </ScrollView>
