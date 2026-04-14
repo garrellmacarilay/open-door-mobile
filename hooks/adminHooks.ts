@@ -106,3 +106,138 @@ export const useAdminAppointments = () => {
     onRefresh
   };
 };
+
+export interface Office {
+  id: string;
+  office_name: string;
+  contact_email: string;
+  status: 'Available' | 'Unavailable'
+}
+
+export const useAdminOffices = () => {
+  const [offices, setOffices] = useState<Office[]>([])
+  const [loading, setLoading] = useState(true)
+  const[error, setError] = useState(null)
+
+  const fetchOffices = async () => {
+    try {
+      setLoading(true)
+      const res = await api.get('/admin/offices')
+
+      const transformed = (res.data.offices || []).map((o: any) => ({
+        id: String(o.id),
+        office_name: o.office_name,
+        contact_email: o.contact_email,
+        status: o.status === 'active' ? 'Available' : 'Unavailable'
+      }))
+
+      setOffices(transformed);
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to fetch offices");
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchOffices()
+  }, [])
+
+  return { offices, loading, error, refetch: fetchOffices}
+}
+
+export const useCreateOffice = (onSuccess?: () => void) => {
+  const [isCreating, setIsCreating] = useState(false)
+  const [createError, setCreateError] = useState<string | null>(null);
+
+  const createOffice = async (officeName: string, email: string) => {
+    setIsCreating(true);
+    setCreateError(null);
+
+    try {
+      const res = await api.post('/admin/office/create', {
+        office_name: officeName,
+        contact_email: email,
+        status: 'active'
+      })
+
+      if (res.data.success) {
+        if (onSuccess) onSuccess();
+        return { success: true }
+      }
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Failed to create office";
+      setCreateError(msg);
+
+      return { success: false, error: msg };
+
+    } finally {
+      setIsCreating(false);
+    }
+  }
+
+  return { createOffice, isCreating, createError };
+}
+
+export const useUpdateOffice = (onSuccess?: () => void) => {
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const updateOffice = async (id: string, data: {
+      office_name?: string;
+      contact_email?: string;
+      status?: 'Available' | 'Unavailable';
+  }) => {
+      setIsUpdating(true);
+
+      try {
+          const payload: any = {};
+          if (data.office_name) payload.office_name = data.office_name;
+          if (data.contact_email) payload.contact_email = data.contact_email;
+          if (data.status) {
+              payload.status = data.status === 'Available' ? 'active' : 'inactive';
+          }
+
+          const response = await api.patch(`/admin/office/update/${id}`, payload);
+
+          if (response.data.success) {
+              if (onSuccess) onSuccess();
+              return { success: true };
+          }
+      } catch (err: any) {
+          return { 
+              success: false, 
+              error: err.response?.data?.message || "Update failed" 
+          };
+      } finally {
+          setIsUpdating(false);
+      }
+  };
+
+  return { updateOffice, isUpdating };
+};
+
+export const useDeleteOffice = (onSuccess: () => void) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const deleteOffice = async (id: string) => {
+    setIsDeleting(true);
+
+    try {
+      const res = await api.delete(`/admin/office/delete/${id}`);
+
+      if (res.data.success) {
+        if (onSuccess) onSuccess()
+          return { success: true }
+      }
+
+    } catch (err: any) {
+      return {
+        success: false,
+        error: err.response?.data?.message || "Failed to delete office"
+      }
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+  return { deleteOffice, isDeleting }; 
+}
