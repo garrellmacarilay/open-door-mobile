@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { Camera, EyeOff, Eye, LogOut, Mail, User, Pencil, KeyRound, } from 'lucide-react-native';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Alert,
     Image,
@@ -12,14 +12,15 @@ import {
     TextInput,
     TouchableOpacity,
     View,
-    Keyboard
+    Keyboard,
+    Switch
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import LogoutConfirmationModal from '@/components/common/LogoutConfirmationModal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLogout } from '@/hooks/authHooks';
 import { useProfile } from '@/hooks/globalHooks';
-
+import { useOfficeUpdate } from '@/hooks/staffHooks';
 
 
 export default function StaffSettingsPage() {
@@ -53,8 +54,14 @@ export default function StaffSettingsPage() {
         setPasswordConfirmation, 
         handleSubmit 
     } = useProfile();
+
+    
     
     const { handleLogout: executeLogout, loading: isLoggingOut } = useLogout();
+
+    const officeId = (user as any)?.staff?.office_id;
+
+    const { statusShow, isAvailable, toggleStatus, isLoading } = useOfficeUpdate(officeId);
 
     const handleImagePicker = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -229,7 +236,7 @@ export default function StaffSettingsPage() {
                                                 className="flex-1 text-[#1C274C] font-bold text-[18px] tracking-widest pt-1"
                                             />
                                             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                                                {showConfirm ? <Eye size={18} color="#6B7280" /> : <EyeOff size={18} color="#6B7280" />}
+                                                {showPassword ? <Eye size={18} color="#6B7280" /> : <EyeOff size={18} color="#6B7280" />}
                                             </TouchableOpacity>
                                         </View>
                                     </View>
@@ -260,6 +267,39 @@ export default function StaffSettingsPage() {
                         className="px-6 pt-8 mb-20 flex-col gap-y-4"
                         style={{ paddingBottom: Math.max(insets.bottom + 36, 72) }}
                     >
+                        {!isEditing && (
+                            <View
+                                className="w-full rounded-[24px] px-5 py-5 border border-[#DADCE0] bg-white"
+                                style={{
+                                    shadowColor: '#000',
+                                    shadowOffset: { width: 0, height: 2 },
+                                    shadowOpacity: 0.04,
+                                    shadowRadius: 10,
+                                    elevation: 2,
+                                }}
+                            >
+                                <Text className="text-[15px] text-[#9CA3AF] mb-6">Current Status</Text>
+                                    <TouchableOpacity
+                                                onPress={toggleStatus}
+                                                disabled={isLoading || !officeId}
+                                                activeOpacity={0.9}
+                                                className="w-full rounded-full border border-[#D4D4D8] bg-[#faf7f7] px-7 py-2 flex-row items-center justify-between"
+                                            >
+                                                <Text className={`text-[15px] font-extrabold ${isAvailable ? 'text-[#34A853]' : 'text-[#EF4444]'}`}>
+                                                    {statusShow === 'loading' ? 'Checking...' : isAvailable ? 'Available' : 'Unavailable'}
+                                                </Text>
+                                                
+                                                <Switch
+                                                    value={isAvailable}
+                                                    onValueChange={toggleStatus}
+                                                    disabled={isLoading || !officeId}
+                                                    trackColor={{ false: '#D1D5DB', true: '#34A853' }}
+                                                    thumbColor="#FFFFFF"
+                                                />
+                                            </TouchableOpacity>
+                            </View>
+                        )}
+
                         {isEditing && (
                             <TouchableOpacity
                                 onPress={onSavePressed}
@@ -269,19 +309,6 @@ export default function StaffSettingsPage() {
                             >
                                 <Text className="text-white text-center font-bold text-[15px]">
                                     {isSaving ? 'Saving...' : 'Save Changes'}
-                                </Text>
-                            </TouchableOpacity>
-                        )}
-
-                        {!isEditing && (
-                            <TouchableOpacity
-                                onPress={() => setShowLogoutModal(true)}
-                                className="w-full py-4 rounded-full flex-row justify-center items-center bg-[#FEF2F2] border border-[#FECACA]"
-                                activeOpacity={0.8}
-                            >
-                                <LogOut size={18} color="#EF4444" />
-                                <Text className="text-[#EF4444] text-center font-bold text-[15px] ml-2">
-                                    Logout
                                 </Text>
                             </TouchableOpacity>
                         )}

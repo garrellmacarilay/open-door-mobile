@@ -221,7 +221,6 @@ export default function BookConsultationModal({
                 </TouchableOpacity>
             </Modal>
 
-            {/* 🚀 FIXED: Added Missing Picker Modals */}
             <DatePickerModal 
                 visible={showDatePicker}
                 onClose={() => setShowDatePicker(false)}

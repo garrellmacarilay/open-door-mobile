@@ -257,7 +257,7 @@ export function useUpcomingAppointments(office: string, status: string, month?: 
     //filter by status
     if (status) {
       if (status === 'all') {
-        const allowed = ['pending', 'approved', 'completed', 'declined']
+        const allowed = ['pending', 'approved', 'declined']
         list = list.filter((apt: any) => {
           const aptStatus = (apt.details?.status || apt.status)?.toLowerCase();
           return allowed.includes(aptStatus);

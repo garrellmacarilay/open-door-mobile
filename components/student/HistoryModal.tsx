@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, ScrollView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import EvaluationModal from './EvaluationModal';
 import { BookingHistory } from '@/hooks/studentHooks';
+import RescheduleModal from './RescheduleModal';
+import api from '@/utils/api';
 
 interface HistoryModalProps {
     visible: boolean;
@@ -12,6 +14,7 @@ interface HistoryModalProps {
 
 export default function HistoryModal({ visible, appointment, onClose }: HistoryModalProps) {
     const [showEvaluation, setShowEvaluation] = useState(false);
+    const [showReschedule, setShowReschedule] = useState(false);
 
     if (!appointment) return null;
 
@@ -27,6 +30,38 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
 
     const statusStyle = getStatusStyle(appointment.status);
     const isCompleted = appointment.status.toLowerCase() === 'completed';
+    const isApproved = appointment.status.toLowerCase() === 'approved';
+    const isDeclined = appointment.status.toLowerCase() === 'declined';
+     const isPending = appointment.status.toLowerCase() === 'pending';
+    const alreadyHasFeedback = appointment.hasFeedback;
+
+    const handleCancel = () => {
+        Alert.alert(
+            "Cancel Consultation",
+            "Are you sure you want to cancel this booking? This action cannot be undone.",
+            [
+                { text: "No, Keep it", style: "cancel" },
+                { 
+                    text: "Yes, Cancel", 
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            // Assuming your api instance is accessible
+                            const res = await api.patch(`/cancel/booking/${appointment.id}`);
+                            
+                            if (res.data.success) {
+                                Alert.alert("Success", "Booking has been cancelled.");
+                                onClose(); 
+                            }
+                        } catch (error: any) {
+                            const msg = error.response?.data?.message || "Failed to cancel";
+                            Alert.alert("Error", msg);
+                        }
+                    }
+                }
+            ]
+        );
+    };
 
     return (
         <>
@@ -121,31 +156,58 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
 
                             {/* Footer Actions */}
                             {isCompleted ? (
-                                <View>
-                                    <View className="bg-[#EFF6FF] rounded-[20px] p-5 flex-row items-center gap-4 mb-4 border border-[#DBEAFE]">
-                                        <Ionicons name="information-circle-outline" size={26} color="#1E3A8A" />
-                                        <View className="flex-1">
-                                            <Text className="text-[#1E3A8A] font-bold text-[14px]">Evaluation is Mandatory</Text>
-                                            <Text className="text-[#1E3A8A] font-bold text-[14px]">for Completed Services.</Text>
+                                alreadyHasFeedback ? (
+                                    /* SHOW THIS IF ALREADY SUBMITTED */
+                                    <View className="bg-green-50 rounded-[20px] p-5 border border-green-100">
+                                        <View className="flex-row items-center gap-3 mb-2">
+                                            <Ionicons name="checkmark-circle" size={24} color="#16A34A" />
+                                            <Text className="text-[#16A34A] font-bold text-[16px]">Feedback Submitted</Text>
                                         </View>
+                                        <View className="flex-row items-center gap-1 mb-2">
+                                            {[1, 2, 3, 4, 5].map((s) => (
+                                                <Ionicons key={s} name="star" size={14} color={s <= (appointment.rating ?? 0) ? "#FBBF24" : "#D1D5DB"} />
+                                            ))}
+                                        </View>
+                                        <Text className="text-gray-500 italic text-[13px]">"{appointment.comment}"</Text>
                                     </View>
-                                    <TouchableOpacity
-                                        className="bg-[#0066FF] rounded-full py-4 flex-row items-center justify-center gap-2"
-                                        activeOpacity={0.8}
-                                        onPress={() => setShowEvaluation(true)}
-                                    >
-                                        <Ionicons name="chatbubble-ellipses-outline" size={20} color="white" />
-                                        <Text className="text-white font-bold text-[16px]">Leave Required Feedback</Text>
-                                    </TouchableOpacity>
-                                </View>
+                                ) : (
+                                    <View>
+                                        <View className="bg-[#EFF6FF] rounded-[20px] p-5 flex-row items-center gap-4 mb-4 border border-[#DBEAFE]">
+                                            <Ionicons name="information-circle-outline" size={26} color="#1E3A8A" />
+                                            <View className="flex-1">
+                                                <Text className="text-[#1E3A8A] font-bold text-[14px]">Evaluation is Mandatory</Text>
+                                                <Text className="text-[#1E3A8A] font-bold text-[14px]">for Completed Services.</Text>
+                                            </View>
+                                        </View>
+                                        <TouchableOpacity
+                                            className="bg-[#0066FF] rounded-full py-4 flex-row items-center justify-center gap-2"
+                                            activeOpacity={0.8}
+                                            onPress={() => setShowEvaluation(true)}
+                                        >
+                                            <Ionicons name="chatbubble-ellipses-outline" size={20} color="white" />
+                                            <Text className="text-white font-bold text-[16px]">Leave Required Feedback</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                )
                             ) : (
-                                <View className="gap-4">
-                                    <View className="bg-[#F9FAFB] rounded-full py-4 flex-row items-center justify-center border border-gray-100">
+                                <View className="gap-3">
+                                    <View className="bg-[#F3F4F6] rounded-full py-3.5 flex-row items-center justify-center border border-gray-200">
                                         <Text className="text-[#D1D5DB] font-bold text-[14px]">Feedback Available Upon Completion</Text>
                                     </View>
-                                    <TouchableOpacity className="bg-[#FEF2F2] rounded-full py-4 flex-row items-center justify-center border border-[#FECACA]" activeOpacity={0.7}>
-                                        <Text className="text-[#EF4444] font-bold text-[15px]">Cancel Consultation</Text>
-                                    </TouchableOpacity>
+                                        <TouchableOpacity className="bg-[#FEF2F2] rounded-full py-4 flex-row items-center justify-center border border-[#FECACA]" activeOpacity={0.7} onPress={handleCancel}>
+                                            <Text className="text-[#EF4444] font-bold text-[15px]">Cancel Consultation</Text>
+                                        </TouchableOpacity>
+                                    {(isApproved || isDeclined) && (
+                                        <TouchableOpacity
+                                            className="bg-[#16264D] rounded-full py-3.5 flex-row items-center justify-center gap-2"
+                                            onPress={() => setShowReschedule(true)} 
+                                            activeOpacity={0.8}
+                                        >
+                                            <Ionicons name="refresh" size={16} color="white" />
+                                            <Text className="text-white font-bold text-[16px]">Reschedule</Text>
+                                        </TouchableOpacity>
+                                        
+                                    )}
                                 </View>
                             )}
                         </ScrollView>
@@ -153,12 +215,23 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
                 </View>
             </Modal>
 
-            {/* Evaluation Modal - opens on top */}
             <EvaluationModal
                 visible={showEvaluation}
                 appointmentTitle={appointment?.office_name}
+                bookingId={appointment?.id}
+                studentId={appointment?.student_id}
+                officeId={appointment?.office_id}
                 onClose={() => setShowEvaluation(false)}
             />
+
+            <RescheduleModal 
+                visible={showReschedule}
+                appointment={appointment}
+                onClose={() => setShowReschedule(false)}
+                onRefresh={() => { 
+                    onClose();    // Close the history detail modal
+                }}
+        />
         </>
     );
 }

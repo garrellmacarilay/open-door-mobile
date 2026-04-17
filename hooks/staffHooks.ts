@@ -1,6 +1,6 @@
-import api from "@/utils/api";
-import React, { useState, useEffect, useCallback, useMemo} from "react";
 import { useAuth } from '@/context/AuthContext';
+import api from "@/utils/api";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert } from 'react-native';
 
 
@@ -87,3 +87,78 @@ export function useOfficeUpcomingAppointments(month?: number, year?: number) {
         loadMore: () => !loading && hasMore && fetchAppointments(true)
     }
 } 
+
+export const useOfficeUpdate = (officeId: string | number | undefined) => {
+    const [statusShow, setStatusShow] = useState<'active' | 'inactive' | 'loading'>('loading');
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const fetchStatus = useCallback(async () => {
+        if (!officeId) {
+            setStatusShow('loading');
+            return;
+        }
+        try {
+            setError(null);
+            const res = await api.get(`/office/${officeId}`);
+            if (res.data.success) {
+                setStatusShow(res.data.data.status);
+            } else {
+                const errMsg = res.data.message || 'Failed to fetch status';
+                setError(errMsg);
+                console.error("Failed to fetch office status:", errMsg);
+            }
+        } catch (err) {
+            const errMsg = err instanceof Error ? err.message : 'Network error fetching status';
+            setError(errMsg);
+            console.error("Failed to fetch office status", err);
+        }
+    }, [officeId]);
+
+    // Fetch the status when officeId is available
+    useEffect(() => {
+        fetchStatus();
+    }, [fetchStatus]);
+
+    const toggleStatus = useCallback(async () => {
+        if (!officeId || statusShow === 'loading' || isLoading) return;
+
+        const previousStatus = statusShow;
+        const newStatus = statusShow === 'active' ? 'inactive' : 'active';
+
+        // Optimistic Update
+        setStatusShow(newStatus);
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            const res = await api.put(`/office/update-status/${officeId}`, {
+                status: newStatus
+            });
+
+            if (!res.data.success) {
+                const errMsg = res.data.message || 'Failed to update status';
+                throw new Error(errMsg);
+            }
+
+            // Re-fetch to confirm the change
+            await fetchStatus();
+        } catch (err) {
+            setStatusShow(previousStatus); // Revert on error
+            const errMsg = err instanceof Error ? err.message : 'Could not update status';
+            setError(errMsg);
+            Alert.alert("Error", errMsg);
+            console.error("Status toggle error:", err);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [officeId, statusShow, isLoading, fetchStatus]);
+
+    return { 
+        statusShow, 
+        isAvailable: statusShow === 'active', 
+        toggleStatus, 
+        isLoading: isLoading || statusShow === 'loading',
+        error
+    };
+};

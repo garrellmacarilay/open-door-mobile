@@ -1,7 +1,7 @@
 import api from "@/utils/api";
-import React, { useState, useEffect, useCallback, useMemo} from "react";
-import { useAuth } from '@/context/AuthContext';
-import { Alert } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
+import { useCallback, useEffect, useState } from "react";
+import { Linking } from 'react-native';
 
 export interface Appointment {
   id: number;
@@ -240,4 +240,147 @@ export const useDeleteOffice = (onSuccess: () => void) => {
     }
   }
   return { deleteOffice, isDeleting }; 
+}
+
+export const useGenerateReport = () => {
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [error, setError] = useState<string>('')
+
+  const generateReport = useCallback(async (): Promise<void> => {
+    setIsGenerating(true)
+    setError('')
+    try {
+      // Retrieve token from SecureStore
+      const token = await SecureStore.getItemAsync('userToken')
+      if (!token) {
+        setError('Authentication required. Please log in.')
+        return
+      }
+
+      const apiUrl = process.env.EXPO_PUBLIC_API_URL
+      // Pass token as query param for Expo Go (workaround)
+      const reportUrl = `${apiUrl}/admin/analytics/generate-report?token=${encodeURIComponent(token)}`
+
+      // Open the PDF URL with token in query string
+      const canOpen = await Linking.canOpenURL(reportUrl)
+      if (canOpen) {
+        await Linking.openURL(reportUrl)
+      } else {
+        setError('Unable to open PDF')
+      }
+
+    } catch (err: any) {
+      setError('Failed to generate report. Please try again.')
+      console.error('Report generation error:', err)
+    } finally {
+      setIsGenerating(false)
+    }
+  }, [])
+
+  return { generateReport, isGenerating, error}
+} 
+
+export const useConsultationStats = () => {
+    const [stats, setStats] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const fetchStats = useCallback(async () => {
+        try {
+            setLoading(true);
+            const response = await api.get('/admin/analytics/stats');
+          
+            if (response.data?.success) {
+                setStats(response.data.stats);
+            }
+        } catch (err: any) {
+            setError(err.message || 'Failed to fetch statistics');
+            console.error('Stats Error:', err);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchStats();
+    }, [fetchStats]);
+
+    return { stats, loading, error, refresh: fetchStats };
+};
+interface ServiceDistribution {
+  id: number;
+  label: string;
+  count: number;
+  color: string;
+}
+
+export const useServiceDistribution = () => {
+  const [distribution, setDistribution] = useState<ServiceDistribution[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('')
+
+  const COLORS = ['#6366F1', '#06B6D4', '#10B981', '#A855F7', '#F59E0B', '#EC4899', '#8B5CF6'];
+
+  const fetchDistribution = async () => {
+    try {
+      const res = await api.get('/admin/analytics/distribution')
+
+      if (res.data.success) {
+        const formatted: ServiceDistribution[] = res.data.distribution.map((item: any, index: number) => ({
+          id: index,
+          label: item.office,
+          count: Number(item.count),
+          color: COLORS[index % COLORS.length]
+        }));
+        setDistribution(formatted)
+      }
+    } catch(err: any) {
+      setError('Server Error, try again later')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { fetchDistribution(); }, []);
+
+  return { distribution, loading, error };
+}
+
+export interface Feedback {
+  id: number;
+  office: string,
+  rating: number,
+  reviews: number,
+  feedback: []
+}
+
+export const useOfficesFeedback = () => {
+  const [officeFeedback, setOfficeFeedback] = useState<Feedback[]>([])
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>('')
+
+  const fetchFeedback = async () => {
+    setLoading(true)
+
+    try {
+      const res = await api.get('/admin/analytics/office-feedback')
+
+      if (res.data.success) {
+        const formattedData = res.data.feedback.map((item: any) => ({
+          ...item,
+          rating: Number(item.rating),
+          reviews: Number(item.reviews)
+        }))
+        setOfficeFeedback(formattedData)
+      }
+    } catch (err: any) {
+      setError('Server error, please try again later')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { fetchFeedback(); }, []);
+
+  return { officeFeedback, loading, error, refresh: fetchFeedback };
 }

@@ -26,9 +26,11 @@ export default function CalendarWidget({
 }: CalendarWidgetProps) {
     const [viewDate, setViewDate] = useState(initialDate);
     const [selectedDate, setSelectedDate] = useState(new Date());
+    const today = new Date();
 
     const monthName = viewDate.toLocaleDateString('en-US', { month: 'long' });
     const yearString = viewDate.toLocaleDateString('en-US', { year: 'numeric' });
+    const usesSplitHeaderLayout = !onAddEvent;
 
     // Calendar Logic
     const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
@@ -107,6 +109,16 @@ export default function CalendarWidget({
             const cellDate = new Date(currentYear, currentMonth, dayNumber);
             const dateKey = `${currentYear}-${currentMonth}-${dayNumber}`;
             const dayEvents = eventsByDate[dateKey] || [];
+            
+            const isToday =
+                today.getFullYear() === currentYear &&
+                today.getMonth() === currentMonth &&
+                today.getDate() === dayNumber;
+            
+            const isSelected =
+                selectedDate.getFullYear() === currentYear &&
+                selectedDate.getMonth() === currentMonth &&
+                selectedDate.getDate() === dayNumber;
 
             days.push(
                 <TouchableOpacity
@@ -118,9 +130,14 @@ export default function CalendarWidget({
                     }}
                     activeOpacity={0.6}
                 >
-                    <Text className={`text-[14px] font-bold ${isWeekend ? 'text-[#3B82F6]' : 'text-[#1C274C]'}`}>
-                        {dayNumber}
-                    </Text>
+                    <View
+                        className={`w-9 h-9 rounded-full items-center justify-center ${isSelected ? 'bg-[#18233D]' : ''}`}
+                        style={isToday && !isSelected ? { borderWidth: 2, borderColor: '#3B82F6' } : undefined}
+                    >
+                        <Text className={`text-[14px] font-bold ${isSelected ? 'text-white' : isWeekend ? 'text-[#3B82F6]' : 'text-[#1C274C]'}`}>
+                            {dayNumber}
+                        </Text>
+                    </View>
 
                     {/* Status indicator dots */}
                     {dayEvents.length > 0 && (
@@ -155,42 +172,76 @@ export default function CalendarWidget({
         }}>
             {/* Header (Dark Blue) */}
             <View className="bg-[#18233D] rounded-t-[24px] px-6 py-5">
-                <View className="flex-row items-center justify-between">
-                    <View className="flex-1 items-center">
-                        <Text className="text-[20px] font-bold text-white tracking-wide">
-                            {monthName}
-                        </Text>
-                        <Text className="text-[13px] font-semibold text-[#3B82F6] mt-0.5">
-                            {yearString}
-                        </Text>
-                    </View>
+                {usesSplitHeaderLayout ? (
+                    <View className="relative h-14 items-center justify-center">
 
-                    <View className='flex-row items-center gap-2'>
-                        <TouchableOpacity 
-                            onPress={() => navigateMonth('prev')} 
-                            className="w-9 h-9 rounded-lg bg-white items-center justify-center" 
-                            activeOpacity={0.7}
-                        >
-                            <ChevronLeft size={18} color="#18233D" strokeWidth={2.5} />
-                        </TouchableOpacity>
-                        <TouchableOpacity 
-                            onPress={() => navigateMonth('next')} 
-                            className="w-9 h-9 rounded-lg bg-white items-center justify-center" 
-                            activeOpacity={0.7}
-                        >
-                            <ChevronRight size={18} color="#18233D" strokeWidth={2.5} />
-                        </TouchableOpacity>
-                        {canAddEvent && (
+                        <View className="absolute left-11 top-0 bottom-0 justify-center">
                             <TouchableOpacity
-                                onPress={onAddEvent}
+                                onPress={() => navigateMonth('prev')}
                                 activeOpacity={0.7}
                                 className="w-9 h-9 rounded-lg bg-white items-center justify-center"
                             >
-                                <Plus size={18} color="#18233D" strokeWidth={2.5} />
+                                <ChevronLeft size={18} color="#18233D" strokeWidth={2.5} />
                             </TouchableOpacity>
-                        )}
+                        </View>
+
+                        <View className="items-center px-12">
+                            <Text className="text-[20px] font-bold text-white tracking-wide">
+                                {monthName}
+                            </Text>
+                            <Text className="text-[13px] font-semibold text-[#3B82F6] mt-0.5">
+                                {yearString}
+                            </Text>
+                        </View>
+
+                        <View className="absolute right-11 top-0 bottom-0 justify-center">
+                            <TouchableOpacity
+                                onPress={() => navigateMonth('next')}
+                                activeOpacity={0.7}
+                                className="w-9 h-9 rounded-lg bg-white items-center justify-center"
+                            >
+                                <ChevronRight size={18} color="#18233D" strokeWidth={2.5} />
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                </View>
+                ) : (
+                    <View className="flex-row items-center justify-between">
+                        <View className="flex-1 items-center">
+                            <Text className="text-[20px] font-bold text-white tracking-wide">
+                                {monthName}
+                            </Text>
+                            <Text className="text-[13px] font-semibold text-[#3B82F6] mt-0.5">
+                                {yearString}
+                            </Text>
+                        </View>
+
+                        <View className="flex-row items-center gap-2">
+                            <TouchableOpacity
+                                onPress={() => navigateMonth('prev')}
+                                activeOpacity={0.7}
+                                className="w-9 h-9 rounded-lg bg-white items-center justify-center"
+                            >
+                                <ChevronLeft size={18} color="#18233D" strokeWidth={2.5} />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => navigateMonth('next')}
+                                activeOpacity={0.7}
+                                className="w-9 h-9 rounded-lg bg-white items-center justify-center"
+                            >
+                                <ChevronRight size={18} color="#18233D" strokeWidth={2.5} />
+                            </TouchableOpacity>
+                            {onAddEvent && (
+                                <TouchableOpacity
+                                    onPress={onAddEvent}
+                                    activeOpacity={0.7}
+                                    className="w-9 h-9 rounded-lg bg-white items-center justify-center"
+                                >
+                                    <Plus size={18} color="#18233D" strokeWidth={2.5} />
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    </View>
+                )}
             </View>
 
             {/* Calendar Body */}
@@ -231,6 +282,10 @@ export default function CalendarWidget({
                     <View className="flex-row items-center gap-1">
                         <View className="w-2 h-2 rounded-full bg-[#3B82F6]" />
                         <Text className="text-[10px] font-bold text-[#6B7280]">Events</Text>
+                    </View>
+                    <View className="flex-row items-center gap-1">
+                        <View className="w-3 h-3 rounded-full border-2 border-[#3B82F6]" />
+                        <Text className="text-[10px] font-bold text-[#6B7280]">Today</Text>
                     </View>
                 </View>
             </View>

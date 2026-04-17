@@ -81,7 +81,7 @@ const api = {
   // These helper methods just wrap the main request function
   get: (endpoint: string, options: any = {}) => api.request('GET', endpoint, null, options),
   post: (endpoint: string, data: any, options: any = {}) => api.request('POST', endpoint, data, options),
-  patch: (endpoint: string, data: any, options: any = {}) => api.request('PATCH', endpoint, data, options),
+  patch: (endpoint: string, data?: any, options: any = {}) => api.request('PATCH', endpoint, data, options),
   put: (endpoint: string, data: any, options: any = {}) => api.request('PUT', endpoint, data, options),
   delete: (endpoint: string, options: any = {}) => api.request('DELETE', endpoint, null, options),
 };

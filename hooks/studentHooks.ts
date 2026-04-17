@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Platform } from "react-native";
+import { Platform, Alert } from "react-native";
 import api from "../utils/api";
 
 export interface BookingForm {
@@ -169,10 +169,67 @@ export function useHistory() {
   return { bookings, fetchHistoryBookings, refreshing, loading, error, setError }
 }
 
-export function useCancel() {
-
+export function useCancelBooking() {
+    
 }
 
-export function useReschedule() {
-    
+export const useReschedule = () => {
+    const [loading, setLoading] = useState(false);
+
+    const rescheduleBooking = async (bookingId: number, dateStr: string, timeStr: string) => {
+        setLoading(true);
+        try {
+            // Convert "04/17/2026" + "10:30 AM" to "2026-04-17T10:30"
+            const [m, d, y] = dateStr.split('/');
+            let [time, modifier] = timeStr.split(' ');
+            let [hours, minutes] = time.split(':');
+
+            if (hours === '12') hours = '00';
+            if (modifier === 'PM') hours = (parseInt(hours, 10) + 12).toString();
+            
+            const formattedDate = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}T${hours.padStart(2, '0')}:${minutes}`;
+
+            const res = await api.patch(`/reschedule/booking/${bookingId}`, {
+                consultation_date: formattedDate,
+            });
+
+            return res.data.success;
+        } catch (error: any) {
+            const msg = error.response?.data?.message || "Reschedule failed";
+            Alert.alert("Error", msg);
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return { rescheduleBooking, loading };
+}
+
+export interface FeedbackPayload {
+    booking_id: number;
+    student_id: number;
+    office_id: number;
+    rating: number;
+    comment: string;
+}
+
+export const useSubmitFeedback = () => {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const submitFeedback = async (payload: FeedbackPayload) => {
+        setIsSubmitting(true);
+
+        try {
+            const res = await api.post('/feedback/store', payload)
+            return { success: true, message: res.data.message };
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || 'Something went wrong';
+            return { success: false, message: errorMessage };
+        } finally {
+            setIsSubmitting(false);
+        }
+    }
+
+    return { submitFeedback, isSubmitting };
 }
