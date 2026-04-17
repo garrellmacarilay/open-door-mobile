@@ -216,7 +216,7 @@ export default function StaffSettingsPage() {
                         {/* Current Status Card */}
                         {!isEditing && (
                             <View
-                                className="w-full rounded-[24px] px-5 py-5 border border-[#DADCE0] bg-[#F3F4F6]"
+                                className="w-full rounded-[24px] px-5 py-5 border border-[#DADCE0] bg-white"
                                 style={{
                                     shadowColor: '#000',
                                     shadowOffset: { width: 0, height: 2 },
@@ -225,14 +225,14 @@ export default function StaffSettingsPage() {
                                     elevation: 2,
                                 }}
                             >
-                                <Text className="text-[31px] font-extrabold text-[#9CA3AF] mb-4">Current Status</Text>
+                                <Text className="text-[15px] text-[#9CA3AF] mb-6">Current Status</Text>
 
                                 <TouchableOpacity
                                     onPress={() => setIsAvailable(!isAvailable)}
                                     activeOpacity={0.9}
-                                    className="w-full rounded-full border border-[#D4D4D8] bg-[#EFEFEF] px-7 py-3 flex-row items-center justify-between"
+                                    className="w-full rounded-full border border-[#D4D4D8] bg-[#faf7f7] px-7 -py-5 flex-row items-center justify-between"
                                 >
-                                    <Text className={`text-[38px] font-extrabold ${isAvailable ? 'text-[#34A853]' : 'text-[#9CA3AF]'}`}>
+                                    <Text className={`text-[15px] font-extrabold ${isAvailable ? 'text-[#34A853]' : 'text-[#c4ccd9]'}`}>
                                         {isAvailable ? 'Available' : 'Unavailable'}
                                     </Text>
                                     <Switch
