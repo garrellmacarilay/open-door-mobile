@@ -191,12 +191,12 @@ export default function AdminAnalyticsPage() {
                                         style={{ backgroundColor: status.backgroundColor }}
                                     >
                                         <Text
-                                            className="text-[14px] font-bold mb-3"
+                                            className="text-[14px] font-bold mb-2"
                                             style={{ color: status.color }}
                                         >
                                             {status.label}
                                         </Text>
-                                        <Text className="text-[#111827] text-[20px] font-extrabold mb-4">
+                                        <Text className="text-[#111827] text-[35px] font-bold mb-4">
                                             {status.count}
                                         </Text>
                                         <View className="h-1.5 bg-white/80 rounded-full overflow-hidden">
@@ -229,7 +229,7 @@ export default function AdminAnalyticsPage() {
                             <View className="w-1 h-7 rounded-full bg-[#E400D9] mt-0.5" />
                             <View>
                                 <Text className="text-[#1F2937] text-[16px] font-extrabold mb-1">
-                                    Common Reasons for Visit
+                                    Offices that are commonly visited
                                 </Text>
                                 <Text className="text-[#7B7280] text-[11px] font-semibold">
                                     Top consultation categories
@@ -278,7 +278,7 @@ export default function AdminAnalyticsPage() {
                         })}
                     </View>
                     {/* Office Feedback */}
-                    <View className="mb-6">
+                    <View className="mb-6 bg-white rounded-[22px] p-5 border border-[#E5E7EB]">
                         <View className="flex-row items-center gap-2 mb-4">
                             <View className="w-1 h-5 bg-[#F59E0B] rounded-full" />
                             <Text className="text-[#1C274C] text-[18px] font-extrabold">
@@ -289,7 +289,7 @@ export default function AdminAnalyticsPage() {
                         {OFFICE_FEEDBACK.map((item) => (
                             <View
                                 key={item.id}
-                                className="bg-white rounded-[16px] p-5 mb-4 border border-gray-100"
+                                className="bg-gray-50 rounded-[16px] p-5 mb-4 border border-gray-100"
                                 style={{
                                     shadowColor: '#000',
                                     shadowOffset: { width: 0, height: 1 },
@@ -320,16 +320,13 @@ export default function AdminAnalyticsPage() {
                                 </Text>
 
                                 {/* Feedback Quotes */}
-                                {item.feedback.map((text, i) => (
-                                    <View
-                                        key={i}
-                                        className="bg-gray-50 border border-gray-100 rounded-[10px] px-4 py-3 mb-2"
-                                    >
-                                        <Text className="text-gray-600 text-[12px] font-medium">
-                                            {text}
+                                
+                                    <View className="bg-white border border-gray-100 rounded-[10px] px-4 py-3 mb-2">
+                                        <Text className="text-gray-600 text-[12px] italic">
+                                            {item.feedback}
                                         </Text>
                                     </View>
-                                ))}
+                                
                             </View>
                         ))}
                     </View>
