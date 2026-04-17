@@ -215,32 +215,35 @@ export default function StaffSettingsPage() {
                     >
                         {/* Current Status Card */}
                         {!isEditing && (
-                            <TouchableOpacity
-                                onPress={() => setIsAvailable(!isAvailable)}
-                                activeOpacity={0.85}
-                                className="w-full bg-white rounded-2xl px-5 py-4 border border-gray-100"
+                            <View
+                                className="w-full rounded-[24px] px-5 py-5 border border-[#DADCE0] bg-[#F3F4F6]"
                                 style={{
                                     shadowColor: '#000',
                                     shadowOffset: { width: 0, height: 2 },
                                     shadowOpacity: 0.04,
-                                    shadowRadius: 8,
+                                    shadowRadius: 10,
                                     elevation: 2,
                                 }}
                             >
-                                <Text className="text-[12px] font-bold text-gray-400 mb-3">Current Status</Text>
-                                <View className="flex-row items-center justify-between">
-                                    <Text className={`text-[16px] font-bold ${isAvailable ? 'text-[#22C55E]' : 'text-gray-400'}`}>
+                                <Text className="text-[31px] font-extrabold text-[#9CA3AF] mb-4">Current Status</Text>
+
+                                <TouchableOpacity
+                                    onPress={() => setIsAvailable(!isAvailable)}
+                                    activeOpacity={0.9}
+                                    className="w-full rounded-full border border-[#D4D4D8] bg-[#EFEFEF] px-7 py-3 flex-row items-center justify-between"
+                                >
+                                    <Text className={`text-[38px] font-extrabold ${isAvailable ? 'text-[#34A853]' : 'text-[#9CA3AF]'}`}>
                                         {isAvailable ? 'Available' : 'Unavailable'}
                                     </Text>
                                     <Switch
                                         value={isAvailable}
                                         onValueChange={setIsAvailable}
-                                        trackColor={{ false: '#E5E7EB', true: '#22C55E' }}
-                                        thumbColor="#fff"
-                                        ios_backgroundColor="#E5E7EB"
+                                        trackColor={{ false: '#D1D5DB', true: '#34A853' }}
+                                        thumbColor="#FFFFFF"
+                                        ios_backgroundColor="#D1D5DB"
                                     />
-                                </View>
-                            </TouchableOpacity>
+                                </TouchableOpacity>
+                            </View>
                         )}
 
                         {isEditing && (
