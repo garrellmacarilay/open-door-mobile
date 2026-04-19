@@ -21,7 +21,7 @@ export interface Appointment {
         reference_code: string;
     }
 }
-export function useOfficeUpcomingAppointments(month?: number, year?: number) {
+export function useOfficeUpcomingAppointments(month?: number, year?: number, status?: string) {
     const { user } = useAuth();
     const [rawAppointments, setRawAppointments] = useState<Appointment[]>([]);
     const [loading, setLoading] = useState(false)
@@ -39,7 +39,8 @@ export function useOfficeUpcomingAppointments(month?: number, year?: number) {
             const params = {
                 page: currPage,
                 month: month,
-                year: year
+                year: year,
+                status: status !== 'all' ? status : undefined,
             }
 
             const res = await api.get('/office/dashboard', {params})
@@ -56,28 +57,43 @@ export function useOfficeUpcomingAppointments(month?: number, year?: number) {
         } finally {
             setLoading(false)
         }
-    }, [user, month, year, page, hasMore, loading])
+    }, [user, month, year, status, page, hasMore, loading])
 
     useEffect(() => {
         setRawAppointments([])
         setPage(1)
         setHasMore(true)
         fetchAppointments(false)
-    }, [month, year])
+    }, [month, year, status])
 
     const filterAppointments = useMemo(() => {
-        let list = [...rawAppointments]
+        // 1. Define what we NEVER want to show
+        const excludedStatuses = ['rescheduled', 'cancelled', 'completed'];
+        
+        let list = rawAppointments.filter((apt: any) => {
+            const aptStatus = (apt.details?.status || apt.status)?.toLowerCase();
+            return !excludedStatuses.includes(aptStatus);
+        });
 
+        // 2. Filter by Date
         if (month && year) {
             list = list.filter((apt: any) => {
                 const [datePart] = apt.start.split(' ');
                 const [y, m] = datePart.split('-').map(Number);
-
                 return m === month && y === year;
-            })
+            });
         }
-        return list
-    }, [rawAppointments, month, year])
+
+        // 3. Filter by specific status (if not 'all')
+        if (status && status !== 'all') {
+            list = list.filter((apt: any) => {
+                const aptStatus = (apt.details?.status || apt.status)?.toLowerCase();
+                return aptStatus === status.toLowerCase();
+            });
+        }
+        
+        return list;
+    }, [rawAppointments, month, year, status]);
 
     return {
         appointments: filterAppointments,
@@ -87,6 +103,124 @@ export function useOfficeUpcomingAppointments(month?: number, year?: number) {
         loadMore: () => !loading && hasMore && fetchAppointments(true)
     }
 } 
+
+export interface History {
+  id: number;
+  title: string;
+  start: string;
+  dateString: string;
+  end: string;
+  color: string;
+  details: {
+    student: string;
+    office: string;
+    staff: string;
+    attachment: string | null;
+    attachment_name: string | null;
+    group_members: any;
+    concern_description: string;
+    status: string;
+    reference_code: string;
+    feedback: {
+      ratings: number | string;
+      comment: string;
+    };
+  };
+}
+
+export function useOfficeHistory(status: string = 'all') {
+  const [appointments, setAppointments] = useState<History[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(1);
+  const [hasMore, setHasMore] = useState<boolean>(false);
+
+  const fetchHistory = useCallback(async (isNextPage = false) => {
+    if (loading || (isNextPage && !hasMore)) return;
+
+    setLoading(true);
+    try {
+      const currentPage = isNextPage ? page + 1 : 1;
+      
+      const response = await api.get('/office/history-mobile', {
+        params: {
+          page: currentPage,
+          status: status,
+        },
+      });
+
+      if (response.data.success) {
+        const newData = response.data.data;
+        
+        setAppointments((prev) => (isNextPage ? [...prev, ...newData] : newData));
+        setPage(response.data.meta.current_page);
+        setHasMore(response.data.meta.has_more);
+      }
+    } catch (error) {
+      console.error('Error fetching office history:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [page, hasMore, loading, status]);
+
+  // Initial load or reset when status changes
+  useEffect(() => {
+    setAppointments([]);
+    setPage(1);
+    setHasMore(true);
+    fetchHistory(false);
+  }, [status]);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchHistory(false);
+  };
+
+  const loadMore = () => {
+    if (hasMore && !loading) {
+      fetchHistory(true);
+    }
+  };
+
+  return {
+    appointments,
+    loading,
+    refreshing,
+    hasMore,
+    onRefresh,
+    loadMore,
+  };
+}
+export function useAppointmentDetail() {
+    const [data, setData] = useState<History | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    const getDetail = useCallback(async (id: number) => {
+        setLoading(true);
+        try {
+            const response = await api.get(`/office/history-mobile/${id}`);
+            if (response.data.success) {
+                setData(response.data.data);
+                return response.data.data; // Return data so the caller can use it immediately
+            }
+        } catch (error) {
+            console.error("Error fetching appointment detail:", error);
+            return null;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const resetDetail = () => setData(null);
+
+    return {
+        appointment: data,
+        loading,
+        getDetail,
+        resetDetail
+    };
+}
 
 export const useOfficeUpdate = (officeId: string | number | undefined) => {
     const [statusShow, setStatusShow] = useState<'active' | 'inactive' | 'loading'>('loading');
