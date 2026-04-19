@@ -5,7 +5,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import EvaluationModal from '../student/EvaluationModal';
 import { Appointment } from '@/hooks/staffHooks';
-import {useUpdateStatus} from '@/hooks/staffAdminHooks';
+import { useUpdateStatus } from '@/hooks/staffAdminHooks';
 
 interface StaffHistoryModalProps {
     visible: boolean;
@@ -83,7 +83,7 @@ export default function StaffHistoryModal({ visible, appointment, onClose, onRef
     const [showEvaluation, setShowEvaluation] = useState(false);
     const [showDeclineModal, setShowDeclineModal] = useState(false);
     const { updateStatus, loading } = useUpdateStatus();
-    const [actionType, setActionType] = useState<'approved' | 'declined' | null>(null);
+    const [actionType, setActionType] = useState<'approved' | 'declined' | 'completed' | null>(null);
 
     if (!appointment) return null;
 
@@ -103,8 +103,9 @@ export default function StaffHistoryModal({ visible, appointment, onClose, onRef
     const isApproved = status === 'approved';
     const isCompleted = status === 'completed';
 
-    const handleAction = async (newStatus: 'approved' | 'declined', reason?: string) => {
-
+    const handleAction = async (newStatus: 'approved' | 'completed' | 'declined', reason?: string) => {
+        setActionType(newStatus);
+        
         const payload = {
             status: newStatus,
             ...(reason ? {declined_reason: reason} : {})
@@ -210,34 +211,55 @@ export default function StaffHistoryModal({ visible, appointment, onClose, onRef
                             {/* Footer Actions */}
                             {isPending && (
                                 <View className="flex-row gap-3">
+                                    {/* Approve Button */}
                                     <TouchableOpacity
                                         activeOpacity={0.8}
-                                        className="flex-1 bg-[#DCFCE7] border border-[#86EFAC] rounded-[14px] py-4 items-center"
-                                        onPress={() => {
-                                            handleAction('approved')
-                                        }}
+                                        className="flex-1 bg-[#4BDB4B] border border-[#4BDB4B] rounded-[14px] py-4 items-center justify-center"
+                                        onPress={() => handleAction('approved')}
                                         disabled={loading}
                                     >
-                                        {loading && actionType === 'approved'? (
-                                            <ActivityIndicator color="#16A34A" />
+                                        {loading && actionType === 'approved' ? (
+                                            <ActivityIndicator size="small" color="#FFFFFF" />
                                         ) : (
-                                            <Text className={`text-[#16A34A] font-bold ${loading && actionType === 'declined' ? 'opacity-50' : ''}`}>
+                                            <Text className={`text-[#FFFFFF] font-bold ${loading ? 'opacity-50' : ''}`}>
                                                 Approve
                                             </Text>
                                         )}
                                     </TouchableOpacity>
 
+                                    {/* Decline Button */}
                                     <TouchableOpacity
                                         activeOpacity={0.8}
-                                        className="flex-1 bg-[#FEE2E2] border border-[#FECACA] rounded-[14px] py-4 items-center"
+                                        className="flex-1 bg-[#F44336] border border-[#F44336] rounded-[14px] py-4 items-center justify-center"
                                         onPress={() => setShowDeclineModal(true)}
                                         disabled={loading}
                                     >
                                         {loading && actionType === 'declined' ? (
-                                            <ActivityIndicator color="#DC2626" />
+                                            <ActivityIndicator size="small" color="#FFFFFF" />
                                         ) : (
-                                            <Text className={`text-[#DC2626] font-bold ${loading && actionType === 'approved' ? 'opacity-50' : ''}`}>
+                                            <Text className={`text-[#FFFFFF] font-bold ${loading ? 'opacity-50' : ''}`}>
                                                 Decline
+                                            </Text>
+                                        )}
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+
+                            {isApproved && (
+                                <View className="mt-4">
+                                    <TouchableOpacity
+                                        activeOpacity={0.8}
+                                        className="w-full bg-[#5059FF] rounded-[14px] h-[56px] items-center justify-center"
+                                        // Ensure you pass 'completed' here
+                                        onPress={() => handleAction('completed')}
+                                        disabled={loading}
+                                    >
+                                        {/* If the hook is loading AND the current action is 'completed' */}
+                                        {loading && actionType === 'completed' ? (
+                                            <ActivityIndicator size="small" color="#FFFFFF" />
+                                        ) : (
+                                            <Text className="text-[#FFFFFF] font-bold">
+                                                Mark as Completed
                                             </Text>
                                         )}
                                     </TouchableOpacity>
@@ -279,11 +301,7 @@ export default function StaffHistoryModal({ visible, appointment, onClose, onRef
                 onCancel={() => setShowDeclineModal(false)}
             />
 
-            <EvaluationModal
-                visible={showEvaluation}
-                appointmentTitle={appointment?.title}
-                onClose={() => setShowEvaluation(false)}
-            />
+
         </>
     );
 }
