@@ -107,6 +107,94 @@ export const useAdminAppointments = () => {
   };
 };
 
+export interface History {
+  id: number;
+  title: string;
+  start: string;
+  dateString: string;
+  end: string;
+  color: string;
+  details: {
+    student: string;
+    office: string;
+    staff: string;
+    attachment: string | null;
+    attachment_name: string | null;
+    group_members: any;
+    concern_description: string;
+    status: string;
+    reference_code: string;
+    feedback: {
+      ratings: number | string;
+      comment: string;
+    };
+  };
+}
+
+export const useAdminHistory = (status: string = 'all') => {
+  const [appointments, setAppointments] = useState<History[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(1);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+
+  const fetchHistory = useCallback(async (pageToFetch: number, isNextPage: boolean) => {
+    if (loading) return;
+
+    setLoading(true);
+    try {
+      const response = await api.get('/admin/history-mobile', {
+        params: {
+          page: pageToFetch,
+          status: status,
+        },
+      });
+
+      if (response.data.success) {
+        const newData = response.data.data;
+        
+        setAppointments((prev) => (isNextPage ? [...prev, ...newData] : newData));
+        setPage(response.data.meta.current_page);
+        setHasMore(response.data.meta.has_more);
+      }
+    } catch (err: any) {
+      if (err.name!== 'AbortError') {
+        console.error('Error fetching office history:', err);
+      }
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [status]);
+
+  useEffect(() => {
+    setPage(1);
+    setHasMore(true);
+    fetchHistory(1, false);
+
+  }, [status, fetchHistory]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setPage(1);
+    fetchHistory(1, false);
+  }, [fetchHistory]);
+
+  const loadMore = useCallback(() => {
+    if (hasMore && !loading) {
+      fetchHistory(page + 1, true);
+    }
+  }, [hasMore, loading, page, fetchHistory]);
+
+  return {
+    appointments,
+    loading,
+    refreshing,
+    onRefresh,
+    loadMore,
+  };
+};
+
 export interface Office {
   id: string;
   office_name: string;

@@ -3,7 +3,8 @@ import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, RefreshContr
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useNotifications, Notification } from '@/hooks/globalHooks';
-import { useOfficeHistory, History, useAppointmentDetail } from '@/hooks/staffHooks';
+import { useOfficeHistory, History } from '@/hooks/staffHooks';
+import { useAppointmentDetail } from '@/hooks/staffAdminHooks';
 import StaffHistoryModal from '@/components/staff/StaffHistoryModal';
 
 export default function StaffNotificationsPage() {

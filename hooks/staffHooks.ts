@@ -133,18 +133,16 @@ export function useOfficeHistory(status: string = 'all') {
   const [loading, setLoading] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
-  const [hasMore, setHasMore] = useState<boolean>(false);
+  const [hasMore, setHasMore] = useState<boolean>(true); 
 
-  const fetchHistory = useCallback(async (isNextPage = false) => {
-    if (loading || (isNextPage && !hasMore)) return;
+  const fetchHistory = useCallback(async (pageToFetch: number, isNextPage: boolean) => {
+    if (loading) return;
 
     setLoading(true);
     try {
-      const currentPage = isNextPage ? page + 1 : 1;
-      
       const response = await api.get('/office/history-mobile', {
         params: {
-          page: currentPage,
+          page: pageToFetch,
           status: status,
         },
       });
@@ -152,6 +150,7 @@ export function useOfficeHistory(status: string = 'all') {
       if (response.data.success) {
         const newData = response.data.data;
         
+        // Use functional updates for arrays to ensure we always have the latest 'prev'
         setAppointments((prev) => (isNextPage ? [...prev, ...newData] : newData));
         setPage(response.data.meta.current_page);
         setHasMore(response.data.meta.has_more);
@@ -162,26 +161,28 @@ export function useOfficeHistory(status: string = 'all') {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [page, hasMore, loading, status]);
+  }, [status]); // Only re-define if status changes
 
-  // Initial load or reset when status changes
+  // 1. Initial Load & Reset when Status changes
   useEffect(() => {
-    setAppointments([]);
     setPage(1);
     setHasMore(true);
-    fetchHistory(false);
-  }, [status]);
+    // Directly pass '1' to avoid waiting for the 'page' state to update
+    fetchHistory(1, false);
+  }, [status, fetchHistory]);
 
-  const onRefresh = () => {
+  // 2. Pull-to-refresh logic
+  const onRefresh = useCallback(() => {
     setRefreshing(true);
-    fetchHistory(false);
-  };
+    fetchHistory(1, false);
+  }, [fetchHistory]);
 
-  const loadMore = () => {
+  // 3. Infinite scroll logic
+  const loadMore = useCallback(() => {
     if (hasMore && !loading) {
-      fetchHistory(true);
+      fetchHistory(page + 1, true);
     }
-  };
+  }, [hasMore, loading, page, fetchHistory]);
 
   return {
     appointments,
@@ -191,35 +192,6 @@ export function useOfficeHistory(status: string = 'all') {
     onRefresh,
     loadMore,
   };
-}
-export function useAppointmentDetail() {
-    const [data, setData] = useState<History | null>(null);
-    const [loading, setLoading] = useState(false);
-
-    const getDetail = useCallback(async (id: number) => {
-        setLoading(true);
-        try {
-            const response = await api.get(`/office/history-mobile/${id}`);
-            if (response.data.success) {
-                setData(response.data.data);
-                return response.data.data; // Return data so the caller can use it immediately
-            }
-        } catch (error) {
-            console.error("Error fetching appointment detail:", error);
-            return null;
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    const resetDetail = () => setData(null);
-
-    return {
-        appointment: data,
-        loading,
-        getDetail,
-        resetDetail
-    };
 }
 
 export const useOfficeUpdate = (officeId: string | number | undefined) => {

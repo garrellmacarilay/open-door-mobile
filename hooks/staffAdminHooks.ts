@@ -1,5 +1,6 @@
 import api from '@/utils/api'
 import { useState, useCallback, useEffect } from 'react'
+import { History } from './staffHooks';
 import { useAuth } from '@/context/AuthContext'
 
 export function useUpdateStatus() {
@@ -29,6 +30,36 @@ export function useUpdateStatus() {
     }, [])
 
     return { loading, error, success, updateStatus };
+}
+
+export function useAppointmentDetail() {
+    const [data, setData] = useState<History | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    const getDetail = useCallback(async (id: number) => {
+        setLoading(true);
+        try {
+            const response = await api.get(`/consultation/history-mobile/${id}`);
+            if (response.data.success) {
+                setData(response.data.data);
+                return response.data.data; // Return data so the caller can use it immediately
+            }
+        } catch (error) {
+            console.error("Error fetching appointment detail:", error);
+            return null;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const resetDetail = () => setData(null);
+
+    return {
+        appointment: data,
+        loading,
+        getDetail,
+        resetDetail
+    };
 }
 
 export function useEvents() {
