@@ -365,7 +365,9 @@ export const useGenerateReport = () => {
       });
 
       if (downloadResult.status !== 200) {
-        throw new Error('Server returned an error.');
+        const errorBody = await FileSystem.readAsStringAsync(downloadResult.uri).catch(() => 'unreadable');
+        console.error('Server error response:', downloadResult.status, errorBody);
+        throw new Error(`Server error ${downloadResult.status}: ${errorBody}`);
       }
 
       if (await Sharing.isAvailableAsync()) {
