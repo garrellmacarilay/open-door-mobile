@@ -342,45 +342,83 @@ export const useGenerateReport = () => {
 
     try {
       const token = await SecureStore.getItemAsync('userToken');
-      if (!token) {
-        setError('Authentication required. Please log in.');
-        return;
+      if (!token) { 
+        setError('Authentication required. Please log in.'); 
+        return; 
       }
 
       const apiUrl = getBaseUrl();
-      const reportUrl = `${apiUrl}/admin/analytics/generate-report?token=${encodeURIComponent(token)}`;
-      
-      // 🟢 Logic Fix: Ensure cacheDirectory exists and add a slash
-      if (!FileSystem.cacheDirectory) {
-          throw new Error("File system cache directory is not available.");
+
+      // 1. Kick off the job
+      const startRes = await fetch(
+        `${apiUrl}/admin/analytics/generate-report?token=${encodeURIComponent(token)}`,
+        { 
+          method: 'GET',
+          headers: { 
+            'Accept': 'application/json', 
+            'Content-Type': 'application/json' 
+          } 
+        }
+      );
+
+      if (!startRes.ok) {
+        const errorText = await startRes.text();
+        throw new Error(`Server returned ${startRes.status}: ${errorText}`);
       }
 
-      const filename = `consultation_report_${Date.now()}.pdf`;
-      const fileUri = `${FileSystem.cacheDirectory}${filename}`;
+      const data = await startRes.json();
+      const { job_id } = data;
+      if (!job_id) throw new Error('Failed to start report generation.');
 
-      const downloadResult = await FileSystem.downloadAsync(reportUrl, fileUri, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      // 2. Poll every 4 seconds, up to 2 minutes
+      const maxAttempts = 30;
+      const tempUri = `${FileSystem.cacheDirectory}consultation_report_check.pdf`;
 
-      if (downloadResult.status !== 200) {
-        const errorBody = await FileSystem.readAsStringAsync(downloadResult.uri).catch(() => 'unreadable');
-        console.error('Server error response:', downloadResult.status, errorBody);
-        throw new Error(`Server error ${downloadResult.status}: ${errorBody}`);
+      for (let i = 0; i < maxAttempts; i++) {
+        await new Promise(r => setTimeout(r, 4000));
+
+        const downloadResult = await FileSystem.downloadAsync(
+          `${apiUrl}/admin/analytics/report-status/${job_id}?token=${encodeURIComponent(token)}`,
+          tempUri,
+          {
+            headers: { 'Accept': 'application/json' }
+          }
+        );
+
+        // Check Content-Type (Check both uppercase and lowercase keys)
+        const contentType = downloadResult.headers['content-type'] || downloadResult.headers['Content-Type'];
+
+        if (contentType?.includes('application/pdf')) {
+          if (await Sharing.isAvailableAsync()) {
+            await Sharing.shareAsync(downloadResult.uri, {
+              mimeType: 'application/pdf',
+              dialogTitle: 'Download Consultation Report',
+              UTI: 'com.adobe.pdf', // Better for iOS sharing
+            });
+          }
+          return; // Success! Exit the function
+        }
+
+        // If not a PDF, it's a JSON status update
+        const body = await FileSystem.readAsStringAsync(downloadResult.uri).catch(() => '{}');
+        
+        // Handle HTML Error pages
+        if (body.trim().startsWith('<')) {
+          console.error('Server returned HTML:', body.substring(0, 200));
+          throw new Error('Server error: received HTML instead of status.');
+        }
+
+        const { status } = JSON.parse(body);
+        if (status === 'failed') throw new Error('Report generation failed on server.');
+        
+        // If status is 'pending' or 'processing', the loop continues...
+        console.log(`Polling report status: ${status}...`);
       }
 
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(downloadResult.uri, {
-          mimeType: 'application/pdf',
-          dialogTitle: 'Download Consultation Report',
-        });
-      } else {
-        setError('Sharing is not available on this device');
-      }
+      throw new Error('Report generation timed out.');
 
     } catch (err: any) {
-      setError('Failed to generate report. Please try again.');
+      setError(err.message || 'Failed to generate report.');
       console.error('Report generation error:', err);
     } finally {
       setIsGenerating(false);
