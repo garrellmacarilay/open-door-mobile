@@ -354,72 +354,62 @@ export const useGenerateReport = () => {
         `${apiUrl}/admin/analytics/generate-report?token=${encodeURIComponent(token)}`,
         { 
           method: 'GET',
-          headers: { 
-            'Accept': 'application/json', 
-            'Content-Type': 'application/json' 
-          } 
+          headers: { 'Accept': 'application/json' } 
         }
       );
 
-      if (!startRes.ok) {
-        const errorText = await startRes.text();
-        throw new Error(`Server returned ${startRes.status}: ${errorText}`);
-      }
-
-      const data = await startRes.json();
-      const { job_id } = data;
+      const startData = await startRes.json();
+      const { job_id } = startData;
       if (!job_id) throw new Error('Failed to start report generation.');
 
-      // 2. Poll every 4 seconds, up to 2 minutes
+      // 2. Polling Logic
       const maxAttempts = 30;
-      const tempUri = `${FileSystem.cacheDirectory}consultation_report_check.pdf`;
-
       for (let i = 0; i < maxAttempts; i++) {
         await new Promise(r => setTimeout(r, 4000));
 
-        const downloadResult = await FileSystem.downloadAsync(
+        // Use standard FETCH for status check (not downloadAsync)
+        const statusRes = await fetch(
           `${apiUrl}/admin/analytics/report-status/${job_id}?token=${encodeURIComponent(token)}`,
-          tempUri,
-          {
-            headers: { 'Accept': 'application/json' }
-          }
+          { headers: { 'Accept': 'application/json' } }
         );
 
-        // Check Content-Type (Check both uppercase and lowercase keys)
-        const contentType = downloadResult.headers['content-type'] || downloadResult.headers['Content-Type'];
-
+        // Check if the response is the PDF directly
+        const contentType = statusRes.headers.get('content-type');
+        
         if (contentType?.includes('application/pdf')) {
+          // NOW we download the actual file
+          const fileUri = `${FileSystem.cacheDirectory}Consultation_Report_${job_id.substring(0, 8)}.pdf`;
+          
+          const downloadResult = await FileSystem.downloadAsync(
+            `${apiUrl}/admin/analytics/report-status/${job_id}?token=${encodeURIComponent(token)}`,
+            fileUri
+          );
+
           if (await Sharing.isAvailableAsync()) {
             await Sharing.shareAsync(downloadResult.uri, {
               mimeType: 'application/pdf',
-              dialogTitle: 'Download Consultation Report',
-              UTI: 'com.adobe.pdf', // Better for iOS sharing
+              UTI: 'com.adobe.pdf',
             });
           }
-          return; // Success! Exit the function
+          return;
         }
 
-        // If not a PDF, it's a JSON status update
-        const body = await FileSystem.readAsStringAsync(downloadResult.uri).catch(() => '{}');
-        
-        // Handle HTML Error pages
-        if (body.trim().startsWith('<')) {
-          console.error('Server returned HTML:', body.substring(0, 200));
-          throw new Error('Server error: received HTML instead of status.');
+        // If not PDF, parse status JSON
+        const statusData = await statusRes.json();
+        if (statusData.status === 'failed') throw new Error('Report generation failed on server.');
+        if (statusData.status === 'ready') {
+            // This is a fallback in case the first check didn't catch the content-type
+            i--; // Retry immediately to trigger the PDF download block above
+            continue;
         }
-
-        const { status } = JSON.parse(body);
-        if (status === 'failed') throw new Error('Report generation failed on server.');
         
-        // If status is 'pending' or 'processing', the loop continues...
-        console.log(`Polling report status: ${status}...`);
+        console.log(`Still processing (Attempt ${i + 1})...`);
       }
 
       throw new Error('Report generation timed out.');
 
     } catch (err: any) {
       setError(err.message || 'Failed to generate report.');
-      console.error('Report generation error:', err);
     } finally {
       setIsGenerating(false);
     }
