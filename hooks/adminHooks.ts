@@ -377,9 +377,15 @@ export const useGenerateReport = () => {
         if (statusData.status === 'ready' && statusData.download_url) {
           // DOWNLOAD from the Cloudinary URL provided by the server
           console.log("Downloading from:", statusData.download_url);
+
           const fileName = `Consultation_Report_${Date.now()}.pdf`;
           const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
-          
+
+          let downloadUrl = statusData.download_url;
+          if (!downloadUrl.toLowerCase().endsWith('.pdf')) {
+             downloadUrl += '.pdf';
+          }
+      
           const downloadResult = await FileSystem.downloadAsync(
             statusData.download_url, 
             fileUri
