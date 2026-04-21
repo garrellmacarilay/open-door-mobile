@@ -367,49 +367,43 @@ export const useGenerateReport = () => {
       for (let i = 0; i < maxAttempts; i++) {
         await new Promise(r => setTimeout(r, 4000));
 
-        // Use standard FETCH for status check (not downloadAsync)
         const statusRes = await fetch(
           `${apiUrl}/admin/analytics/report-status/${job_id}?token=${encodeURIComponent(token)}`,
           { headers: { 'Accept': 'application/json' } }
         );
 
-        // Check if the response is the PDF directly
-        const contentType = statusRes.headers.get('content-type');
-        
-        if (contentType?.includes('application/pdf')) {
-          // NOW we download the actual file
-          const fileUri = `${FileSystem.cacheDirectory}Consultation_Report_${job_id.substring(0, 8)}.pdf`;
+        const statusData = await statusRes.json();
+
+        if (statusData.status === 'ready' && statusData.download_url) {
+          // DOWNLOAD from the Cloudinary URL provided by the server
+          console.log("Downloading from:", statusData.download_url);
+          const fileName = `Consultation_Report_${Date.now()}.pdf`;
+          const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
           
           const downloadResult = await FileSystem.downloadAsync(
-            `${apiUrl}/admin/analytics/report-status/${job_id}?token=${encodeURIComponent(token)}`,
+            statusData.download_url, 
             fileUri
           );
 
           if (await Sharing.isAvailableAsync()) {
             await Sharing.shareAsync(downloadResult.uri, {
               mimeType: 'application/pdf',
-              UTI: 'com.adobe.pdf',
+              dialogTitle: 'Download Consultation Report',
+              UTI: 'com.adobe.pdf'
             });
           }
           return;
         }
 
-        // If not PDF, parse status JSON
-        const statusData = await statusRes.json();
-        if (statusData.status === 'failed') throw new Error('Report generation failed on server.');
-        if (statusData.status === 'ready') {
-            // This is a fallback in case the first check didn't catch the content-type
-            i--; // Retry immediately to trigger the PDF download block above
-            continue;
-        }
-        
-        console.log(`Still processing (Attempt ${i + 1})...`);
+        if (statusData.status === 'failed') throw new Error('Report generation failed.');
+        console.log(`Job processing (Attempt ${i + 1})...`);
       }
 
       throw new Error('Report generation timed out.');
 
     } catch (err: any) {
       setError(err.message || 'Failed to generate report.');
+      console.error('Report generation error:', err);
     } finally {
       setIsGenerating(false);
     }
