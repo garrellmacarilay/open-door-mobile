@@ -1,5 +1,7 @@
 import api from "@/utils/api";
 import * as SecureStore from 'expo-secure-store';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as Sharing from 'expo-sharing';
 import { useCallback, useEffect, useState } from "react";
 import { Linking } from 'react-native';
 
@@ -331,42 +333,60 @@ export const useDeleteOffice = (onSuccess: () => void) => {
 }
 
 export const useGenerateReport = () => {
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [error, setError] = useState<string>('')
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string>('');
 
   const generateReport = useCallback(async (): Promise<void> => {
-    setIsGenerating(true)
-    setError('')
+    setIsGenerating(true);
+    setError('');
+
     try {
-      // Retrieve token from SecureStore
-      const token = await SecureStore.getItemAsync('userToken')
+      const token = await SecureStore.getItemAsync('userToken');
       if (!token) {
-        setError('Authentication required. Please log in.')
-        return
+        setError('Authentication required. Please log in.');
+        return;
       }
 
-      const apiUrl = process.env.EXPO_PUBLIC_API_URL
-      // Pass token as query param for Expo Go (workaround)
-      const reportUrl = `${apiUrl}/admin/analytics/generate-report?token=${encodeURIComponent(token)}`
+      const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+      const reportUrl = `${apiUrl}/admin/analytics/generate-report?token=${encodeURIComponent(token)}`;
+      
+      // 🟢 Logic Fix: Ensure cacheDirectory exists and add a slash
+      if (!FileSystem.cacheDirectory) {
+          throw new Error("File system cache directory is not available.");
+      }
 
-      // Open the PDF URL with token in query string
-      const canOpen = await Linking.canOpenURL(reportUrl)
-      if (canOpen) {
-        await Linking.openURL(reportUrl)
+      const filename = `consultation_report_${Date.now()}.pdf`;
+      const fileUri = `${FileSystem.cacheDirectory}${filename}`;
+
+      const downloadResult = await FileSystem.downloadAsync(reportUrl, fileUri, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (downloadResult.status !== 200) {
+        throw new Error('Server returned an error.');
+      }
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(downloadResult.uri, {
+          mimeType: 'application/pdf',
+          dialogTitle: 'Download Consultation Report',
+        });
       } else {
-        setError('Unable to open PDF')
+        setError('Sharing is not available on this device');
       }
 
     } catch (err: any) {
-      setError('Failed to generate report. Please try again.')
-      console.error('Report generation error:', err)
+      setError('Failed to generate report. Please try again.');
+      console.error('Report generation error:', err);
     } finally {
-      setIsGenerating(false)
+      setIsGenerating(false);
     }
-  }, [])
+  }, []);
 
-  return { generateReport, isGenerating, error}
-} 
+  return { generateReport, isGenerating, error };
+};
 
 export const useConsultationStats = () => {
     const [stats, setStats] = useState<any>(null);
