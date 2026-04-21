@@ -1,4 +1,4 @@
-import api from "@/utils/api";
+import api, { getBaseUrl } from "@/utils/api";
 import * as SecureStore from 'expo-secure-store';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
@@ -347,7 +347,7 @@ export const useGenerateReport = () => {
         return;
       }
 
-      const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+      const apiUrl = getBaseUrl();
       const reportUrl = `${apiUrl}/admin/analytics/generate-report?token=${encodeURIComponent(token)}`;
       
       // 🟢 Logic Fix: Ensure cacheDirectory exists and add a slash

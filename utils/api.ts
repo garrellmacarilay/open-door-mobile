@@ -1,12 +1,12 @@
 import * as SecureStore from 'expo-secure-store';
 
-const getBaseUrl = () => {
+export const getBaseUrl = () => {
   const envUrl = process.env.EXPO_PUBLIC_API_URL;
   // If we are in a production/preview build, force the deployed URL to be safe
   if (!__DEV__) {
     return "https://open-door-th8q.onrender.com/api"; 
   }
-  return envUrl || "http://192.168.137.1:8000/api";
+  return process.env.EXPO_PUBLIC_API_URL || "http://192.168.137.1:8000/api";
 };
 
 const api = {
