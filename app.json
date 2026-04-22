@@ -2,7 +2,7 @@
   "expo": {
     "name": "OpenDoor",
     "slug": "open-doo-mobile",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/images/psaslogo.png",
     "scheme": "opendoomobile",
@@ -45,7 +45,14 @@
         }
       ],
       "expo-font",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-sharing",
+      [
+        "expo-file-system", {
+          "supportsOpeningDocumentsInPlace": true,
+          "enableFileSharing": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
