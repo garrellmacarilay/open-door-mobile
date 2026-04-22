@@ -1,6 +1,6 @@
 import api, { getBaseUrl } from "@/utils/api";
 import * as SecureStore from 'expo-secure-store';
-import * as FileSystem from 'expo-file-system/legacy';
+import { Directory, File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { useCallback, useEffect, useState } from "react";
 import { Linking } from 'react-native';
@@ -342,9 +342,9 @@ export const useGenerateReport = () => {
 
     try {
       const token = await SecureStore.getItemAsync('userToken');
-      if (!token) { 
-        setError('Authentication required. Please log in.'); 
-        return; 
+      if (!token) {
+        setError('Authentication required. Please log in.');
+        return;
       }
 
       const apiUrl = getBaseUrl();
@@ -352,9 +352,9 @@ export const useGenerateReport = () => {
       // 1. Kick off the job
       const startRes = await fetch(
         `${apiUrl}/admin/analytics/generate-report?token=${encodeURIComponent(token)}`,
-        { 
+        {
           method: 'GET',
-          headers: { 'Accept': 'application/json' } 
+          headers: { 'Accept': 'application/json' }
         }
       );
 
@@ -365,6 +365,7 @@ export const useGenerateReport = () => {
       // 2. Polling Logic
       const maxAttempts = 30;
       for (let i = 0; i < maxAttempts; i++) {
+        // Wait 4 seconds between polls
         await new Promise(r => setTimeout(r, 4000));
 
         const statusRes = await fetch(
@@ -375,30 +376,36 @@ export const useGenerateReport = () => {
         const statusData = await statusRes.json();
 
         if (statusData.status === 'ready' && statusData.download_url) {
-          // DOWNLOAD from the Cloudinary URL provided by the server
-          console.log("Downloading from:", statusData.download_url);
-
-          const fileName = `Consultation_Report_${Date.now()}.pdf`;
-          const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
-
-          let downloadUrl = statusData.download_url;
-          if (!downloadUrl.toLowerCase().endsWith('.pdf')) {
-             downloadUrl += '.pdf';
+          console.log("Report ready. Downloading...");
+          
+          const reportsDir = new Directory(Paths.cache, 'generated_reports');
+          
+          if (!reportsDir.exists) {
+            reportsDir.create();
           }
-      
-          const downloadResult = await FileSystem.downloadAsync(
-            statusData.download_url, 
-            fileUri
-          );
 
-          if (await Sharing.isAvailableAsync()) {
-            await Sharing.shareAsync(downloadResult.uri, {
-              mimeType: 'application/pdf',
-              dialogTitle: 'Download Consultation Report',
-              UTI: 'com.adobe.pdf'
-            });
+          let finalDownloadUrl = statusData.download_url;
+          if (!finalDownloadUrl.toLowerCase().endsWith('.pdf')) {
+            finalDownloadUrl += '.pdf';
           }
-          return;
+
+          const fileName = `Consultation_Report_${job_id}.pdf`;
+          const downloadedFile = await File.downloadFileAsync(finalDownloadUrl, reportsDir, {
+          });
+
+          if (downloadedFile.exists) {
+            // 5. Open System Share Sheet
+            if (await Sharing.isAvailableAsync()) {
+              await Sharing.shareAsync(downloadedFile.uri, {
+                mimeType: 'application/pdf',
+                dialogTitle: 'Consultation Report',
+                UTI: 'com.adobe.pdf'
+              });
+            }
+          } else {
+            throw new Error('File download failed: File not found.');
+          }
+          return; 
         }
 
         if (statusData.status === 'failed') throw new Error('Report generation failed.');
