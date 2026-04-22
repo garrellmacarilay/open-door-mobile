@@ -1,8 +1,10 @@
 import api, { getBaseUrl } from "@/utils/api";
 import * as SecureStore from 'expo-secure-store';
 import { Directory, File, Paths } from 'expo-file-system';
+import { Platform } from "react-native";
 import * as Sharing from 'expo-sharing';
 import { useCallback, useEffect, useState } from "react";
+import * as WebBrowser from 'expo-web-browser';
 import { Linking } from 'react-native';
 
 export interface Appointment {
@@ -343,21 +345,14 @@ export const useGenerateReport = () => {
     try {
       const token = await SecureStore.getItemAsync('userToken');
       if (!token) {
-        setError('Authentication required. Please log in.');
+        setError('Authentication required.');
         return;
       }
 
       const apiUrl = getBaseUrl();
 
       // 1. Kick off the job
-      const startRes = await fetch(
-        `${apiUrl}/admin/analytics/generate-report?token=${encodeURIComponent(token)}`,
-        {
-          method: 'GET',
-          headers: { 'Accept': 'application/json' }
-        }
-      );
-
+      const startRes = await fetch(`${apiUrl}/admin/analytics/generate-report?token=${encodeURIComponent(token)}`);
       const startData = await startRes.json();
       const { job_id } = startData;
       if (!job_id) throw new Error('Failed to start report generation.');
@@ -365,53 +360,38 @@ export const useGenerateReport = () => {
       // 2. Polling Logic
       const maxAttempts = 30;
       for (let i = 0; i < maxAttempts; i++) {
-        // Wait 4 seconds between polls
         await new Promise(r => setTimeout(r, 4000));
 
-        const statusRes = await fetch(
-          `${apiUrl}/admin/analytics/report-status/${job_id}?token=${encodeURIComponent(token)}`,
-          { headers: { 'Accept': 'application/json' } }
-        );
-
+        const statusRes = await fetch(`${apiUrl}/admin/analytics/report-status/${job_id}?token=${encodeURIComponent(token)}`);
         const statusData = await statusRes.json();
 
         if (statusData.status === 'ready' && statusData.download_url) {
-          console.log("Report ready. Downloading...");
           
-          const reportsDir = new Directory(Paths.cache, 'generated_reports');
-          
-          if (!reportsDir.exists) {
-            reportsDir.create();
-          }
-
           let finalDownloadUrl = statusData.download_url;
           if (!finalDownloadUrl.toLowerCase().endsWith('.pdf')) {
             finalDownloadUrl += '.pdf';
           }
 
-          const fileName = `Consultation_Report_${job_id}.pdf`;
-          const downloadedFile = await File.downloadFileAsync(finalDownloadUrl, reportsDir, {
-          });
-
-          if (downloadedFile.exists) {
-            // 5. Open System Share Sheet
-            if (await Sharing.isAvailableAsync()) {
-              await Sharing.shareAsync(downloadedFile.uri, {
-                mimeType: 'application/pdf',
-                dialogTitle: 'Consultation Report',
-                UTI: 'com.adobe.pdf'
-              });
-            }
+          if (Platform.OS === 'web') {
+            // WEB: standard download
+            const link = document.createElement('a');
+            link.href = finalDownloadUrl;
+            link.download = `Consultation_Report_${job_id}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
           } else {
-            throw new Error('File download failed: File not found.');
+            // MOBILE: Use WebBrowser to open the URL directly
+            // This avoids the share sheet and opens a high-quality PDF viewer
+            console.log("Opening report in WebBrowser...");
+            await WebBrowser.openBrowserAsync(finalDownloadUrl);
           }
+
           return; 
         }
 
         if (statusData.status === 'failed') throw new Error('Report generation failed.');
-        console.log(`Job processing (Attempt ${i + 1})...`);
       }
-
       throw new Error('Report generation timed out.');
 
     } catch (err: any) {

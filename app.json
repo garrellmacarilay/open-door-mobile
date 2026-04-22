@@ -47,12 +47,7 @@
       "expo-font",
       "expo-secure-store",
       "expo-sharing",
-      [
-        "expo-file-system", {
-          "supportsOpeningDocumentsInPlace": true,
-          "enableFileSharing": true
-        }
-      ]
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
