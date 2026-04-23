@@ -68,10 +68,12 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
             <Modal
                 animationType="slide"
                 transparent={true}
+                statusBarTranslucent
+                navigationBarTranslucent
                 visible={visible}
                 onRequestClose={onClose}
             >
-                <View className="flex-1 justify-end bg-black/40">
+                <View className="absolute top-0 left-0 right-0 bottom-0 justify-end bg-black/40">
                     <View className="bg-white rounded-t-[32px] p-6 h-[88%] shadow-lg">
                         {/* Header: Status and Close */}
                         <View className="flex-row items-center justify-between mb-8 mt-2">
@@ -90,7 +92,7 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
                             </TouchableOpacity>
                         </View>
 
-                        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+                        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
                             {/* Office Category */}
                             <Text className="text-gray-400 text-[14px] font-bold mb-1">Office Category</Text>
                             <Text className="text-[#111827] text-[26px] font-extrabold mb-8 tracking-tight">
@@ -99,7 +101,7 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
 
                             {/* Date and Time Cards */}
                             <View className="flex-row gap-4 mb-8">
-                                <View className="flex-1 bg-[#F9FAFB] rounded-[20px] p-5 border border-gray-100">
+                                <View className="flex-1 bg-[#F9FAFB] rounded-[14px] p-4 border border-gray-100">
                                     <Text className="text-gray-400 text-[13px] font-bold mb-3">Booked Date</Text>
                                     <View className="flex-row items-center gap-2">
                                         <Ionicons name="calendar-outline" size={18} color="#9CA3AF" />
@@ -112,8 +114,8 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
                                         </Text>
                                     </View>
                                 </View>
-                                <View className="flex-1 bg-[#F9FAFB] rounded-[20px] p-5 border border-gray-100">
-                                    <Text className="text-gray-400 text-[13px] font-bold mb-3">Booked Time</Text>
+                                <View className="flex-1 bg-[#F9FAFB] rounded-[14px] p-4 border border-gray-100">
+                                    <Text className="text-gray-400 text-[13px] font-bold mb-3">Booked Date</Text>
                                     <View className="flex-row items-center gap-2">
                                         <Ionicons name="time-outline" size={18} color="#9CA3AF" />
                                         <Text className="text-gray-600 font-bold text-[14px]">
@@ -136,17 +138,16 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
                             </View>
 
                             {/* Members and Files */}
-                            <View className="flex-row mb-12">
-                                <View className="flex-1 items-center justify-center">
-                                    <View className="flex-row items-center gap-2 mb-2">
+                            <View className="flex-row mb-10">
+                                <View className="flex-1 justify-center">
+                                    <View className="flex-row items-center gap-2 mb-1">
                                         <Ionicons name="people-outline" size={18} color="#9CA3AF" />
                                         <Text className="text-gray-400 font-bold text-[14px]">Members</Text>
                                     </View>
                                     <Text className="text-gray-300 font-bold text-[13px]">{appointment.group_members ?? 'Individual'}</Text>
                                 </View>
-                                <View className="w-[1px] h-12 bg-gray-100" />
-                                <View className="flex-1 items-center justify-center">
-                                    <View className="flex-row items-center gap-2 mb-2">
+                                <View className="flex-1 justify-center items-start">
+                                    <View className="flex-row items-center gap-2 mb-1">
                                         <Ionicons name="attach-outline" size={18} color="#9CA3AF" />
                                         <Text className="text-gray-400 font-bold text-[14px]">Files</Text>
                                     </View>

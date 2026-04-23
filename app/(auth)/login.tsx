@@ -85,10 +85,6 @@ export default function LoginPage() {
                                 Sign in to your{"\n"}Account
                             </Text>
 
-                            {/* Subtitle */}
-                            <Text className="text-white/90 text-center text-[15px] mt-1">
-                                Enter your email and password to log in
-                            </Text>
                         </View>
 
                         {/* White Card Section */}
@@ -137,7 +133,7 @@ export default function LoginPage() {
                             {/* Password Input */}
                             <View className="relative mb-3">
                                 <TextInput
-                                    placeholder="••••••••"
+                                    placeholder="Password"
                                     value={password}
                                     onChangeText={(text) => {
                                         setPassword(text)
@@ -157,9 +153,9 @@ export default function LoginPage() {
                                     activeOpacity={0.7}
                                 >
                                     {showPassword ? (
-                                        <EyeOff size={20} color="#9CA3AF" />
-                                    ) : (
                                         <Eye size={20} color="#9CA3AF" />
+                                    ) : (
+                                        <EyeOff size={20} color="#9CA3AF" />
                                     )}
                                 </TouchableOpacity>
                                 {errors?.password && (
@@ -187,7 +183,7 @@ export default function LoginPage() {
 
                                 <TouchableOpacity activeOpacity={0.7}>
                                     <Text className="text-blue-600 font-semibold text-[14px]">
-                                        Forgot Password ?
+                                        Forgot Password?
                                     </Text>
                                 </TouchableOpacity>
                             </View>
@@ -208,14 +204,14 @@ export default function LoginPage() {
                                 }}
                             >
                                 <Text className="text-white text-center font-bold text-[16px]">
-                                    {loading ? "Logging in..." : "Log In"}
+                                    {loading ? "Signing in..." : "Sign In"}
                                 </Text>
                             </TouchableOpacity>
 
                              {/* Divider */}
                             <View className="flex-row items-center mb-6">
                                 <View className="flex-1 h-[1px] bg-gray-200" />
-                                <Text className="mx-4 text-gray-400 text-[13px]">Or login with</Text>
+                                <Text className="mx-4 text-gray-400 text-[13px]">Or sign up with</Text>
                                 <View className="flex-1 h-[1px] bg-gray-200" />
                             </View>
                         
@@ -247,6 +243,82 @@ export default function LoginPage() {
                                         </Text>
                                     </TouchableOpacity>
                                 </Link>
+                            </View>
+                        </View>
+
+                        {/* Quick Navigation (Dev Only) */}
+                        <View className="mb-10">
+                            <View className="flex-row items-center mb-4">
+                                <View className="flex-1 h-[1px] bg-gray-200" />
+                                <Text className="mx-3 text-gray-400 text-[12px] uppercase tracking-widest">
+                                    Quick Access
+                                </Text>
+                                <View className="flex-1 h-[1px] bg-gray-200" />
+                            </View>
+
+                            <View className="flex-row gap-3">
+                                <TouchableOpacity
+                                    onPress={() => router.push('/(student)/dashboard')}
+                                    activeOpacity={0.8}
+                                    style={{
+                                        flex: 1,
+                                        paddingVertical: 14,
+                                        borderRadius: 14,
+                                        backgroundColor: '#122141',
+                                        alignItems: 'center',
+                                        shadowColor: '#122141',
+                                        shadowOffset: { width: 0, height: 3 },
+                                        shadowOpacity: 0.3,
+                                        shadowRadius: 6,
+                                        elevation: 5,
+                                    }}
+                                >
+                                    <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>
+                                        Student
+                                    </Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    onPress={() => router.push('/(admin)')}
+                                    activeOpacity={0.8}
+                                    style={{
+                                        flex: 1,
+                                        paddingVertical: 14,
+                                        borderRadius: 14,
+                                        backgroundColor: '#1D4ED8',
+                                        alignItems: 'center',
+                                        shadowColor: '#1D4ED8',
+                                        shadowOffset: { width: 0, height: 3 },
+                                        shadowOpacity: 0.3,
+                                        shadowRadius: 6,
+                                        elevation: 5,
+                                    }}
+                                >
+                                    <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>
+                                        Admin
+                                    </Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    onPress={() => router.push('/(staff)')}
+                                    activeOpacity={0.8}
+                                    style={{
+                                        flex: 1,
+                                        paddingVertical: 14,
+                                        borderRadius: 14,
+                                        backgroundColor: '#0F766E',
+                                        alignItems: 'center',
+                                        shadowColor: '#0F766E',
+                                        shadowOffset: { width: 0, height: 3 },
+                                        shadowOpacity: 0.3,
+                                        shadowRadius: 6,
+                                        elevation: 5,
+                                    }}
+                                >
+                                    <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>
+                                        Office
+                                    </Text>
+                                </TouchableOpacity>
                             </View>
                         </View>
                     </ScrollView>

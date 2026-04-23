@@ -109,17 +109,19 @@ export default function DatePickerModal({
         <Modal
             animationType="fade"
             transparent
+            statusBarTranslucent
+            navigationBarTranslucent
             visible={visible}
             onRequestClose={onClose}
         >
-            <TouchableOpacity
-                className="flex-1 bg-black/40 justify-end"
-                activeOpacity={1}
-                onPress={onClose}
-            >
-                {/* Prevent close when tapping inside */}
-                <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
-                    <View className="bg-white rounded-t-[28px] pb-10 pt-4 px-4">
+            <View className="absolute top-0 left-0 right-0 bottom-0 bg-black/40">
+                <TouchableOpacity
+                    className="absolute top-0 left-0 right-0 bottom-0"
+                    activeOpacity={1}
+                    onPress={onClose}
+                />
+
+                <View className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[28px] pt-4 px-4 pb-4">
                         {/* Handle */}
                         <View className="w-10 h-1 rounded-full bg-gray-200 self-center mb-5" />
 
@@ -211,9 +213,8 @@ export default function DatePickerModal({
                                 </Text>
                             </View>
                         )}
-                    </View>
-                </TouchableOpacity>
-            </TouchableOpacity>
+                </View>
+            </View>
         </Modal>
     );
 }

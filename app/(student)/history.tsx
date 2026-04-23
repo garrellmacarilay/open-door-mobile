@@ -37,7 +37,7 @@ export default function History() {
         return (
             <TouchableOpacity
                 onPress={() => setActiveFilter(value)}
-                className={`px-4 py-2 rounded-lg ${isActive ? 'bg-[#1C2A48]' : 'bg-white border border-gray-200'}`}
+                className={`px-4 py-2 rounded-full mr-2 ${isActive ? 'bg-[#1C2A48]' : 'bg-white border border-gray-200'}`}
             >
                 <Text className={`text-xs font-semibold ${isActive ? 'text-white' : 'text-gray-600'}`} style={{ fontFamily: 'Inter-SemiBold' }}>
                     {label}
@@ -53,9 +53,9 @@ export default function History() {
                 <View className="flex-row items-start justify-between mb-1">
                     <View className="flex-1">
                         <Text className="text-[#1C2A48] text-2xl font-bold mb-1" style={{ fontFamily: 'Poppins-Bold' }}>
-                            Records
+                            Appointments
                         </Text>
-                        <Text className="text-gray-500 text-xs" style={{ fontFamily: 'Inter-Regular' }}>
+                        <Text className="text-[#1C2A48] text-xs font-bold" style={{ fontFamily: 'Poppins-Bold' }}>
                             Consultation History
                         </Text>
                     </View>
@@ -135,7 +135,7 @@ export default function History() {
 
                             {/* View Appointment Button */}
                             <TouchableOpacity
-                                className="bg-[#1C2A48] rounded-xl py-3 flex-row items-center justify-center gap-2"
+                                className="bg-[#18233D] rounded-xl py-3 flex-row items-center justify-center gap-2"
                                 onPress={() => setSelectedAppointment(item)}
                             >
                                 <Text className="text-white text-sm font-semibold" style={{ fontFamily: 'Poppins-SemiBold' }}>

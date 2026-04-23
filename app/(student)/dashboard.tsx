@@ -73,7 +73,7 @@ function DropdownModal({ visible, title, options, selectedId, onSelect, onClose 
                         }}
                     />
                 </View>
-            </TouchableOpacity>
+            </View>
         </Modal>
     );
 }
@@ -160,9 +160,7 @@ export default function StudentDashboard() {
                         <Text className="text-[#1C274C] text-[24px] font-extrabold tracking-[-0.5px]">
                             Student Dashboard
                         </Text>
-                        <TouchableOpacity activeOpacity={0.7} className="p-1">
-                            <Ionicons name="grid" size={24} color="#1C274C" />
-                        </TouchableOpacity>
+                        
                     </View>
                     <Text className="text-[#6B7280] text-[15px] font-semibold">
                         Student Consultation Overview
