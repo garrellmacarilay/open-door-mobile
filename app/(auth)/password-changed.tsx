@@ -70,7 +70,7 @@ export default function PasswordChangedPage() {
                                 activeOpacity={0.8}
                             >
                                 <Text className="text-white text-center font-bold text-[16px]">
-                                    Get Started
+                                    Sign In Again
                                 </Text>
                             </TouchableOpacity>
                         </View>

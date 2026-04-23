@@ -77,11 +77,8 @@ export default function ForgotPasswordPage() {
                                 />
                             </View>
 
-                            <Text className="text-[30px] font-bold text-white text-center mb-2 leading-10">
+                            <Text className="text-[30px] font-bold text-white text-center mb-10 leading-10">
                                 Forgot Password
-                            </Text>
-                            <Text className="text-[14px] text-white/90 text-center px-5">
-                                Enter your email address to receive your confirmation code.
                             </Text>
                         </View>
 
