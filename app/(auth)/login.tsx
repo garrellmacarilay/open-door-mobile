@@ -149,11 +149,13 @@ export default function LoginPage() {
                                     <Text className="text-gray-600 text-[14px]">Remember me</Text>
                                 </TouchableOpacity>
 
-                                <TouchableOpacity activeOpacity={0.7}>
-                                    <Text className="text-blue-600 font-semibold text-[14px]">
-                                        Forgot Password?
-                                    </Text>
-                                </TouchableOpacity>
+                                <Link href="/(auth)/forgot-password" asChild>
+                                    <TouchableOpacity activeOpacity={0.7}>
+                                        <Text className="text-blue-600 font-semibold text-[14px]">
+                                            Forgot Password?
+                                        </Text>
+                                    </TouchableOpacity>
+                                </Link>
                             </View>
 
                             {/* Login Button */}
