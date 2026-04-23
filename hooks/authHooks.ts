@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { Alert } from 'react-native';
 import api from '../utils/api';
 
 export interface RegisterData {
@@ -253,5 +254,87 @@ export function useGoogleLogin(): GoogleLoginHook {
 
     return { handleGoogleLogin };
 };
+
+export const useForgetPassword = () => {
+    const router = useRouter();
+    const [loading, setLoading] = useState(false);
+    const [email, setEmail] = useState('');
+
+    const requestResetCode = async (targetEmail: string) => {
+        setLoading(true);
+        try {
+            await api.post('/forgot-password', {
+                email: targetEmail.trim()
+            })
+            setEmail(targetEmail.trim());
+            router.push({
+                    pathname: '/(auth)/confirm-code',
+                    params: { email: targetEmail.trim() },
+            });
+        } catch (err: any) {
+            const message = err.response?.data?.message || "Email not found.";
+        } finally {
+            setLoading(false);
+        }
+
+    }
+
+    const verifyCode = async (codeArray: string[], currEmail: string) => {
+        const fullCode = codeArray.join('')
+        if (fullCode.length < 6) {
+            Alert.alert("Wait", "Please enter the full 6-digit code.");
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            await api.post('/verify-reset-code', {
+                email: currEmail, 
+                code: fullCode
+            })
+            router.push({
+                pathname: '/(auth)/reset-password',
+                params: { email: currEmail, code: fullCode },
+            });
+        } catch (err: any) {
+            Alert.alert("Error", "Invalid or expired code.");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const resetPassword = async (
+        currEmail: string,
+        password: string,
+        password_confirmation: string,
+        code: string
+    ) => {
+        setLoading(true)
+
+        try {
+            await api.post('/reset-password', {
+                email: currEmail,
+                password: password,
+                password_confirmation: password_confirmation, // Laravel 'confirmed' rule looks for this
+                code: code
+            })
+            router.replace('/(auth)/password-changed');
+        } catch (err: any) {
+            const errors = err.response?.data?.errors;
+            const firstError = errors ? (Object.values(errors) as any)[0][0] : "Failed to reset password.";
+            Alert.alert("Reset Failed", firstError);
+        } finally {
+            setLoading(false);
+        }
+    }
+    return {
+        loading,
+        email,
+        requestResetCode,
+        verifyCode,
+        resetPassword
+    };
+}
 
 

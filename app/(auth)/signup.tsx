@@ -10,8 +10,13 @@ import { useAuthRegistration } from '../../hooks/authHooks';
 
 
 export default function SignupPage() {
-    const [firstName, setFirstName] = useState("");
+    const [name, setName] = useState("");
+
+
     const [lastName, setLastName] = useState("");
+
+    const [acceptedTerms, setAcceptedTerms] = useState(false);
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -170,28 +175,6 @@ export default function SignupPage() {
                                     </TouchableOpacity>
                                 </View>
 
-                                <View className="relative">
-                                    <TextInput
-                                        placeholder="Confirm Password"
-                                        value={confirmPassword}
-                                        onChangeText={setConfirmPassword}
-                                        secureTextEntry={!showConfirmPassword}
-                                        className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 bg-gray-50 focus:border-blue-500 focus:bg-white pr-12"
-                                        placeholderTextColor="#9CA3AF"
-                                    />
-                                    <TouchableOpacity
-                                        onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        className="absolute right-4 top-3.5"
-                                    >
-                                        {showConfirmPassword ?
-                                            <Eye size={22} color="#9CA3AF" /> :
-                                            <EyeOff size={22} color="#9CA3AF" />
-                                        }
-                                    </TouchableOpacity>
-                                    {fieldErrors.password && (
-                                       <Text className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.password[0]}</Text>
-                                    )}
-                                </View>
 
                                 <View className="relative">
                                     <TextInput
