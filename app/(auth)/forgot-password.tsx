@@ -93,7 +93,7 @@ export default function ForgotPasswordPage() {
                             }}
                         >
                             <TextInput
-                                placeholder="E-mail address"
+                                placeholder="Email address"
                                 value={email}
                                 onChangeText={setEmail}
                                 className="w-full px-4 py-4 border-[1.5px] border-gray-200 rounded-xl text-gray-800 bg-gray-50 text-[15px] mb-5"
@@ -109,7 +109,7 @@ export default function ForgotPasswordPage() {
                                 activeOpacity={0.8}
                             >
                                 <Text className="text-white text-center font-bold text-[16px]">
-                                    Confirm E-mail
+                                    Confirm Email
                                 </Text>
                             </TouchableOpacity>
                         </View>
