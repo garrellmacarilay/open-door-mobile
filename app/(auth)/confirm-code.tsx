@@ -19,7 +19,7 @@ export default function ConfirmCodePage() {
     const router = useRouter();
     const { email } = useLocalSearchParams<{ email?: string }>();
 
-    const [code, setCode] = useState(['', '', '', '']);
+    const [code, setCode] = useState(['', '', '', '', '', '']);
     const inputRefs = useRef<(TextInput | null)[]>([]);
 
     const handleCodeChange = (value: string, index: number) => {
@@ -29,7 +29,7 @@ export default function ConfirmCodePage() {
         next[index] = value;
         setCode(next);
 
-        if (value && index < 3) {
+        if (value && index < 5) {
             inputRefs.current[index + 1]?.focus();
         }
     };
@@ -42,7 +42,7 @@ export default function ConfirmCodePage() {
 
     const handleContinue = () => {
         if (code.some((digit) => !digit)) {
-            alert('Please enter the 4-digit code');
+            alert('Please enter the 6-digit code');
             return;
         }
 
@@ -128,7 +128,7 @@ export default function ConfirmCodePage() {
                                         onKeyPress={(e) => handleKeyPress(e.nativeEvent.key, index)}
                                         keyboardType="number-pad"
                                         maxLength={1}
-                                        className="w-[22%] h-14 text-center text-[22px] font-bold border-[1.5px] border-gray-200 rounded-xl text-gray-800 bg-gray-50"
+                                        className="w-[15%] h-14 text-center text-[22px] font-bold border-[1.5px] border-gray-200 rounded-xl text-gray-800 bg-gray-50"
                                     />
                                 ))}
                             </View>
