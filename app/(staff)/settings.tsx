@@ -199,24 +199,24 @@ export default function StaffSettingsPage() {
                                     {/* Email Address */}
                                     <View className="mb-4">
                                         <Text className="text-[13px] font-bold text-gray-500 mb-1.5 ml-1">Email Address</Text>
-                                        <View className="w-full flex-row items-center border border-gray-300 rounded-[10px] px-4 py-3.5">
+                                        <View className="w-full flex-row items-center border border-gray-300 rounded-[10px] px-4 py-3.5 bg-gray-50">
                                             <Mail size={18} color="#6B7280" />
-                                            <Text className="flex-1 ml-2.5 text-gray-400 font-semibold text-[15px]">
+                                            <Text className="flex-1 ml-2.5 text-gray-400 font-semibold text-[15px]" numberOfLines={1} ellipsizeMode="tail">
                                                 {(user as any)?.email}
                                             </Text>
                                         </View>
                                     </View>
 
-                                    {/* Current Password */}
                                     <View className="mb-4">
                                         <Text className="text-[13px] font-bold text-gray-500 mb-1.5 ml-1">Current Password</Text>
                                         <View className="w-full flex-row items-center justify-between border border-gray-300 rounded-[10px] px-4 py-3.5">
                                             <TextInput
                                                 value={currPassword}
-                                                onChangeText={setPassword}
+                                                onChangeText={setCurrPassword}
                                                 secureTextEntry={!showCurrent}
-                                                placeholder='Enter new password'
-                                                className="flex-1 text-[#1C274C] font-bold text-[18px] tracking-widest pt-1"
+                                                placeholder="Enter your current password"
+                                                placeholderTextColor="#9CA3AF"
+                                                className="flex-1 text-[#1C274C] font-bold text-[16px] p-0"
                                             />
                                             <TouchableOpacity onPress={() => setShowCurrent(!showCurrent)}>
                                                 {showCurrent ? <Eye size={18} color="#6B7280" /> : <EyeOff size={18} color="#6B7280" />}
@@ -224,7 +224,7 @@ export default function StaffSettingsPage() {
                                         </View>
                                     </View>
 
-                                    {/* New Password */}
+
                                     <View className="mb-4">
                                         <Text className="text-[13px] font-bold text-gray-500 mb-1.5 ml-1">New Password</Text>
                                         <View className="w-full flex-row items-center justify-between border border-gray-300 rounded-[10px] px-4 py-3.5">
@@ -233,7 +233,8 @@ export default function StaffSettingsPage() {
                                                 onChangeText={setPassword}
                                                 secureTextEntry={!showPassword}
                                                 placeholder='Enter your new password'
-                                                className="flex-1 text-[#1C274C] font-bold text-[18px] tracking-widest pt-1"
+                                                placeholderTextColor="#9CA3AF"
+                                                className="flex-1 text-[#1C274C] font-bold text-[16px] p-0"
                                             />
                                             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                                                 {showPassword ? <Eye size={18} color="#6B7280" /> : <EyeOff size={18} color="#6B7280" />}
@@ -241,7 +242,6 @@ export default function StaffSettingsPage() {
                                         </View>
                                     </View>
 
-                                    {/* Confirm Password */}
                                     <View>
                                         <Text className="text-[13px] font-bold text-gray-500 mb-1.5 ml-1">Confirm Password</Text>
                                         <View className="w-full flex-row items-center justify-between border border-gray-300 rounded-[10px] px-4 py-3.5">
@@ -250,7 +250,8 @@ export default function StaffSettingsPage() {
                                                 onChangeText={setPasswordConfirmation}
                                                 secureTextEntry={!showConfirm}
                                                 placeholder='Confirm new password'
-                                                className="flex-1 text-[#1C274C] font-bold text-[18px] tracking-widest pt-1"
+                                                placeholderTextColor="#9CA3AF"
+                                                className="flex-1 text-[#1C274C] font-bold text-[16px] p-0"
                                             />
                                             <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
                                                 {showConfirm ? <Eye size={18} color="#6B7280" /> : <EyeOff size={18} color="#6B7280" />}
@@ -317,7 +318,7 @@ export default function StaffSettingsPage() {
                             <TouchableOpacity
                                 onPress={onSavePressed}
                                 disabled={isSaving}
-                                className={`w-full py-4 rounded-full flex-row justify-center items-center ${isSaving ? 'bg-[#0F766E]/70' : 'bg-[#0F766E]'}`}
+                                className={`w-full py-4 rounded-full flex-row justify-center items-center ${isSaving ? 'bg-[#0066FF]/70' : 'bg-[#0066FF]'}`}
                                 activeOpacity={0.8}
                             >
                                 <Text className="text-white text-center font-bold text-[15px]">

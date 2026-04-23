@@ -19,10 +19,12 @@ import * as ImagePicker from 'expo-image-picker';
 import LogoutConfirmationModal from '../../components/common/LogoutConfirmationModal';
 import { useLogout } from '@/hooks/authHooks';
 import { useProfile } from '@/hooks/globalHooks';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function UserSettingsPage() {
     const router = useRouter();
-    
+    const insets = useSafeAreaInsets();
+
     // 1. UI Control States
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -110,7 +112,13 @@ export default function UserSettingsPage() {
                     contentContainerStyle={{ flexGrow: 1 }}
                     bounces={false}
                 >
-                    <View className="bg-white rounded-b-[40px] border-b border-gray-200 shadow-sm">
+                    <View className="bg-white rounded-b-[40px] border-b border-l border-r border-[#E5E7EB]" style={{
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.05,
+                        shadowRadius: 10,
+                        elevation: 3,
+                    }}>
                         <View className="px-6 pt-8 pb-10">
                             <View className="flex-row justify-between items-center mb-10">
                                 <Text className="text-3xl font-extrabold text-[#1C274C]">Profile</Text>
@@ -118,6 +126,7 @@ export default function UserSettingsPage() {
                                     <TouchableOpacity
                                         onPress={() => setIsEditing(true)}
                                         className="w-9 h-9 bg-gray-100 rounded-[10px] items-center justify-center border border-gray-200"
+                                        activeOpacity={0.7}
                                     >
                                         <Pencil size={16} color="#9CA3AF" />
                                     </TouchableOpacity>
@@ -238,7 +247,11 @@ export default function UserSettingsPage() {
                         </View>
                     </View>
 
-                    <View className="px-6 pt-8 pb-8 flex-col gap-y-4">
+                    <View 
+                        className="px-6 pt-8 pb-8 flex-col gap-y-4"
+                        style={{ paddingBottom: Math.max(insets.bottom + 36, 130) }}
+                    
+                    >
                         {isEditing && (
                             <TouchableOpacity
                                 onPress={onSavePressed}
