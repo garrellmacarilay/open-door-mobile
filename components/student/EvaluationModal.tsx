@@ -56,10 +56,12 @@ export default function EvaluationModal({ visible, onClose, appointmentTitle, bo
         <Modal
             animationType="fade"
             transparent={true}
+            statusBarTranslucent
+            navigationBarTranslucent
             visible={visible}
             onRequestClose={handleDismiss}
         >
-            <View className="flex-1 bg-black/40 justify-center items-center px-6">
+            <View className="absolute top-0 left-0 right-0 bottom-0 bg-black/40 justify-center items-center px-6">
                 <View
                     className="bg-white w-full rounded-[24px] overflow-hidden"
                     style={{

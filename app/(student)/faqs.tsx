@@ -62,9 +62,7 @@ export default function FAQs() {
             <View className="px-6 pt-4 pb-6 bg-white border-b border-gray-100">
                 <View className="flex-row items-center justify-between mb-2">
                     <Text className="text-3xl font-bold text-[#1F3463]">Help Center</Text>
-                    <View className="w-10 h-10 rounded-full bg-[#1F3463] items-center justify-center">
-                        <Ionicons name="help-circle-outline" size={24} color="#ffffff" />
-                    </View>
+                    
                 </View>
                 <Text className="text-sm text-gray-500">Student Support & FAQs</Text>
             </View>
