@@ -324,6 +324,9 @@ export default function AdminAnalyticsPage() {
                                     <View className="bg-white border border-gray-100 rounded-[10px] px-4 py-3 mb-2">
                                         <Text className="text-gray-600 text-[12px] italic">
                                             {item.feedback}
+                                            
+
+                                            
                                         </Text>
                                     </View>
                                 
