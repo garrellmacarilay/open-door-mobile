@@ -73,10 +73,12 @@ export default function CalendarWidget({
                 const fadeDay = dayNumber <= 0 ? prevMonthDays + dayNumber : dayNumber - daysInMonth;
 
                 days.push(
-                    <View key={`empty-${i}`} className="w-[14.28%] aspect-square flex items-center justify-center">
-                        <Text className="text-[13px] font-bold text-gray-300">
-                            {fadeDay}
-                        </Text>
+                    <View key={`empty-${i}`} className="w-[14.28%] aspect-square items-center justify-center relative">
+                        <View className="w-9 h-9 rounded-full items-center justify-center">
+                            <Text className="text-[14px] font-bold text-gray-300">
+                                {fadeDay}
+                            </Text>
+                        </View>
                     </View>
                 );
                 continue;
