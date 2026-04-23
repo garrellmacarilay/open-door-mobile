@@ -73,7 +73,7 @@ function DropdownModal({ visible, title, options, selectedId, onSelect, onClose 
                         }}
                     />
                 </View>
-            </View>
+            </TouchableOpacity>
         </Modal>
     );
 }
@@ -207,7 +207,7 @@ export default function StudentDashboard() {
                     <View className="mb-6 mt-4">
                         <View className="flex-row items-center justify-between mb-5">
                             <Text className="text-[#1C274C] text-[22px] font-bold tracking-tight">
-                                Appointment Feed
+                                Appointments and Events Feed
                             </Text>
                             {(!isDefaultOffice || selectedStatus !== 'all') && (
                                 <TouchableOpacity 

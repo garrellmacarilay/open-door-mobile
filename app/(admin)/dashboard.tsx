@@ -172,7 +172,7 @@ export default function AdminDashboard() {
                 <View className="px-6 pt-5 pb-4">
                     <View className="flex-row items-center justify-between mb-1">
                         <Text className="text-[#1C274C] text-[24px] font-extrabold tracking-[-0.5px]">
-                            Admin Dashboard
+                            Appointments and Events Feed
                         </Text>
                     </View>
                     <Text className="text-[#6B7280] text-[15px] font-semibold">

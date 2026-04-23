@@ -150,7 +150,7 @@ export default function StaffSettingsPage() {
                             {/* Profile Image */}
                             <View className="items-center mb-8">
                                 <View className="relative">
-                                    <View className="w-28 h-28 rounded-full overflow-hidden border-[3px] border-[#0F766E] bg-gray-100 flex items-center justify-center">
+                                    <View className="w-28 h-28 rounded-full overflow-hidden border-[3px] border-[#0066FF] bg-gray-100 flex items-center justify-center">
                                         {(preview || profileImageUrl) ? (
                                             <Image 
                                                 source={{ uri: preview || profileImageUrl || '' }} 
@@ -163,7 +163,7 @@ export default function StaffSettingsPage() {
                                     </View>
                                     <TouchableOpacity
                                         onPress={handleImagePicker}
-                                        className="absolute -bottom-1 -right-1 w-[34px] h-[34px] rounded-full bg-[#0F766E] border-2 border-white flex items-center justify-center"
+                                        className="absolute -bottom-1 -right-1 w-[34px] h-[34px] rounded-full bg-[#0066FF] border-2 border-white items-center justify-center"
                                     >
                                         <Camera size={16} color="#FFF" />
                                     </TouchableOpacity>
@@ -179,8 +179,8 @@ export default function StaffSettingsPage() {
                                         <Text className="text-[#9CA3AF] font-bold text-[14px] ml-2">{(user as any)?.email}</Text>
                                     </View>
                                     <View className="flex-row items-center justify-center">
-                                        <Ionicons name="briefcase-outline" size={18} color="#0F766E" />
-                                        <Text className="text-[#0F766E] font-extrabold text-[15px] ml-2">Office Staff</Text>
+                                        <Ionicons name="briefcase-outline" size={18} color="#0066FF" />
+                                        <Text className="text-[#0066FF] font-extrabold text-[15px] ml-2">Office Staff</Text>
                                     </View>
                                 </View>
                             ) : (
