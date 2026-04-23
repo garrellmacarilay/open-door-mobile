@@ -128,7 +128,7 @@ export default function AdminAnalyticsPage() {
                     <View className="flex-row gap-2 mb-6">
                         {topStats.map((stat, index) => (
                             <View key={index} className="flex-1 bg-[#13244F] rounded-[10px] px-2 py-3 items-center">
-                                <Text className="text-white text-[30px] leading-[42px] font-extrabold mb-1">{stat.value}</Text>
+                                <Text className="text-white text-[20px] leading-[42px] font-extrabold mb-1">{stat.value}</Text>
                                 <Text className="text-[#C8D0E3] text-[10px] font-semibold text-center leading-[12px]">{stat.label}</Text>
                             </View>
                         ))}

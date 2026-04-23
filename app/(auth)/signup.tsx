@@ -173,6 +173,9 @@ export default function SignupPage() {
                                             <EyeOff size={22} color="#9CA3AF" />
                                         }
                                     </TouchableOpacity>
+                                    {fieldErrors.password && (
+                                        <Text className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.password[0]}</Text>
+                                    )}
                                 </View>
 
 

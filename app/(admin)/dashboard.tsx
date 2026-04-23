@@ -172,7 +172,7 @@ export default function AdminDashboard() {
                 <View className="px-6 pt-5 pb-4">
                     <View className="flex-row items-center justify-between mb-1">
                         <Text className="text-[#1C274C] text-[24px] font-extrabold tracking-[-0.5px]">
-                            Appointments and Events Feed
+                            Admin Dashboard
                         </Text>
                     </View>
                     <Text className="text-[#6B7280] text-[15px] font-semibold">
@@ -219,7 +219,7 @@ export default function AdminDashboard() {
                     <View className="mb-6 mt-4">
                         <View className="flex-row items-center justify-between mb-5">
                             <Text className="text-[#1C274C] text-[22px] font-bold tracking-tight">
-                                Appointment Feed
+                                Appointments and Events Feed
                             </Text>
                             {(!isDefaultOffice || selectedStatus !== 'all') && (
                                 <TouchableOpacity 

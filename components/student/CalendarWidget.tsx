@@ -205,7 +205,7 @@ export default function CalendarWidget({
                         </View>
                     </View>
                 ) : (
-                    <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center justify-between py-1">
                         <View className="flex-1 items-center">
                             <Text className="text-[20px] font-bold text-white tracking-wide">
                                 {monthName}
@@ -215,11 +215,11 @@ export default function CalendarWidget({
                             </Text>
                         </View>
 
-                        <View className="flex-row items-center gap-2">
+                        <View className="flex-row items-center gap-3">
                             <TouchableOpacity
                                 onPress={() => navigateMonth('prev')}
                                 activeOpacity={0.7}
-                                className="w-9 h-9 rounded-lg bg-white items-center justify-center"
+                                className="w-11 h-11 rounded-2xl bg-white items-center justify-center"
                             >
                                 <ChevronLeft size={18} color="#18233D" strokeWidth={2.5} />
                             </TouchableOpacity>
