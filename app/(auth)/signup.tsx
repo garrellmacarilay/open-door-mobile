@@ -1,12 +1,12 @@
 
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useRouter } from "expo-router";
-import { Eye, EyeOff } from "lucide-react-native";
+import { Eye, EyeOff, Lock } from "lucide-react-native";
 import React, { useState } from "react";
 import { Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGoogleLogin } from '../../hooks/authHooks';
-
+import { useAuthRegistration } from '../../hooks/authHooks';
 
 
 export default function SignupPage() {
@@ -17,28 +17,48 @@ export default function SignupPage() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [acceptedTerms, setAcceptedTerms] = useState(false);
+
+    const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string[] }>({})
+
     const router = useRouter();
 
     const { handleGoogleLogin } = useGoogleLogin();
+    const { register, loading, error} = useAuthRegistration()
 
     const handleSignup = async () => {
-        if (!firstName || !lastName || !email || !password || !confirmPassword) {
-            alert("Please fill in all fields");
-            return;
-        }
+        setFieldErrors({})
 
         if (password !== confirmPassword) {
-            alert("Passwords do not match");
+            setFieldErrors({ password_confirmation: ['Passwords do not match'] });
             return;
         }
+        
+        try {
+            const res = await register({
+                full_name: name,
+                email: email,
+                password: password,
+                password_confirmation: confirmPassword
+            })
 
-        if (!acceptedTerms) {
-            alert("Please accept Terms of Service and Privacy Policy");
-            return;
-        }
-
-        alert("Signup logic would go here!");
+            if (res.success) {
+                router.push({
+                    pathname: '/(auth)/verify-otp',
+                    params: { email: email }
+                })
+            }
+        } catch (err: any) {
+            console.log("🚨 Signup Error Caught:", err);
+            console.log("🚨 Error Response:", err.response);
+            console.log("🚨 Error Data:", err.response?.data);
+            
+            if (err.response?.data?.errors) {
+                console.log("📝 Setting Field Errors:", err.response.data.errors);
+                setFieldErrors(err.response.data.errors);
+            } else {
+                console.log("⚠️ No field errors found in error response");
+            }
+        }   
     };
 
     return (
@@ -100,22 +120,16 @@ export default function SignupPage() {
                             <View className="space-y-4 gap-4">
                                 <View>
                                     <TextInput
-                                        placeholder="First Name"
-                                        value={firstName}
-                                        onChangeText={setFirstName}
-                                        className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 bg-gray-50 focus:border-blue-500 focus:bg-white"
+                                        placeholder="Full Name"
+                                        value={name}
+                                        onChangeText={setName}
+                                        className={`w-full px-4 py-3.5 border rounded-xl text-gray-800 bg-gray-50 focus:bg-white 
+                                             ${fieldErrors.full_name ? 'border-red-500' : 'border-gray-200 focus:border-blue-500'}`}
                                         placeholderTextColor="#9CA3AF"
                                     />
-                                </View>
-
-                                <View>
-                                    <TextInput
-                                        placeholder="Last Name"
-                                        value={lastName}
-                                        onChangeText={setLastName}
-                                        className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 bg-gray-50 focus:border-blue-500 focus:bg-white"
-                                        placeholderTextColor="#9CA3AF"
-                                    />
+                                    {fieldErrors.full_name && (
+                                        <Text className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.full_name[0]}</Text>
+                                    )}
                                 </View>
 
                                 <View>
@@ -123,11 +137,15 @@ export default function SignupPage() {
                                         placeholder="Email"
                                         value={email}
                                         onChangeText={setEmail}
-                                        className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 bg-gray-50 focus:border-blue-500 focus:bg-white"
-                                        placeholderTextColor="#9CA3AF"
+                                       className={`w-full px-4 py-3.5 border rounded-xl text-gray-800 bg-gray-50 focus:bg-white 
+                                            ${fieldErrors.email ? 'border-red-500' : 'border-gray-200 focus:border-blue-500'}`}
                                         autoCapitalize="none"
                                         keyboardType="email-address"
+                                        placeholderTextColor="#9CA3AF"
                                     />
+                                    {fieldErrors.email && (
+                                        <Text className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.email[0]}</Text>
+                                    )}
                                 </View>
 
                                 <View className="relative">
@@ -136,7 +154,9 @@ export default function SignupPage() {
                                         value={password}
                                         onChangeText={setPassword}
                                         secureTextEntry={!showPassword}
-                                        className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 bg-gray-50 focus:border-blue-500 focus:bg-white pr-12"
+                                        contextMenuHidden={true}
+                                        className={`w-full px-4 py-3.5 border rounded-xl text-gray-800 bg-gray-50 focus:bg-white pr-12 
+                                            ${fieldErrors.password ? 'border-red-500' : 'border-gray-200 focus:border-blue-500'}`}
                                         placeholderTextColor="#9CA3AF"
                                     />
                                     <TouchableOpacity
@@ -168,6 +188,34 @@ export default function SignupPage() {
                                             <EyeOff size={22} color="#9CA3AF" />
                                         }
                                     </TouchableOpacity>
+                                    {fieldErrors.password && (
+                                       <Text className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.password[0]}</Text>
+                                    )}
+                                </View>
+
+                                <View className="relative">
+                                    <TextInput
+                                        placeholder="Confirm Password"
+                                        value={confirmPassword}
+                                        onChangeText={setConfirmPassword}
+                                        secureTextEntry={!showConfirmPassword}
+                                        contextMenuHidden={true}
+                                        className={`w-full px-4 py-3.5 border rounded-xl text-gray-800 bg-gray-50 focus:bg-white pr-12 
+                                            ${fieldErrors.password_confirmation ? 'border-red-500' : 'border-gray-200 focus:border-blue-500'}`}
+                                        placeholderTextColor="#9CA3AF"
+                                    />
+                                    <TouchableOpacity
+                                        onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute right-4 top-3.5"
+                                    >
+                                        {showConfirmPassword ?
+                                            <EyeOff size={22} color="#9CA3AF" /> :
+                                            <Eye size={22} color="#9CA3AF" />
+                                        }
+                                    </TouchableOpacity>
+                                    {fieldErrors.password_confirmation && (
+                                        <Text className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.password_confirmation[0]}</Text>
+                                    )}
                                 </View>
 
                                 {/* Terms Checkbox (Optional but good for signup) */}
@@ -189,10 +237,11 @@ export default function SignupPage() {
                                 {/* Signup Button */}
                                 <TouchableOpacity
                                     onPress={handleSignup}
+                                    disabled={loading}
                                     className="w-full bg-[#122141] py-4 rounded-xl shadow-lg shadow-blue-600/30 active:bg-blue-700 mt-2"
                                 >
                                     <Text className="text-white text-center font-bold text-lg">
-                                        Sign Up
+                                        {loading ? "Creating Account..." : "Sign Up"}
                                     </Text>
                                 </TouchableOpacity>
 
@@ -207,7 +256,7 @@ export default function SignupPage() {
 
                             {/* Google Signup */}
                             <TouchableOpacity
-                                onPress={() => router.push('/(auth)/verify-otp')}
+                                onPress={handleGoogleLogin}
                                 className="flex-row items-center justify-center gap-3 py-3.5 rounded-xl border border-gray-200 bg-white active:bg-gray-50"
                             >
                                 <Image

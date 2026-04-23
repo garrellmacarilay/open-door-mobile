@@ -15,6 +15,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGoogleLogin, useLogin } from '../../hooks/authHooks';
+import { useProfile } from '../../hooks/globalHooks';   
+
+
 
 export default function LoginPage() {
     const [email, setEmail] = useState<string>("");
@@ -24,11 +27,13 @@ export default function LoginPage() {
     const router = useRouter();
 
     const { handleGoogleLogin } = useGoogleLogin();
-    const { handleLogin, loading } = useLogin();
+    const { handleLogin, loading, errors, setErrors } = useLogin();
 
     const handleSubmit = async () => {
-        if (!email || !password) {
-            alert("Please fill in all fields");
+        if (!email.trim() || !password.trim()) {
+            setErrors({
+                general: ['Please enter both email and password']
+            });
             return;
         }
         await handleLogin(email, password);
@@ -93,18 +98,36 @@ export default function LoginPage() {
                                 elevation: 8,
                             }}
                         >
+                            {/* ERROR MESSAGE */}
+                            {errors?.general && !loading ? (
+                                <View className="mb-6 p-4 rounded-xl border-l-4 bg-red-50 border-red-500">
+                                    <Text className="text-[14px] font-medium text-red-800">
+                                        {errors.general[0]}
+                                    </Text>
+
+                                </View>
+                            ) : null}
                             {/* Email Input */}
+
                             <View className="mb-4">
                                 <TextInput
-                                    placeholder="Email"
+                                    placeholder="Enter your email"
                                     value={email}
-                                    onChangeText={setEmail}
-                                    className="w-full px-4 py-4 border-[1.5px] border-gray-200 rounded-xl text-gray-800 bg-gray-50 text-[15px]"
+                                    onChangeText={(text) => {
+                                        setEmail(text)
+                                        if (errors?.email) setErrors({ ...errors, email: undefined})
+                                    }}
+                                    className={`w-full px-4 py-4 border-[1.5px] rounded-xl text-gray-800 bg-gray-50 text-[15px] ${
+                                        errors?.email ? 'border-red-500' : 'border-gray-200'
+                                    }`}
                                     placeholderTextColor="#9CA3AF"
                                     autoCapitalize="none"
                                     keyboardType="email-address"
                                     autoCorrect={false}
                                 />
+                                {errors?.email && (
+                                    <Text className="text-red-500 text-[12px] mt-1 ml-1">{errors.email[0]}</Text>
+                                )}
                             </View>
 
                             {/* Password Input */}
@@ -112,9 +135,15 @@ export default function LoginPage() {
                                 <TextInput
                                     placeholder="Password"
                                     value={password}
-                                    onChangeText={setPassword}
+                                    onChangeText={(text) => {
+                                        setPassword(text)
+                                        if (errors?.password) setErrors({ ...errors, password: undefined });
+                                    }}
                                     secureTextEntry={!showPassword}
-                                    className="w-full px-4 py-4 border-[1.5px] border-gray-200 rounded-xl text-gray-800 bg-gray-50 pr-12 text-[15px]"
+                                    contextMenuHidden={true}
+                                    className={`w-full px-4 py-4 border-[1.5px] border-gray-200 rounded-xl text-gray-800 bg-gray-50 pr-12 text-[15px] ${
+                                        errors?.password ? 'border-red-500' : 'border-gray-200'
+                                    }`}
                                     placeholderTextColor="#9CA3AF"
                                     autoCapitalize="none"
                                 />
@@ -129,6 +158,9 @@ export default function LoginPage() {
                                         <EyeOff size={20} color="#9CA3AF" />
                                     )}
                                 </TouchableOpacity>
+                                {errors?.password && (
+                                    <Text className="text-red-500 text-[12px] mt-1 ml-1">{errors.password[0]}</Text>
+                                )}
                             </View>
 
                             {/* Remember Me & Forgot Password */}
@@ -185,7 +217,7 @@ export default function LoginPage() {
                         
                             {/* Google Login Button */}
                             <TouchableOpacity
-                                onPress={() => router.push('/(auth)/verify-otp')}
+                                onPress={handleGoogleLogin}
                                 className="flex-row items-center justify-center py-4 rounded-xl border-[1.5px] border-gray-200 bg-white mb-6"
                                 activeOpacity={0.7}
                             >

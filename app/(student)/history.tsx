@@ -1,63 +1,36 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import HistoryModal from '../../components/student/HistoryModal';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-// Dummy Data
-const HISTORY_DATA = [
-    {
-        id: 'APPT-129',
-        title: 'Medical Services',
-        date: '03-10-2026',
-        time: '10:00 AM',
-        status: 'completed'
-    },
-    {
-        id: 'APPT-132',
-        title: 'Student Organization',
-        date: '03-12-2026',
-        time: '10:00 AM',
-        status: 'pending'
-    },
-    {
-        id: 'APPT-130',
-        title: 'Student Internship',
-        date: '03-14-2026',
-        time: '10:00 AM',
-        status: 'declined'
-    },
-    {
-        id: 'APPT-131',
-        title: 'Student Publication',
-        date: '03-16-2026',
-        time: '10:00 AM',
-        status: 'approved',
-        topic: 'Meet with the Paper Adviser',
-        group_members: 'Individual'
-    }
-];
+import { useHistory, BookingHistory } from '@/hooks/studentHooks'; // Ensure BookingHistory is exported from your hook file
 
 type FilterStatus = 'all' | 'pending' | 'approved' | 'completed' | 'declined';
 
 export default function History() {
-    const insets = useSafeAreaInsets();
+    // 1. Hook Integration
+    const { bookings, loading, refreshing, fetchHistoryBookings } = useHistory();
+    
+    // 2. State
     const [activeFilter, setActiveFilter] = useState<FilterStatus>('all');
-    const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
+    const [selectedAppointment, setSelectedAppointment] = useState<BookingHistory | null>(null);
 
+    // 3. Status Styling Logic (Backend status is typically lowercase)
     const getStatusStyle = (status: string) => {
-        switch (status) {
+        const s = status.toLowerCase();
+        switch (s) {
             case 'pending': return { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Pending' };
             case 'approved': return { bg: 'bg-green-100', text: 'text-green-700', label: 'Approved' };
             case 'completed': return { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Completed' };
             case 'declined': return { bg: 'bg-red-100', text: 'text-red-700', label: 'Declined' };
-            default: return { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Unknown' };
+            default: return { bg: 'bg-gray-100', text: 'text-gray-700', label: status };
         }
     };
 
-    const filteredData = activeFilter === 'all'
-        ? HISTORY_DATA
-        : HISTORY_DATA.filter(item => item.status === activeFilter);
+    // 4. Memoized Filtering Logic
+    const filteredData = useMemo(() => {
+        if (activeFilter === 'all') return bookings;
+        return bookings.filter(item => item.status.toLowerCase() === activeFilter);
+    }, [bookings, activeFilter]);
 
     const FilterButton = ({ label, value }: { label: string; value: FilterStatus }) => {
         const isActive = activeFilter === value;
@@ -75,7 +48,6 @@ export default function History() {
 
     return (
         <View className="flex-1 bg-gray-50">
-
             {/* Header */}
             <View className="bg-white px-5 pt-4 pb-4 border-b border-gray-100">
                 <View className="flex-row items-start justify-between mb-1">
@@ -87,7 +59,16 @@ export default function History() {
                             Consultation History
                         </Text>
                     </View>
-                   
+                    <TouchableOpacity 
+                        onPress={() => fetchHistoryBookings()}
+                        className="w-10 h-10 items-center justify-center bg-[#1C2A48] rounded-lg"
+                    >
+                        {loading ? (
+                            <ActivityIndicator size="small" color="white" />
+                        ) : (
+                            <Ionicons name="refresh" size={20} color="white" />
+                        )}
+                    </TouchableOpacity>
                 </View>
             </View>
 
@@ -103,19 +84,28 @@ export default function History() {
             </View>
 
             {/* History List */}
-            <ScrollView className="flex-1 px-5 pt-4" showsVerticalScrollIndicator={false}>
-                {filteredData.map((item, index) => {
+            <ScrollView 
+                className="flex-1 px-5 pt-4" 
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={() => fetchHistoryBookings(true)} />
+                }
+            >
+                {filteredData.map((item) => {
                     const statusStyle = getStatusStyle(item.status);
                     return (
-                        <View key={index} className="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-gray-100">
+                        <View key={item.id} className="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-gray-100">
                             {/* Header with ID and Status */}
                             <View className="flex-row items-start justify-between mb-3">
                                 <View className="flex-1">
                                     <Text className="text-gray-500 text-xs mb-1" style={{ fontFamily: 'Inter-Regular' }}>
-                                        {item.id}
+                                        {item.reference_code}
                                     </Text>
                                     <Text className="text-[#1C2A48] text-base font-bold" style={{ fontFamily: 'Poppins-Bold' }}>
-                                        {item.title}
+                                        {item.office_name}
+                                    </Text>
+                                    <Text className="text-gray-400 text-[11px]" style={{ fontFamily: 'Inter-Regular' }}>
+                                        {item.service_type}
                                     </Text>
                                 </View>
                                 <View className={`px-3 py-1.5 rounded-full ${statusStyle.bg}`}>
@@ -125,20 +115,22 @@ export default function History() {
                                 </View>
                             </View>
 
-                            {/* Date and Time */}
+                            {/* Date and Feedback Info */}
                             <View className="flex-row items-center gap-4 mb-4">
                                 <View className="flex-row items-center gap-1.5">
                                     <Ionicons name="calendar-outline" size={14} color="#6B7280" />
                                     <Text className="text-gray-600 text-xs" style={{ fontFamily: 'Inter-Regular' }}>
-                                        {item.date}
+                                        {item.consultation_date}
                                     </Text>
                                 </View>
-                                <View className="flex-row items-center gap-1.5">
-                                    <Ionicons name="time-outline" size={14} color="#6B7280" />
-                                    <Text className="text-gray-600 text-xs" style={{ fontFamily: 'Inter-Regular' }}>
-                                        {item.time}
-                                    </Text>
-                                </View>
+                                {item.hasFeedback && (
+                                    <View className="flex-row items-center gap-1.5">
+                                        <Ionicons name="star" size={14} color="#F59E0B" />
+                                        <Text className="text-gray-600 text-xs" style={{ fontFamily: 'Inter-Regular' }}>
+                                            {item.rating}/5
+                                        </Text>
+                                    </View>
+                                )}
                             </View>
 
                             {/* View Appointment Button */}
@@ -155,7 +147,8 @@ export default function History() {
                     );
                 })}
 
-                {filteredData.length === 0 && (
+                {/* Empty State */}
+                {!loading && filteredData.length === 0 && (
                     <View className="bg-white rounded-2xl p-12 items-center">
                         <Ionicons name="document-text-outline" size={48} color="#D1D5DB" />
                         <Text className="text-gray-400 text-center mt-3" style={{ fontFamily: 'Inter-Regular' }}>
@@ -164,8 +157,7 @@ export default function History() {
                     </View>
                 )}
 
-                {/* Padding for bottom nav */}
-                <View style={{ height: Math.max(insets.bottom + 80, 112) }} />
+                <View className="h-24" />
             </ScrollView>
 
             <HistoryModal

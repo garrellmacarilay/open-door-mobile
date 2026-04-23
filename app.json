@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "open-doo-mobile",
+    "name": "OpenDoor",
     "slug": "open-doo-mobile",
-    "version": "1.0.0",
+    "version": "1.0.6",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/psaslogo.png",
     "scheme": "opendoomobile",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -18,9 +18,9 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/images/psaslogo.png",
+        "backgroundImage": "./assets/images/lvccgate.jpg",
+        "monochromeImage": "./assets/images/psaslogo.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -44,7 +44,10 @@
           }
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-secure-store",
+      "expo-sharing",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -53,14 +56,15 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "da7bd275-92dd-44a0-b486-7b827a96fde2"
+        "projectId": "09088e89-77d1-4ad4-8095-c3fa1edf35de"
       }
     },
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/da7bd275-92dd-44a0-b486-7b827a96fde2"
-    }
+      "url": "https://u.expo.dev/09088e89-77d1-4ad4-8095-c3fa1edf35de"
+    },
+    "owner": "vinceaintreadin"
   }
 }

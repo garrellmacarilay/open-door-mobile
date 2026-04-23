@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import {
-    View, Text, TouchableOpacity, Modal, ScrollView, TextInput,
+    View, Text, TouchableOpacity, Modal, ScrollView, TextInput, ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import EvaluationModal from '../student/EvaluationModal';
+import { Appointment } from '@/hooks/staffHooks';
+import { useUpdateStatus } from '@/hooks/staffAdminHooks';
 
 interface StaffHistoryModalProps {
     visible: boolean;
-    appointment: any;
+    appointment: Appointment | null;   
     onClose: () => void;
+    onRefresh: () => void;
 }
 
 function DeclineModal({
@@ -75,8 +79,11 @@ function DeclineModal({
     );
 }
 
-export default function StaffHistoryModal({ visible, appointment, onClose }: StaffHistoryModalProps) {
+export default function StaffHistoryModal({ visible, appointment, onClose, onRefresh }: StaffHistoryModalProps) {
+    const [showEvaluation, setShowEvaluation] = useState(false);
     const [showDeclineModal, setShowDeclineModal] = useState(false);
+    const { updateStatus, loading } = useUpdateStatus();
+    const [actionType, setActionType] = useState<'approved' | 'declined' | 'completed' | null>(null);
 
     if (!appointment) return null;
 
@@ -90,21 +97,37 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
         }
     };
 
-    const statusStyle = getStatusStyle(appointment.status);
-    const status = appointment.status.toLowerCase();
+    const statusStyle = getStatusStyle(appointment.details.status);
+    const status = appointment.details.status.toLowerCase();
     const isPending = status === 'pending';
+    const isApproved = status === 'approved';
+    const isCompleted = status === 'completed';
+
+    const handleAction = async (newStatus: 'approved' | 'completed' | 'declined', reason?: string) => {
+        setActionType(newStatus);
+        
+        const payload = {
+            status: newStatus,
+            ...(reason ? {declined_reason: reason} : {})
+        }
+        const success = await updateStatus(appointment.id, payload);
+
+        if (success) {
+            onRefresh(); // Refresh the list in the background
+            onClose();   // Close the modal
+        }
+        setActionType(null);
+    };
 
     return (
         <>
             <Modal
                 animationType="slide"
                 transparent
-                statusBarTranslucent
-                navigationBarTranslucent
                 visible={visible}
                 onRequestClose={onClose}
             >
-                <View className="absolute top-0 left-0 right-0 bottom-0 justify-end bg-black/40">
+                <View className="flex-1 justify-end bg-black/40">
                     <View className="bg-white rounded-t-[32px] p-6 h-[88%] shadow-lg">
 
                         {/* Header */}
@@ -112,11 +135,11 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
                             <View className="flex-row items-center gap-3">
                                 <View className={`px-4 py-1.5 rounded-full border ${statusStyle.bg}`}>
                                     <Text className={`text-[12px] font-bold capitalize ${statusStyle.text}`}>
-                                        {appointment.status}
+                                        {appointment.details.status}
                                     </Text>
                                 </View>
                                 <Text className="text-gray-400 text-[13px] font-bold tracking-wider">
-                                    {appointment.id}
+                                    {appointment.details.reference_code}
                                 </Text>
                             </View>
                             <TouchableOpacity onPress={onClose} className="p-1" activeOpacity={0.6}>
@@ -127,7 +150,7 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
                         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
 
                             {/* Office Category */}
-                            <Text className="text-gray-400 text-[14px] font-bold mb-1">Office Category</Text>
+                            <Text className="text-gray-400 text-[14px] font-bold mb-1">Student Name</Text>
                             <Text className="text-[#111827] text-[26px] font-extrabold mb-8 tracking-tight">
                                 {appointment.title}
                             </Text>
@@ -138,14 +161,24 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
                                     <Text className="text-gray-400 text-[13px] font-bold mb-3">Booked Date</Text>
                                     <View className="flex-row items-center gap-2">
                                         <Ionicons name="calendar-outline" size={18} color="#9CA3AF" />
-                                        <Text className="text-gray-600 font-bold text-[14px]">{appointment.date}</Text>
+                                        <Text className="text-gray-600 font-bold text-[14px]">{new Date(appointment.start).toLocaleDateString('en-US', {
+                                                month: 'long',
+                                                day: 'numeric',
+                                                year: 'numeric'
+                                            })}
+                                        </Text>
                                     </View>
                                 </View>
                                 <View className="flex-1 bg-[#F9FAFB] rounded-[20px] p-5 border border-gray-100">
                                     <Text className="text-gray-400 text-[13px] font-bold mb-3">Booked Time</Text>
                                     <View className="flex-row items-center gap-2">
                                         <Ionicons name="time-outline" size={18} color="#9CA3AF" />
-                                        <Text className="text-gray-600 font-bold text-[14px]">{appointment.time}</Text>
+                                        <Text className="text-gray-600 font-bold text-[14px]">{new Date(appointment.start).toLocaleTimeString('en-US', {
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                hour12: true
+                                            })}
+                                        </Text>
                                     </View>
                                 </View>
                             </View>
@@ -153,7 +186,7 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
                             {/* Detailed Topic */}
                             <Text className="text-gray-400 text-[14px] font-bold mb-3">Detailed Topic</Text>
                             <View className="bg-white border border-gray-100 rounded-[16px] p-5 mb-8 shadow-sm">
-                                <Text className="text-gray-400 font-bold text-[15px]">Internship Preparation</Text>
+                                <Text className="text-gray-400 font-bold text-[15px]">{appointment.details.concern_description}</Text>
                             </View>
 
                             {/* Members and Files */}
@@ -163,7 +196,7 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
                                         <Ionicons name="people-outline" size={18} color="#9CA3AF" />
                                         <Text className="text-gray-400 font-bold text-[14px]">Members</Text>
                                     </View>
-                                    <Text className="text-gray-300 font-bold text-[13px]">Individual</Text>
+                                    <Text className="text-gray-300 font-bold text-[13px]">{appointment.details.group_members ?? 'Individual' }</Text>
                                 </View>
                                 <View className="w-[1px] h-12 bg-gray-100" />
                                 <View className="flex-1 items-center justify-center">
@@ -171,35 +204,89 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
                                         <Ionicons name="attach-outline" size={18} color="#9CA3AF" />
                                         <Text className="text-gray-400 font-bold text-[14px]">Files</Text>
                                     </View>
-                                    <Text className="text-gray-300 font-bold text-[13px]">No Upload</Text>
+                                    <Text className="text-gray-300 font-bold text-[13px]">{appointment.details.attachment_name ?? 'No Upload'}</Text>
                                 </View>
                             </View>
 
                             {/* Footer Actions */}
                             {isPending && (
-                                <View className="flex-row gap-4">
+                                <View className="flex-row gap-3">
+                                    {/* Approve Button */}
                                     <TouchableOpacity
                                         activeOpacity={0.8}
-                                        className="flex-1 bg-[#F44336] rounded-[10px] py-3.5 items-center"
-                                        onPress={() => setShowDeclineModal(true)}
+                                        className="flex-1 bg-[#4BDB4B] border border-[#4BDB4B] rounded-[14px] py-4 items-center justify-center"
+                                        onPress={() => handleAction('approved')}
+                                        disabled={loading}
                                     >
-                                        <Text className="text-white font-bold text-[15px]">Decline</Text>
+                                        {loading && actionType === 'approved' ? (
+                                            <ActivityIndicator size="small" color="#FFFFFF" />
+                                        ) : (
+                                            <Text className={`text-[#FFFFFF] font-bold ${loading ? 'opacity-50' : ''}`}>
+                                                Approve
+                                            </Text>
+                                        )}
                                     </TouchableOpacity>
 
+                                    {/* Decline Button */}
                                     <TouchableOpacity
                                         activeOpacity={0.8}
-                                        className="flex-1 bg-[#45C943] rounded-[10px] py-3.5 items-center"
-                                        onPress={() => {
-                                            // TODO: approve action
-                                            onClose();
-                                        }}
+                                        className="flex-1 bg-[#F44336] border border-[#F44336] rounded-[14px] py-4 items-center justify-center"
+                                        onPress={() => setShowDeclineModal(true)}
+                                        disabled={loading}
                                     >
-                                        <Text className="text-white font-bold text-[15px]">Approve</Text>
+                                        {loading && actionType === 'declined' ? (
+                                            <ActivityIndicator size="small" color="#FFFFFF" />
+                                        ) : (
+                                            <Text className={`text-[#FFFFFF] font-bold ${loading ? 'opacity-50' : ''}`}>
+                                                Decline
+                                            </Text>
+                                        )}
                                     </TouchableOpacity>
                                 </View>
                             )}
 
-                            {/* approved / declined / completed -> no footer actions */}
+                            {isApproved && (
+                                <View className="mt-4">
+                                    <TouchableOpacity
+                                        activeOpacity={0.8}
+                                        className="w-full bg-[#5059FF] rounded-[14px] h-[56px] items-center justify-center"
+                                        // Ensure you pass 'completed' here
+                                        onPress={() => handleAction('completed')}
+                                        disabled={loading}
+                                    >
+                                        {/* If the hook is loading AND the current action is 'completed' */}
+                                        {loading && actionType === 'completed' ? (
+                                            <ActivityIndicator size="small" color="#FFFFFF" />
+                                        ) : (
+                                            <Text className="text-[#FFFFFF] font-bold">
+                                                Mark as Completed
+                                            </Text>
+                                        )}
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+
+                            {/* {isCompleted && (
+                                <View>
+                                    <View className="bg-[#F0FDF4] rounded-[20px] p-5 flex-row items-center gap-4 mb-4 border border-[#BBF7D0]">
+                                        <Ionicons name="information-circle-outline" size={26} color="#166534" />
+                                        <View className="flex-1">
+                                            <Text className="text-[#166534] font-bold text-[14px]">Evaluation is Mandatory</Text>
+                                            <Text className="text-[#166534] font-bold text-[14px]">for Completed Services.</Text>
+                                        </View>
+                                    </View>
+                                    <TouchableOpacity
+                                        className="bg-[#0F766E] rounded-full py-4 flex-row items-center justify-center gap-2"
+                                        activeOpacity={0.8}
+                                        onPress={() => setShowEvaluation(true)}
+                                    >
+                                        <Ionicons name="chatbubble-ellipses-outline" size={20} color="white" />
+                                        <Text className="text-white font-bold text-[16px]">Leave Required Feedback</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )} */}
+
+                            {/* approved / declined → no footer actions */}
                         </ScrollView>
                     </View>
                 </View>
@@ -207,12 +294,14 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
 
             <DeclineModal
                 visible={showDeclineModal}
-                onConfirm={(_reason) => {
+                onConfirm={(reason) => {
                     setShowDeclineModal(false);
-                    onClose();
+                    handleAction('declined', reason);
                 }}
                 onCancel={() => setShowDeclineModal(false)}
             />
+
+
         </>
     );
 }

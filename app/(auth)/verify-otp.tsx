@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Check } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -10,16 +10,21 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View
+    View,
+    ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-
+import { useAuthRegistration } from '@/hooks/authHooks';
 
 type VerificationState = 'idle' | 'error' | 'success' | 'verifying';
 
 export default function VerifyOTPPage() {
     const router = useRouter();
+
+    const { email } = useLocalSearchParams<{ email: string }>();
+
+    const { verifyEmail, loading, resendLoading, resendOtp } = useAuthRegistration();
+
     const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
     const [verificationState, setVerificationState] = useState<VerificationState>('idle');
     const [resendTimer, setResendTimer] = useState(60);
@@ -31,9 +36,6 @@ export default function VerifyOTPPage() {
     // Animation values
     const shakeAnimation = useRef(new Animated.Value(0)).current;
     const successScale = useRef(new Animated.Value(0)).current;
-
-    // Mock user email (in real app, this would come from route params or context)
-    const userEmail = "user@example.com";
 
     // Countdown timer for resend
     useEffect(() => {
@@ -49,6 +51,10 @@ export default function VerifyOTPPage() {
     const handleOtpChange = (value: string, index: number) => {
         // Only allow numbers
         if (value && !/^\d+$/.test(value)) return;
+
+        if (verificationState === 'error') {
+            setVerificationState('idle');
+        }
 
         const newOtp = [...otp];
         newOtp[index] = value;
@@ -94,45 +100,57 @@ export default function VerifyOTPPage() {
 
     // Verify OTP
     const handleVerify = async (code: string) => {
-        setVerificationState('verifying');
+       if (!email) {
+        alert("Email missing. Please go back and sign up again.");
+        return;
+       }
+       
+       setVerificationState('verifying')
 
-        // Simulate API call
+       try {
+        const res = await verifyEmail({
+            email: email,
+            verification_code: code
+        })
+
+        if (res.success) {
+            setVerificationState('success')
+            triggerSuccessAnimation()
+
+            setTimeout(() => {
+                router.replace('/(student)/dashboard')
+            }, 1500)
+        }
+       } catch (err: any) {
+        setVerificationState('error');
+        triggerShakeAnimation();
+
+        const errorMsg = err.response?.data?.message || "Invalid code. Please try again.";
+
         setTimeout(() => {
-            // Mock validation (replace with actual API call)
-            if (code === '123456') {
-                setVerificationState('success');
-                triggerSuccessAnimation();
+            setOtp(['', '', '', '', '', '']);
+            inputRefs.current[0]?.focus();
+        }, 1000);
 
-                // Navigate to next screen after success
-                setTimeout(() => {
-                    router.push('/(student)/dashboard');
-                }, 1500);
-            } else {
-                setVerificationState('error');
-                triggerShakeAnimation();
-
-                // Clear OTP after error
-                setTimeout(() => {
-                    setOtp(['', '', '', '', '', '']);
-                    setVerificationState('idle');
-                    inputRefs.current[0]?.focus();
-                }, 1000);
-            }
-        }, 1500);
+        alert(errorMsg);
+       }
     };
 
     // Resend code
-    const handleResend = () => {
-        if (!canResend) return;
+    const handleResend = async () => {
+        if (!canResend || !email || resendLoading) return;
 
-        setResendTimer(60);
-        setCanResend(false);
-        setOtp(['', '', '', '', '', '']);
-        setVerificationState('idle');
-        inputRefs.current[0]?.focus();
+        const result = await resendOtp(email)
 
-        // Simulate resend API call
-        console.log('Resending OTP...');
+        if (result.success) {
+            setResendTimer(60);
+            setCanResend(false);
+            setOtp(['', '', '', '', '', '']);
+            setVerificationState('idle');
+            inputRefs.current[0]?.focus();
+        } else {
+            alert(result.message);
+        }
     };
 
     // Get border color based on state
@@ -174,7 +192,7 @@ export default function VerifyOTPPage() {
                             {/* Subtitle */}
                             <Text className="text-[14px] text-gray-600 text-center leading-5 px-4">
                                 A 6-digit code was sent to{'\n'}
-                                <Text className="font-medium text-gray-900">{userEmail}</Text>
+                                <Text className="font-medium text-gray-900">{email || "your email"}</Text>
                             </Text>
                         </View>
 
@@ -244,9 +262,12 @@ export default function VerifyOTPPage() {
 
                             {/* Verifying Message */}
                             {verificationState === 'verifying' && (
-                                <Text className="text-center text-[13px] text-gray-600 mb-2">
-                                    Verifying...
-                                </Text>
+                                <View className="flex-row justify-center items-center gap-2">
+                                    <ActivityIndicator size="small" color="#1A73E8" />
+                                    <Text className="text-center text-[13px] text-gray-600 mb-2">
+                                        Verifying...
+                                    </Text>
+                                </View>
                             )}
                         </Animated.View>
 
@@ -263,15 +284,6 @@ export default function VerifyOTPPage() {
                                         }`}
                                 >
                                     {canResend ? 'Resend code' : `Resend code in ${resendTimer}s`}
-                                </Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                onPress={() => router.back()}
-                                activeOpacity={0.7}
-                            >
-                                <Text className="text-[14px] text-blue-600 font-medium">
-                                    Try another way
                                 </Text>
                             </TouchableOpacity>
                         </View>

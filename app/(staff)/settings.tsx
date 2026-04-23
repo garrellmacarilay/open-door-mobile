@@ -1,22 +1,27 @@
 import { useRouter } from 'expo-router';
-import { Camera, EyeOff, Eye, LogOut, Mail, User, Pencil } from 'lucide-react-native';
+import { Camera, EyeOff, Eye, LogOut, Mail, User, Pencil, KeyRound, } from 'lucide-react-native';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Alert,
     Image,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
-    Switch,
     Text,
     TextInput,
     TouchableOpacity,
     View,
+    Keyboard,
+    Switch
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import LogoutConfirmationModal from '../../components/common/LogoutConfirmationModal';
+import LogoutConfirmationModal from '@/components/common/LogoutConfirmationModal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useLogout } from '@/hooks/authHooks';
+import { useProfile } from '@/hooks/globalHooks';
+import { useOfficeUpdate } from '@/hooks/staffHooks';
+
 
 export default function StaffSettingsPage() {
     const router = useRouter();
@@ -24,17 +29,39 @@ export default function StaffSettingsPage() {
     const [isEditing, setIsEditing] = useState(false);
     const [name, setName] = useState('Staff Member');
     const [email] = useState('office@staff.laverdad.edu.ph');
-    const [currentPassword, setCurrentPassword] = useState('password123');
-    const [newPassword, setNewPassword] = useState('password123');
-    const [confirmPassword, setConfirmPassword] = useState('password123');
     const [profileImage, setProfileImage] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
 
     const [showCurrent, setShowCurrent] = useState(false);
-    const [showNew, setShowNew] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
-    const [isAvailable, setIsAvailable] = useState(true);
+
+    
+    const { 
+        user, 
+        fullName, 
+        setFullName, 
+        profileImageUrl,     // The original/saved URL
+        preview,             // The temporary base64/blob preview
+        setProfileAndPreview, 
+        message, 
+        password, 
+        setPassword, 
+        currPassword,
+        setCurrPassword,
+        passwordConfirmation, 
+        setPasswordConfirmation, 
+        handleSubmit 
+    } = useProfile();
+
+    
+    
+    const { handleLogout: executeLogout, loading: isLoggingOut } = useLogout();
+
+    const officeId = (user as any)?.staff?.office_id;
+
+    const { statusShow, isAvailable, toggleStatus, isLoading } = useOfficeUpdate(officeId);
 
     const handleImagePicker = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -48,10 +75,34 @@ export default function StaffSettingsPage() {
             aspect: [1, 1],
             quality: 0.8,
         });
-        if (!result.canceled && result.assets[0]) {
-            setProfileImage(result.assets[0].uri);
+
+        if (!result.canceled) {
+            const asset = result.assets[0];
+
+            const imageFile = {
+                uri: Platform.OS === 'ios' ? asset.uri.replace('file://', '') : asset.uri,
+                name: asset.fileName || 'profile.jpg',
+                type: asset.mimeType || 'image/jpeg',
+            }
+            setProfileAndPreview(imageFile as any);
         }
     };
+
+    const onSavePressed = async () => {
+        Keyboard.dismiss()
+        setIsSaving(true)
+
+        try {
+            await handleSubmit()
+
+            setIsEditing(false)
+            Alert.alert('Success', 'Profile updated!')
+        } catch (err) {
+            Alert.alert('Error', 'Update failed')
+        } finally {
+            setIsSaving(false)
+        }
+    }
 
     const handleSaveChanges = async () => {
         setIsSaving(true);
@@ -90,7 +141,6 @@ export default function StaffSettingsPage() {
                                     <TouchableOpacity
                                         onPress={() => setIsEditing(true)}
                                         className="w-9 h-9 bg-gray-100 rounded-[10px] items-center justify-center border border-gray-200"
-                                        activeOpacity={0.7}
                                     >
                                         <Pencil size={16} color="#9CA3AF" />
                                     </TouchableOpacity>
@@ -100,17 +150,20 @@ export default function StaffSettingsPage() {
                             {/* Profile Image */}
                             <View className="items-center mb-8">
                                 <View className="relative">
-                                    <View className="w-28 h-28 rounded-full overflow-hidden border-[3px] border-[#0066FF] bg-gray-100 flex items-center justify-center">
-                                        {profileImage ? (
-                                            <Image source={{ uri: profileImage }} className="w-full h-full" resizeMode="cover" />
+                                    <View className="w-28 h-28 rounded-full overflow-hidden border-[3px] border-[#0F766E] bg-gray-100 flex items-center justify-center">
+                                        {(preview || profileImageUrl) ? (
+                                            <Image 
+                                                source={{ uri: preview || profileImageUrl || '' }} 
+                                                className="w-full h-full" 
+                                                resizeMode="cover" 
+                                            />
                                         ) : (
-                                            <User size={48} color="#9CA3AF" strokeWidth={1.5} />
+                                            <User size={48} color="#9CA3AF" /> 
                                         )}
                                     </View>
                                     <TouchableOpacity
                                         onPress={handleImagePicker}
-                                        className="absolute -bottom-1 -right-1 w-[34px] h-[34px] rounded-full bg-[#0066FF] border-2 border-white flex items-center justify-center"
-                                        activeOpacity={0.8}
+                                        className="absolute -bottom-1 -right-1 w-[34px] h-[34px] rounded-full bg-[#0F766E] border-2 border-white flex items-center justify-center"
                                     >
                                         <Camera size={16} color="#FFF" />
                                     </TouchableOpacity>
@@ -120,14 +173,14 @@ export default function StaffSettingsPage() {
                             {!isEditing ? (
                                 /* View Mode */
                                 <View className="items-center pb-2">
-                                    <Text className="text-[24px] font-extrabold text-[#1C274C] mb-3">{name}</Text>
+                                    <Text className="text-[24px] font-extrabold text-[#1C274C] mb-3">{fullName}</Text>
                                     <View className="flex-row items-center justify-center mb-4">
                                         <Mail size={15} color="#9CA3AF" />
-                                        <Text className="text-[#9CA3AF] font-bold text-[14px] ml-2">{email}</Text>
+                                        <Text className="text-[#9CA3AF] font-bold text-[14px] ml-2">{(user as any)?.email}</Text>
                                     </View>
                                     <View className="flex-row items-center justify-center">
-                                        <Ionicons name="briefcase-outline" size={18} color="#0066FF" />
-                                        <Text className="text-[#0066FF] font-extrabold text-[15px] ml-2">Office Staff</Text>
+                                        <Ionicons name="briefcase-outline" size={18} color="#0F766E" />
+                                        <Text className="text-[#0F766E] font-extrabold text-[15px] ml-2">Office Staff</Text>
                                     </View>
                                 </View>
                             ) : (
@@ -137,8 +190,8 @@ export default function StaffSettingsPage() {
                                     <View className="mb-4">
                                         <Text className="text-[13px] font-bold text-gray-500 mb-1.5 ml-1">Name</Text>
                                         <TextInput
-                                            value={name}
-                                            onChangeText={setName}
+                                            value={fullName}
+                                            onChangeText={setFullName}
                                             className="w-full px-4 py-3.5 border border-gray-300 rounded-[10px] text-[#1C274C] font-semibold text-[15px]"
                                         />
                                     </View>
@@ -148,11 +201,9 @@ export default function StaffSettingsPage() {
                                         <Text className="text-[13px] font-bold text-gray-500 mb-1.5 ml-1">Email Address</Text>
                                         <View className="w-full flex-row items-center border border-gray-300 rounded-[10px] px-4 py-3.5">
                                             <Mail size={18} color="#6B7280" />
-                                            <TextInput
-                                                value={email}
-                                                editable={false}
-                                                className="flex-1 ml-2.5 text-gray-400 font-semibold text-[15px]"
-                                            />
+                                            <Text className="flex-1 ml-2.5 text-gray-400 font-semibold text-[15px]">
+                                                {(user as any)?.email}
+                                            </Text>
                                         </View>
                                     </View>
 
@@ -161,9 +212,10 @@ export default function StaffSettingsPage() {
                                         <Text className="text-[13px] font-bold text-gray-500 mb-1.5 ml-1">Current Password</Text>
                                         <View className="w-full flex-row items-center justify-between border border-gray-300 rounded-[10px] px-4 py-3.5">
                                             <TextInput
-                                                value={currentPassword}
-                                                onChangeText={setCurrentPassword}
+                                                value={currPassword}
+                                                onChangeText={setPassword}
                                                 secureTextEntry={!showCurrent}
+                                                placeholder='Enter new password'
                                                 className="flex-1 text-[#1C274C] font-bold text-[18px] tracking-widest pt-1"
                                             />
                                             <TouchableOpacity onPress={() => setShowCurrent(!showCurrent)}>
@@ -177,13 +229,14 @@ export default function StaffSettingsPage() {
                                         <Text className="text-[13px] font-bold text-gray-500 mb-1.5 ml-1">New Password</Text>
                                         <View className="w-full flex-row items-center justify-between border border-gray-300 rounded-[10px] px-4 py-3.5">
                                             <TextInput
-                                                value={newPassword}
-                                                onChangeText={setNewPassword}
-                                                secureTextEntry={!showNew}
+                                                value={password}
+                                                onChangeText={setPassword}
+                                                secureTextEntry={!showPassword}
+                                                placeholder='Enter your new password'
                                                 className="flex-1 text-[#1C274C] font-bold text-[18px] tracking-widest pt-1"
                                             />
-                                            <TouchableOpacity onPress={() => setShowNew(!showNew)}>
-                                                {showNew ? <Eye size={18} color="#6B7280" /> : <EyeOff size={18} color="#6B7280" />}
+                                            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                                                {showPassword ? <Eye size={18} color="#6B7280" /> : <EyeOff size={18} color="#6B7280" />}
                                             </TouchableOpacity>
                                         </View>
                                     </View>
@@ -193,9 +246,10 @@ export default function StaffSettingsPage() {
                                         <Text className="text-[13px] font-bold text-gray-500 mb-1.5 ml-1">Confirm Password</Text>
                                         <View className="w-full flex-row items-center justify-between border border-gray-300 rounded-[10px] px-4 py-3.5">
                                             <TextInput
-                                                value={confirmPassword}
-                                                onChangeText={setConfirmPassword}
+                                                value={passwordConfirmation}
+                                                onChangeText={setPasswordConfirmation}
                                                 secureTextEntry={!showConfirm}
+                                                placeholder='Confirm new password'
                                                 className="flex-1 text-[#1C274C] font-bold text-[18px] tracking-widest pt-1"
                                             />
                                             <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
@@ -213,7 +267,6 @@ export default function StaffSettingsPage() {
                         className="px-6 pt-8 mb-20 flex-col gap-y-4"
                         style={{ paddingBottom: Math.max(insets.bottom + 36, 72) }}
                     >
-                        {/* Current Status Card */}
                         {!isEditing && (
                             <View
                                 className="w-full rounded-[24px] px-5 py-5 border border-[#DADCE0] bg-white"
@@ -226,37 +279,25 @@ export default function StaffSettingsPage() {
                                 }}
                             >
                                 <Text className="text-[15px] text-[#9CA3AF] mb-6">Current Status</Text>
-
-                                <TouchableOpacity
-                                    onPress={() => setIsAvailable(!isAvailable)}
-                                    activeOpacity={0.9}
-                                    className="w-full rounded-full border border-[#D4D4D8] bg-[#faf7f7] px-7 -py-5 flex-row items-center justify-between"
-                                >
-                                    <Text className={`text-[15px] font-extrabold ${isAvailable ? 'text-[#34A853]' : 'text-[#c4ccd9]'}`}>
-                                        {isAvailable ? 'Available' : 'Unavailable'}
-                                    </Text>
-                                    <Switch
-                                        value={isAvailable}
-                                        onValueChange={setIsAvailable}
-                                        trackColor={{ false: '#D1D5DB', true: '#34A853' }}
-                                        thumbColor="#FFFFFF"
-                                        ios_backgroundColor="#D1D5DB"
-                                    />
-                                </TouchableOpacity>
+                                    <TouchableOpacity
+                                                onPress={toggleStatus}
+                                                disabled={isLoading || !officeId}
+                                                activeOpacity={0.9}
+                                                className="w-full rounded-full border border-[#D4D4D8] bg-[#faf7f7] px-7 py-2 flex-row items-center justify-between"
+                                            >
+                                                <Text className={`text-[15px] font-extrabold ${isAvailable ? 'text-[#34A853]' : 'text-[#EF4444]'}`}>
+                                                    {statusShow === 'loading' ? 'Checking...' : isAvailable ? 'Available' : 'Unavailable'}
+                                                </Text>
+                                                
+                                                <Switch
+                                                    value={isAvailable}
+                                                    onValueChange={toggleStatus}
+                                                    disabled={isLoading || !officeId}
+                                                    trackColor={{ false: '#D1D5DB', true: '#34A853' }}
+                                                    thumbColor="#FFFFFF"
+                                                />
+                                            </TouchableOpacity>
                             </View>
-                        )}
-
-                        {isEditing && (
-                            <TouchableOpacity
-                                onPress={handleSaveChanges}
-                                disabled={isSaving}
-                                className={`w-full py-4 rounded-full flex-row justify-center items-center ${isSaving ? 'bg-[#0066FF]/70' : 'bg-[#0066FF]'}`}
-                                activeOpacity={0.8}
-                            >
-                                <Text className="text-white text-center font-bold text-[15px]">
-                                    {isSaving ? 'Saving...' : 'Save Changes'}
-                                </Text>
-                            </TouchableOpacity>
                         )}
 
                         {!isEditing && (
@@ -271,16 +312,34 @@ export default function StaffSettingsPage() {
                                 </Text>
                             </TouchableOpacity>
                         )}
+
+                        {isEditing && (
+                            <TouchableOpacity
+                                onPress={onSavePressed}
+                                disabled={isSaving}
+                                className={`w-full py-4 rounded-full flex-row justify-center items-center ${isSaving ? 'bg-[#0F766E]/70' : 'bg-[#0F766E]'}`}
+                                activeOpacity={0.8}
+                            >
+                                <Text className="text-white text-center font-bold text-[15px]">
+                                    {isSaving ? 'Saving...' : 'Save Changes'}
+                                </Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
 
             <LogoutConfirmationModal
                 visible={showLogoutModal}
-                onCancel={() => setShowLogoutModal(false)}
-                onConfirm={() => {
-                    setShowLogoutModal(false);
-                    router.replace('/(auth)/login');
+                loading={isLoggingOut}
+                onCancel={() => !isLoggingOut && setShowLogoutModal(false)}
+                onConfirm={async () => {
+                    try {
+                        await executeLogout();
+                    } catch (err) {
+                        setShowLogoutModal(false);
+                        Alert.alert("Error", "Could not log out.");
+                    }
                 }}
             />
         </View>

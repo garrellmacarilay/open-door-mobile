@@ -2,6 +2,9 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { Bell } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { useProfile } from '@/hooks/globalHooks';
+
+import { useAuth } from '@/context/AuthContext';
 
 interface DashboardHeaderProps {
     title?: string;
@@ -18,7 +21,6 @@ interface DashboardHeaderProps {
 
 export default function DashboardHeader({
     title = "Dashboard",
-    user,
     onProfilePress,
     onNotificationPress,
     onPlusPress,
@@ -26,11 +28,28 @@ export default function DashboardHeader({
 }: DashboardHeaderProps) {
     const router = useRouter();
 
+    const { preview } = useProfile() 
+
+    const { user } = useAuth()
+
+    const getFolderByRole = () => {
+        switch (user?.role) {
+            case 'admin':
+                return '(admin)';
+            case 'staff':
+                return '(staff)';
+            case 'student':
+            default:
+                return '(student)';
+        }
+    };
+
     const handleProfilePress = () => {
         if (onProfilePress) {
             onProfilePress();
         } else {
-            router.push('/(student)/settings');
+            const folder = getFolderByRole();
+            router.push(`/${folder}/settings` as any);
         }
     };
 
@@ -38,10 +57,28 @@ export default function DashboardHeader({
         if (onNotificationPress) {
             onNotificationPress();
         } else {
-            router.push('/(student)/notifications');
+            const folder = getFolderByRole();
+            router.push(`/${folder}/notifications` as any);
         }
     };
 
+    const getProfileImage = () => {
+        if (!user?.profile_picture) {
+            return 'https://www.pngitem.com/pimgs/m/150-1503945_transparent-user-png-default-user-image-png-png.png';
+        }
+
+        if (user.profile_picture.startsWith('http')) {
+            return user.profile_picture;
+        }
+
+        const apiBase = process.env.EXPO_PUBLIC_API_URL || "";
+        const base = apiBase.replace(/\/api\/?$/, '');
+        const path = user.profile_picture.startsWith('/') 
+            ? user.profile_picture 
+            : `/${user.profile_picture}`;
+
+        return `${base}${path}`;
+    }
 
     return (
         <View className="bg-[#18233D] px-6 py-4 flex-row items-center justify-between">
@@ -69,7 +106,7 @@ export default function DashboardHeader({
                     activeOpacity={0.8}
                 >
                     <Image
-                        source={{ uri: user?.avatar || 'https://xsgames.co/randomusers/assets/avatars/female/72.jpg' }}
+                        source={{ uri: preview || 'https://via.placeholder.com/150' }}
                         className="w-full h-full"
                         resizeMode="cover"
                     />

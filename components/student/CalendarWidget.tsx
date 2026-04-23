@@ -1,20 +1,28 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react-native';
+import { UserRole } from '@/utils/auth';
+
 
 interface CalendarWidgetProps {
     currentDate?: Date;
     events?: any[];
+    appointments?: any[];
     onDateSelect?: (date: Date) => void;
+    onMonthChange?: (date: Date) => void;
     onBookPress?: () => void;
     onAddEvent?: () => void;
+    userRole?: UserRole;
 }
 
 export default function CalendarWidget({
     currentDate: initialDate = new Date(),
     events = [],
+    appointments = [],
     onDateSelect,
+    onMonthChange,
     onAddEvent,
+    userRole
 }: CalendarWidgetProps) {
     const [viewDate, setViewDate] = useState(initialDate);
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -42,21 +50,37 @@ export default function CalendarWidget({
             newDate.setMonth(currentMonth + 1);
         }
         setViewDate(newDate);
+        onMonthChange?.(newDate)
     };
 
-    // Events Mapping
+    // Events Mapping (FIXED VERSION)
     const eventsByDate = useMemo(() => {
         const map: Record<string, any[]> = {};
-        events.forEach(evt => {
-            if (evt.dateString) {
-                const d = new Date(evt.dateString);
-                const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-                if (!map[key]) map[key] = [];
-                map[key].push(evt);
-            }
-        });
+        
+        const processItems = (items: any[]) => {
+            if (!Array.isArray(items)) return;
+            
+            items.forEach(item => {
+                const dateStr = item.dateString || item.start;
+                if (dateStr) {
+                    // dateStr is "2024-05-01 14:30:00" -> split(' ')[0] gets "2024-05-01"
+                    const [year, month, day] = dateStr.split(' ')[0].split('-').map(Number);
+                    
+                    // Match the key format used in renderDays: YYYY-MonthIndex-Day
+                    // Note: Month in split is 1-12, but JS Date months in renderDays are 0-11
+                    const key = `${year}-${month - 1}-${day}`;
+                    
+                    if (!map[key]) map[key] = [];
+                    map[key].push(item);
+                }
+            });
+        };
+
+        processItems(appointments);
+        processItems(events);
+        
         return map;
-    }, [events]);
+    }, [appointments, events]);
 
     const renderDays = () => {
         const days = [];
@@ -85,10 +109,12 @@ export default function CalendarWidget({
             const cellDate = new Date(currentYear, currentMonth, dayNumber);
             const dateKey = `${currentYear}-${currentMonth}-${dayNumber}`;
             const dayEvents = eventsByDate[dateKey] || [];
+            
             const isToday =
                 today.getFullYear() === currentYear &&
                 today.getMonth() === currentMonth &&
                 today.getDate() === dayNumber;
+            
             const isSelected =
                 selectedDate.getFullYear() === currentYear &&
                 selectedDate.getMonth() === currentMonth &&
@@ -132,6 +158,9 @@ export default function CalendarWidget({
         }
         return days;
     };
+    //helper variable
+
+    const canAddEvent = onAddEvent && (userRole === 'staff' || userRole === 'admin')
 
     return (
         <View className="bg-white rounded-[24px] shadow-sm mb-6 border border-gray-100" style={{
@@ -176,38 +205,38 @@ export default function CalendarWidget({
                         </View>
                     </View>
                 ) : (
-                    <View className="flex-row items-center justify-between py-1">
-                        <View className="flex-row items-baseline">
+                    <View className="flex-row items-center justify-between">
+                        <View className="flex-1 items-center">
                             <Text className="text-[20px] font-bold text-white tracking-wide">
                                 {monthName}
                             </Text>
-                            <Text className="text-[20px] font-bold text-[#4A6CFF] ml-3 tracking-wide">
+                            <Text className="text-[13px] font-semibold text-[#3B82F6] mt-0.5">
                                 {yearString}
                             </Text>
                         </View>
 
-                        <View className="flex-row items-center gap-3">
+                        <View className="flex-row items-center gap-2">
                             <TouchableOpacity
                                 onPress={() => navigateMonth('prev')}
                                 activeOpacity={0.7}
-                                className="w-11 h-11 rounded-2xl bg-white items-center justify-center"
+                                className="w-9 h-9 rounded-lg bg-white items-center justify-center"
                             >
-                                <ChevronLeft size={24} color="#000" strokeWidth={2.7} />
+                                <ChevronLeft size={18} color="#18233D" strokeWidth={2.5} />
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={() => navigateMonth('next')}
                                 activeOpacity={0.7}
-                                className="w-11 h-11 rounded-2xl bg-white items-center justify-center"
+                                className="w-9 h-9 rounded-lg bg-white items-center justify-center"
                             >
-                                <ChevronRight size={24} color="#000" strokeWidth={2.7} />
+                                <ChevronRight size={18} color="#18233D" strokeWidth={2.5} />
                             </TouchableOpacity>
                             {onAddEvent && (
                                 <TouchableOpacity
                                     onPress={onAddEvent}
                                     activeOpacity={0.7}
-                                    className="w-11 h-11 rounded-2xl bg-white items-center justify-center"
+                                    className="w-9 h-9 rounded-lg bg-white items-center justify-center"
                                 >
-                                    <Plus size={24} color="#000" strokeWidth={2.7} />
+                                    <Plus size={18} color="#18233D" strokeWidth={2.5} />
                                 </TouchableOpacity>
                             )}
                         </View>
@@ -253,6 +282,10 @@ export default function CalendarWidget({
                     <View className="flex-row items-center gap-1">
                         <View className="w-2 h-2 rounded-full bg-[#3B82F6]" />
                         <Text className="text-[10px] font-bold text-[#6B7280]">Events</Text>
+                    </View>
+                    <View className="flex-row items-center gap-1">
+                        <View className="w-3 h-3 rounded-full border-2 border-[#3B82F6]" />
+                        <Text className="text-[10px] font-bold text-[#6B7280]">Today</Text>
                     </View>
                 </View>
             </View>

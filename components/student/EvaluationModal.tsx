@@ -1,34 +1,54 @@
 import React, { useState } from 'react';
-import { View, Text, Modal, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSubmitFeedback } from '@/hooks/studentHooks';
 
 interface EvaluationModalProps {
     visible: boolean;
     onClose: () => void;
+
     appointmentTitle?: string;
+    bookingId: number;
+    officeId: number;
+    studentId: number;
 }
 
-export default function EvaluationModal({ visible, onClose, appointmentTitle }: EvaluationModalProps) {
+export default function EvaluationModal({ visible, onClose, appointmentTitle, bookingId, officeId, studentId }: EvaluationModalProps) {
     const [rating, setRating] = useState(0);
-    const [feedback, setFeedback] = useState('');
+    const [comment, setComment] = useState('');
+    const { submitFeedback, isSubmitting } = useSubmitFeedback();
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (rating === 0) {
             Alert.alert('Rating Required', 'Please select a star rating before submitting.');
             return;
         }
-        if (!feedback.trim()) {
+        if (!comment.trim()) {
             Alert.alert('Feedback Required', 'Please write your feedback before submitting.');
             return;
         }
-        Alert.alert('Thank you!', 'Your evaluation has been submitted successfully.', [
-            { text: 'OK', onPress: () => { setRating(0); setFeedback(''); onClose(); } }
-        ]);
+
+        const result = await submitFeedback({
+            booking_id: bookingId,
+            student_id: studentId,
+            office_id: officeId,
+            rating: rating,
+            comment: comment.trim(),
+
+        });
+
+        if (result.success) {
+            Alert.alert('Success', result.message, [
+                { text: 'OK', onPress: handleDismiss }
+            ]);
+        } else {
+            Alert.alert('Submission Failed', result.message);
+        }
     };
 
     const handleDismiss = () => {
         setRating(0);
-        setFeedback('');
+        setComment('');
         onClose();
     };
 
@@ -68,6 +88,7 @@ export default function EvaluationModal({ visible, onClose, appointmentTitle }: 
                                 <TouchableOpacity
                                     key={star}
                                     onPress={() => setRating(star)}
+                                    disabled={isSubmitting}
                                     activeOpacity={0.7}
                                 >
                                     <Ionicons
@@ -95,14 +116,16 @@ export default function EvaluationModal({ visible, onClose, appointmentTitle }: 
                                 multiline
                                 numberOfLines={5}
                                 style={{ textAlignVertical: 'top', minHeight: 130 }}
-                                value={feedback}
-                                onChangeText={setFeedback}
+                                value={comment}
+                                onChangeText={setComment}
+                                editable={!isSubmitting}
                             />
                         </View>
 
                         {/* Submit Button */}
                         <TouchableOpacity
                             onPress={handleSubmit}
+                            disabled={isSubmitting}
                             className="w-full bg-[#2563EB] rounded-full py-4 items-center justify-center mb-4"
                             activeOpacity={0.85}
                             style={{
@@ -113,13 +136,15 @@ export default function EvaluationModal({ visible, onClose, appointmentTitle }: 
                                 elevation: 6,
                             }}
                         >
-                            <Text className="text-white text-[16px] font-bold">
-                                Submit
-                            </Text>
+                            {isSubmitting ? (
+                                <ActivityIndicator color="white" />
+                            ) : (
+                                <Text className="text-white text-[16px] font-bold">Submit</Text>
+                            )}
                         </TouchableOpacity>
 
                         {/* Dismiss */}
-                        <TouchableOpacity onPress={handleDismiss} activeOpacity={0.6}>
+                        <TouchableOpacity onPress={handleDismiss} disabled={isSubmitting} activeOpacity={0.6}>
                             <Text className="text-[#6B7280] text-[14px] font-semibold">
                                 Dismiss
                             </Text>

@@ -12,10 +12,14 @@ import {
     TextInput,
     TouchableOpacity,
     View,
+    Keyboard
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import LogoutConfirmationModal from '../../components/common/LogoutConfirmationModal';
+import LogoutConfirmationModal from '@/components/common/LogoutConfirmationModal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { useLogout } from '@/hooks/authHooks';
+import { useProfile } from '@/hooks/globalHooks';
 
 export default function AdminSettingsPage() {
     const router = useRouter();
@@ -30,17 +34,33 @@ export default function AdminSettingsPage() {
     const [isSaving, setIsSaving] = useState(false);
 
     const [showCurrent, setShowCurrent] = useState(false);
-    const [showNew, setShowNew] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
+
+    const { 
+        user, 
+        fullName, 
+        setFullName, 
+        profileImageUrl,     // The original/saved URL
+        preview,             // The temporary base64/blob preview
+        setProfileAndPreview, 
+        message, 
+        password, 
+        setPassword, 
+        currPassword,
+        setCurrPassword,
+        passwordConfirmation, 
+        setPasswordConfirmation, 
+        handleSubmit 
+    } = useProfile();
+
+    const { handleLogout: executeLogout, loading: isLoggingOut } = useLogout();
     const [showLogoutModal, setShowLogoutModal] = useState(false);
 
     const handleImagePicker = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-            Alert.alert(
-                'Permission Denied',
-                'We need camera roll permissions to change your profile picture.'
-            );
+            Alert.alert('Permission Denied', 'We need camera roll permissions to change your profile picture.');
             return;
         }
         const result = await ImagePicker.launchImageLibraryAsync({
@@ -49,10 +69,34 @@ export default function AdminSettingsPage() {
             aspect: [1, 1],
             quality: 0.8,
         });
-        if (!result.canceled && result.assets[0]) {
-            setProfileImage(result.assets[0].uri);
+
+        if (!result.canceled) {
+            const asset = result.assets[0];
+
+            const imageFile = {
+                uri: Platform.OS === 'ios' ? asset.uri.replace('file://', '') : asset.uri,
+                name: asset.fileName || 'profile.jpg',
+                type: asset.mimeType || 'image/jpeg',
+            }
+            setProfileAndPreview(imageFile as any);
         }
     };
+
+    const onSavePressed = async () => {
+        Keyboard.dismiss()
+        setIsSaving(true)
+
+        try {
+            await handleSubmit()
+
+            setIsEditing(false)
+            Alert.alert('Success', 'Profile updated!')
+        } catch (err) {
+            Alert.alert('Error', 'Update failed')
+        } finally {
+            setIsSaving(false)
+        }
+    }
 
     const handleSaveChanges = async () => {
         setIsSaving(true);
@@ -102,9 +146,9 @@ export default function AdminSettingsPage() {
                             <View className="items-center mb-8">
                                 <View className="relative">
                                     <View className="w-28 h-28 rounded-full overflow-hidden border-[3px] border-[#0066FF] bg-gray-100 flex items-center justify-center">
-                                        {profileImage ? (
+                                        {(preview || profileImageUrl) ? (
                                             <Image
-                                                source={{ uri: profileImage }}
+                                                source={{ uri: preview || profileImageUrl || '' }}
                                                 className="w-full h-full"
                                                 resizeMode="cover"
                                             />
@@ -126,12 +170,12 @@ export default function AdminSettingsPage() {
                                 /* View Mode */
                                 <View className="items-center pb-2">
                                     <Text className="text-[24px] font-extrabold text-[#1C274C] mb-3">
-                                        {name}
+                                        {fullName}
                                     </Text>
                                     <View className="flex-row items-center justify-center mb-4">
                                         <Mail size={15} color="#9CA3AF" />
                                         <Text className="text-[#9CA3AF] font-bold text-[14px] ml-2">
-                                            {email}
+                                            {(user as any)?.email}
                                         </Text>
                                     </View>
                                     <View className="flex-row items-center justify-center">
@@ -154,8 +198,8 @@ export default function AdminSettingsPage() {
                                             Name
                                         </Text>
                                         <TextInput
-                                            value={name}
-                                            onChangeText={setName}
+                                            value={fullName}
+                                            onChangeText={setFullName}
                                             className="w-full px-4 py-3.5 border border-gray-300 rounded-[10px] text-[#1C274C] font-semibold text-[15px]"
                                         />
                                     </View>
@@ -167,11 +211,9 @@ export default function AdminSettingsPage() {
                                         </Text>
                                         <View className="w-full flex-row items-center border border-gray-300 rounded-[10px] px-4 py-3.5">
                                             <Mail size={18} color="#6B7280" />
-                                            <TextInput
-                                                value={email}
-                                                editable={false}
-                                                className="flex-1 ml-2.5 text-gray-400 font-semibold text-[15px]"
-                                            />
+                                            <Text className="flex-1 ml-2.5 text-gray-400 font-semibold text-[15px]">
+                                                {(user as any)?.email}
+                                            </Text>
                                         </View>
                                     </View>
 
@@ -182,19 +224,15 @@ export default function AdminSettingsPage() {
                                         </Text>
                                         <View className="w-full flex-row items-center justify-between border border-gray-300 rounded-[10px] px-4 py-3.5">
                                             <TextInput
-                                                value={currentPassword}
-                                                onChangeText={setCurrentPassword}
+                                                value={currPassword}
+                                                onChangeText={setPassword}
                                                 secureTextEntry={!showCurrent}
+                                                placeholder='Enter current password'
+                                                placeholderTextColor="#9CA3AF"
                                                 className="flex-1 text-[#1C274C] font-bold text-[18px] tracking-widest pt-1"
                                             />
-                                            <TouchableOpacity
-                                                onPress={() => setShowCurrent(!showCurrent)}
-                                            >
-                                                {showCurrent ? (
-                                                    <Eye size={18} color="#6B7280" />
-                                                ) : (
-                                                    <EyeOff size={18} color="#6B7280" />
-                                                )}
+                                            <TouchableOpacity onPress={() => setShowCurrent(!showCurrent)}>
+                                                {showCurrent ? <Eye size={18} color="#6B7280" /> : <EyeOff size={18} color="#6B7280" />}
                                             </TouchableOpacity>
                                         </View>
                                     </View>
@@ -206,19 +244,15 @@ export default function AdminSettingsPage() {
                                         </Text>
                                         <View className="w-full flex-row items-center justify-between border border-gray-300 rounded-[10px] px-4 py-3.5">
                                             <TextInput
-                                                value={newPassword}
-                                                onChangeText={setNewPassword}
-                                                secureTextEntry={!showNew}
+                                                value={password}
+                                                onChangeText={setPassword}
+                                                secureTextEntry={!showPassword}
+                                                placeholder='Enter your new password'
+                                                placeholderTextColor="#9CA3AF"
                                                 className="flex-1 text-[#1C274C] font-bold text-[18px] tracking-widest pt-1"
                                             />
-                                            <TouchableOpacity
-                                                onPress={() => setShowNew(!showNew)}
-                                            >
-                                                {showNew ? (
-                                                    <Eye size={18} color="#6B7280" />
-                                                ) : (
-                                                    <EyeOff size={18} color="#6B7280" />
-                                                )}
+                                            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                                                {showPassword ? <Eye size={18} color="#6B7280" /> : <EyeOff size={18} color="#6B7280" />}
                                             </TouchableOpacity>
                                         </View>
                                     </View>
@@ -230,19 +264,15 @@ export default function AdminSettingsPage() {
                                         </Text>
                                         <View className="w-full flex-row items-center justify-between border border-gray-300 rounded-[10px] px-4 py-3.5">
                                             <TextInput
-                                                value={confirmPassword}
-                                                onChangeText={setConfirmPassword}
+                                                value={passwordConfirmation}
+                                                onChangeText={setPasswordConfirmation}
                                                 secureTextEntry={!showConfirm}
+                                                placeholder='Confirm new password'
+                                                placeholderTextColor="#9CA3AF"
                                                 className="flex-1 text-[#1C274C] font-bold text-[18px] tracking-widest pt-1"
                                             />
-                                            <TouchableOpacity
-                                                onPress={() => setShowConfirm(!showConfirm)}
-                                            >
-                                                {showConfirm ? (
-                                                    <Eye size={18} color="#6B7280" />
-                                                ) : (
-                                                    <EyeOff size={18} color="#6B7280" />
-                                                )}
+                                            <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
+                                                {showConfirm ? <Eye size={18} color="#6B7280" /> : <EyeOff size={18} color="#6B7280" />}
                                             </TouchableOpacity>
                                         </View>
                                     </View>
@@ -258,7 +288,7 @@ export default function AdminSettingsPage() {
                     >
                         {isEditing && (
                             <TouchableOpacity
-                                onPress={handleSaveChanges}
+                                onPress={onSavePressed}
                                 disabled={isSaving}
                                 className={`w-full py-4 rounded-full flex-row justify-center items-center ${
                                     isSaving ? 'bg-[#0066FF]/70' : 'bg-[#0066FF]'
@@ -289,10 +319,16 @@ export default function AdminSettingsPage() {
 
             <LogoutConfirmationModal
                 visible={showLogoutModal}
-                onCancel={() => setShowLogoutModal(false)}
-                onConfirm={() => {
-                    setShowLogoutModal(false);
-                    router.replace('/(auth)/login');
+                loading={isLoggingOut}
+                onCancel={() => !isLoggingOut && setShowLogoutModal(false)}
+                onConfirm={async () => {
+                    try {
+                        await executeLogout()
+                    } catch (err) {
+                        setShowLogoutModal(false);
+                        Alert.alert('Error', 'Could not log out')
+                    }
+                    
                 }}
             />
         </View>
