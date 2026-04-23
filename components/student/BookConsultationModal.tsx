@@ -149,6 +149,7 @@ export default function BookConsultationModal({
                                         style={{ height: 100, textAlignVertical: 'top' }}
                                         value={form.concern_description}
                                         onChangeText={(text) => setForm({ ...form, concern_description: text })}
+                                        placeholderTextColor="#9CA3AF"
                                     />
                                 </View>
 
