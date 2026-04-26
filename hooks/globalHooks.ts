@@ -78,7 +78,9 @@ export function useProfile(): UseProfileReturn {
     setMessage('');
 
     if (password) {
-      if (!currPassword) {
+      const isGoogleOnly = user.google_id && !user.has_set_password;
+
+      if (!currPassword && !isGoogleOnly) {
         setMessage('Current password is required to set a new one')
         throw new Error('Missing current password')
       }

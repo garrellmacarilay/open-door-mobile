@@ -2,7 +2,7 @@
   "expo": {
     "name": "OpenDoor",
     "slug": "open-doo-mobile",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "orientation": "portrait",
     "icon": "./assets/images/psaslogo.png",
     "scheme": "opendoomobile",
@@ -16,6 +16,17 @@
       }
     },
     "android": {
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "opendoomobile"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/psaslogo.png",

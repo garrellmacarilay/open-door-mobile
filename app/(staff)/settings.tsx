@@ -55,7 +55,7 @@ export default function StaffSettingsPage() {
         handleSubmit 
     } = useProfile();
 
-    
+    const isGoogleOnly = !!user.google_id && !user.has_set_password;
     
     const { handleLogout: executeLogout, loading: isLoggingOut } = useLogout();
 

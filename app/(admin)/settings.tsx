@@ -54,6 +54,8 @@ export default function AdminSettingsPage() {
         handleSubmit 
     } = useProfile();
 
+    const isGoogleOnly = !!user.google_id && !user.has_set_password;
+
     const { handleLogout: executeLogout, loading: isLoggingOut } = useLogout();
     const [showLogoutModal, setShowLogoutModal] = useState(false);
 
@@ -218,24 +220,26 @@ export default function AdminSettingsPage() {
                                     </View>
 
                                     {/* Current Password */}
-                                    <View className="mb-4">
-                                        <Text className="text-[13px] font-bold text-gray-500 mb-1.5 ml-1">
-                                            Current Password
-                                        </Text>
-                                        <View className="w-full flex-row items-center justify-between border border-gray-300 rounded-[10px] px-4 py-3.5">
-                                            <TextInput
-                                                value={currPassword}
-                                                onChangeText={setPassword}
-                                                secureTextEntry={!showCurrent}
-                                                placeholder='Enter current password'
-                                                placeholderTextColor="#9CA3AF"
-                                                className="flex-1 text-[#1C274C] font-bold text-[18px] tracking-widest pt-1"
-                                            />
-                                            <TouchableOpacity onPress={() => setShowCurrent(!showCurrent)}>
-                                                {showCurrent ? <Eye size={18} color="#6B7280" /> : <EyeOff size={18} color="#6B7280" />}
-                                            </TouchableOpacity>
+                                    {!isGoogleOnly && (
+                                        <View className="mb-4">
+                                            <Text className="text-[13px] font-bold text-gray-500 mb-1.5 ml-1">
+                                                Current Password
+                                            </Text>
+                                            <View className="w-full flex-row items-center justify-between border border-gray-300 rounded-[10px] px-4 py-3.5">
+                                                <TextInput
+                                                    value={currPassword}
+                                                    onChangeText={setCurrPassword}
+                                                    secureTextEntry={!showCurrent}
+                                                    placeholder="Enter your current password"
+                                                    placeholderTextColor="#9CA3AF"
+                                                    className="flex-1 text-[#1C274C] font-bold text-[16px] p-0"
+                                                />
+                                                <TouchableOpacity onPress={() => setShowCurrent(!showCurrent)}>
+                                                    {showCurrent ? <Eye size={18} color="#6B7280" /> : <EyeOff size={18} color="#6B7280" />}
+                                                </TouchableOpacity>
+                                            </View>
                                         </View>
-                                    </View>
+                                    )}
 
                                     {/* New Password */}
                                     <View className="mb-4">

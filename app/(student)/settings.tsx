@@ -51,6 +51,8 @@ export default function UserSettingsPage() {
         handleSubmit 
     } = useProfile();
 
+    const isGoogleOnly = !!user.google_id && !user.has_set_password;
+
     const { handleLogout: executeLogout, loading: isLoggingOut } = useLogout();
 
     // 3. Refined Image Picker

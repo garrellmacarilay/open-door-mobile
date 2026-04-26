@@ -8,6 +8,8 @@ export interface User {
   role: UserRole;
   email?: string;
   profile_picture?: string;
+  google_id?: string;
+  has_set_password: boolean
   // Add any other fields your Laravel backend returns
 }
 
