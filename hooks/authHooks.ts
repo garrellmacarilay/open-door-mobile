@@ -1,7 +1,8 @@
 
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { useState } from 'react';
+import * as Linking from 'expo-linking';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Alert } from 'react-native';
 import api from '../utils/api';
@@ -238,8 +239,27 @@ export const useLogout = () => {
 interface GoogleLoginHook {
     handleGoogleLogin: () => Promise<void>;
 }
+WebBrowser.maybeCompleteAuthSession(); // Required for redirect handling
+
 export function useGoogleLogin(): GoogleLoginHook {
     const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
+    // Listen for the deep link redirect after Google auth
+    useEffect(() => {
+        const subscription = Linking.addEventListener('url', ({ url }) => {
+            const parsed = Linking.parse(url);
+            const token = parsed.queryParams?.token as string;
+            const role = parsed.queryParams?.role as string;
+
+            if (token && role) {
+                // Save token (AsyncStorage, SecureStore, etc.)
+                console.log('Token:', token, 'Role:', role);
+                // TODO: navigate based on role
+            }
+        });
+
+        return () => subscription.remove();
+    }, []);
 
     const handleGoogleLogin = async (): Promise<void> => {
         if (!apiUrl) {
@@ -247,14 +267,18 @@ export function useGoogleLogin(): GoogleLoginHook {
             return;
         }
 
-        const authUrl = `${apiUrl}/auth/google`;
+        // Pass your app's deep link so the backend knows where to redirect
+        const redirectUri = Linking.createURL('/auth');  // e.g. "yourapp://auth"
+        const authUrl = `${apiUrl}/auth/google?redirect_uri=${encodeURIComponent(redirectUri)}`;
 
-        await WebBrowser.openBrowserAsync(authUrl);
+        await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
+        //     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        // Use openAuthSessionAsync instead of openBrowserAsync
+        // This automatically closes the browser when your deep link is triggered
     };
 
     return { handleGoogleLogin };
-};
-
+}
 export const useForgetPassword = () => {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
