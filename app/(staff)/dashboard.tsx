@@ -61,7 +61,7 @@ export default function OfficeDashboard() {
 
 
         } else {
-            alert(error || 'Failed to create event');
+            Alert.alert('Error', result?.message || 'Failed to create event');
         }
     };
 
@@ -250,8 +250,11 @@ export default function OfficeDashboard() {
                                 className={`flex-1 rounded-[12px] py-3.5 items-center ${isSubmitting ? 'bg-[#1C274C]/60' : 'bg-[#1C274C]'}`}
                                 activeOpacity={0.8}
                             >
-                                {isSubmitting ? <ActivityIndicator color="white"/> : <Text className="text-white font-bold text-[15px]">Create Event</Text>}
-                                
+                            {isSubmitting ? (
+                                    <ActivityIndicator color="white" />
+                                ) : (
+                                    <Text className="text-white font-bold text-[15px]">Create Event</Text>
+                            )}    
                             </TouchableOpacity>
                         </View>
                     </View>

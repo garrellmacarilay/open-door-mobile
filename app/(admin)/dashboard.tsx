@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, FlatList, Modal, TextInput, ActivityIndicator, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, FlatList, Modal, TextInput, ActivityIndicator, NativeSyntheticEvent, NativeScrollEvent, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AppointmentCard from '../../components/student/AppointmentCard';
 import EventCard from '@/components/student/EventCard';
@@ -99,7 +99,7 @@ export default function AdminDashboard() {
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
-    const { setError, error, createEvent, events, refreshEvents, loading: eventLoading} = useEvents(currentMonth, currentYear)
+    const { setError, error, createEvent, events, refreshEvents, loading: eventLoading, isSubmitting} = useEvents(currentMonth, currentYear)
 
     const { user } = useAuth()
 
@@ -132,6 +132,7 @@ export default function AdminDashboard() {
         const result = await createEvent(payload);
 
         if (result?.success) {
+            Alert.alert('Success', 'Event uploaded successfully')
             // Reset Form
             setEventTitle('');
             setEventDate('');
@@ -139,7 +140,7 @@ export default function AdminDashboard() {
             setEventDescription('');
             setShowAddEventModal(false);
         } else {
-            alert(error || 'Failed to create event');
+            Alert.alert('Error', result?.message || 'Failed to create event');
         }
     };
 
@@ -385,10 +386,15 @@ export default function AdminDashboard() {
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={handleAddEvent}
-                                className="flex-1 bg-[#1C274C] rounded-[12px] py-3.5 items-center"
+                                disabled={isSubmitting}
+                                className={`flex-1 rounded-[12px] py-3.5 items-center ${isSubmitting ? 'bg-[#1C274C]/60' : 'bg-[#1C274C]'}`}
                                 activeOpacity={0.8}
                             >
-                                <Text className="text-white font-bold text-[15px]">Create Event</Text>
+                            {isSubmitting ? (
+                                    <ActivityIndicator color="white" />
+                                ) : (
+                                    <Text className="text-white font-bold text-[15px]">Create Event</Text>
+                            )}    
                             </TouchableOpacity>
                         </View>
                     </View>
