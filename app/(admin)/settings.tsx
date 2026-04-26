@@ -309,7 +309,7 @@ export default function AdminSettingsPage() {
                             >
                                 <LogOut size={18} color="#EF4444" />
                                 <Text className="text-[#EF4444] text-center font-bold text-[15px] ml-2">
-                                    Logout
+                                    Sign Out
                                 </Text>
                             </TouchableOpacity>
                         )}

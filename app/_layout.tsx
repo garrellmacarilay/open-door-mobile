@@ -1,9 +1,10 @@
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { AuthProvider, useAuth } from '../context/AuthContext'; 
+import SplashScreen from '@/components/loading/SplashScreen';
 
 import '../global.css';
 
@@ -24,6 +25,8 @@ function RootLayoutNav() {
   const segments = useSegments();
   const router = useRouter();
 
+  const [splashFinished, setSplashFinished] = useState(true);
+
   useEffect(() => {
     if (loading) return;
 
@@ -40,12 +43,8 @@ function RootLayoutNav() {
   }, [user, loading, segments]);
 
   // 2. Show a global spinner while the /show/user API is running
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
-    );
+  if (loading || splashFinished) {
+    return <SplashScreen onFinish={() => setSplashFinished(false)} />;
   }
 
   return (

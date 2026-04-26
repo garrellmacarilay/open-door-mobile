@@ -146,6 +146,7 @@ export const useAdminHistory = (status: string = 'all') => {
     if (loading) return;
 
     setLoading(true);
+    setAppointments([]);
     try {
       const response = await api.get('/admin/history-mobile', {
         params: {

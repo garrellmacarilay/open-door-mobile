@@ -37,7 +37,7 @@ export default function LogoutConfirmationModal({
                     </Text>
 
                     <Text className="text-[#4B5563] text-[15px] font-medium text-center mb-8">
-                        Are you sure you want to logout?
+                        Are you sure you want to sign out?
                     </Text>
 
                     <View className="flex-row items-center justify-between w-full h-[45px] gap-4 mb-2">
@@ -67,7 +67,7 @@ export default function LogoutConfirmationModal({
                                 <ActivityIndicator color="white" size="small" />
                             ) : (
                                 <Text className="text-white text-[15px] font-bold">
-                                    Log out
+                                    Sign Out
                                 </Text>
                             )}
                         </TouchableOpacity>

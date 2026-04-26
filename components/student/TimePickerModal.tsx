@@ -77,7 +77,7 @@ export default function TimePickerModal({ visible, selectedTime, onSelect, onClo
                                 className="w-10 h-10 items-end justify-center"
                                 activeOpacity={0.7}
                             >
-                                <Text className="text-[#1D4ED8] text-[16px] font-bold">Done</Text>
+                                <Text className="text-[#1D4ED8] text-[14.5px] font-bold">Done</Text>
                             </TouchableOpacity>
                         </View>
 

@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput, Alert } fro
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAdminOffices, useCreateOffice, useUpdateOffice, useDeleteOffice } from '@/hooks/adminHooks';
+import LoadingBlock from '@/components/loading/LoadingBlock';
 
 // const OFFICES_DATA = [
 //     {
@@ -265,7 +266,14 @@ export default function AdminOfficesPage() {
                         </View>
                     ))}
 
-                    {offices.length === 0 && (
+                    {loading && (
+                        <View>
+                            <LoadingBlock height={100} />
+                            <LoadingBlock height={100} />
+                        </View>
+                    )}
+
+                    {!loading && offices.length === 0 && (
                         <View className="bg-white rounded-[16px] p-12 items-center">
                             <Ionicons
                                 name="home-outline"

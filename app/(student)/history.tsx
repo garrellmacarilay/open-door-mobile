@@ -117,12 +117,28 @@ export default function History() {
 
                             {/* Date and Feedback Info */}
                             <View className="flex-row items-center gap-4 mb-4">
+                            <View className="flex-row items-center gap-4 mb-4">
                                 <View className="flex-row items-center gap-1.5">
-                                    <Ionicons name="calendar-outline" size={14} color="#6B7280" />
-                                    <Text className="text-gray-600 text-xs" style={{ fontFamily: 'Inter-Regular' }}>
-                                        {item.consultation_date}
+                                    <Ionicons name="calendar-outline" size={12} color="#9CA3AF" />
+                                    <Text className="text-gray-500 text-[10px] font-semibold">
+                                        {new Date(item.consultation_date).toLocaleDateString('en-US', {
+                                            month: 'numeric',
+                                            day: '2-digit',
+                                            year: 'numeric'
+                                        })}
                                     </Text>
                                 </View>
+                                <View className="flex-row items-center gap-1.5">
+                                    <Ionicons name="time-outline" size={12} color="#9CA3AF" />
+                                    <Text className="text-gray-500 text-[10px] font-semibold">
+                                        {new Date(item.consultation_date).toLocaleTimeString('en-US', {
+                                            hour12: true,
+                                            hour: '2-digit',
+                                            minute: 'numeric'
+                                        })}
+                                    </Text>
+                                </View>
+                            </View>
                                 {item.hasFeedback && (
                                     <View className="flex-row items-center gap-1.5">
                                         <Ionicons name="star" size={14} color="#F59E0B" />

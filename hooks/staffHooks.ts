@@ -139,6 +139,7 @@ export function useOfficeHistory(status: string = 'all') {
     if (loading) return;
 
     setLoading(true);
+    setAppointments([])
     try {
       const response = await api.get('/office/history-mobile', {
         params: {

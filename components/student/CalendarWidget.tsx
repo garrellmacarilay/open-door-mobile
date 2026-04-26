@@ -206,11 +206,11 @@ export default function CalendarWidget({
                     </View>
                 ) : (
                     <View className="flex-row items-center justify-between py-1">
-                        <View className="flex-1 items-center">
+                        <View className="flex-row items-baseline">
                             <Text className="text-[20px] font-bold text-white tracking-wide">
                                 {monthName}
                             </Text>
-                            <Text className="text-[13px] font-semibold text-[#3B82F6] mt-0.5">
+                            <Text className="text-[20px] font-bold text-[#3B82F6] ml-3 tracking-wide">
                                 {yearString}
                             </Text>
                         </View>
@@ -221,22 +221,22 @@ export default function CalendarWidget({
                                 activeOpacity={0.7}
                                 className="w-11 h-11 rounded-2xl bg-white items-center justify-center"
                             >
-                                <ChevronLeft size={18} color="#18233D" strokeWidth={2.5} />
+                                <ChevronLeft size={24} color="#000" strokeWidth={2.7} />
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={() => navigateMonth('next')}
                                 activeOpacity={0.7}
-                                className="w-9 h-9 rounded-lg bg-white items-center justify-center"
+                                className="w-11 h-11 rounded-2xl bg-white items-center justify-center"
                             >
-                                <ChevronRight size={18} color="#18233D" strokeWidth={2.5} />
+                                <ChevronRight size={24} color="#000" strokeWidth={2.7} />
                             </TouchableOpacity>
-                            {onAddEvent && (
+                            {canAddEvent && (
                                 <TouchableOpacity
                                     onPress={onAddEvent}
                                     activeOpacity={0.7}
-                                    className="w-9 h-9 rounded-lg bg-white items-center justify-center"
+                                    className="w-11 h-11 rounded-2xl bg-white items-center justify-center"
                                 >
-                                    <Plus size={18} color="#18233D" strokeWidth={2.5} />
+                                    <Plus size={24} color="#000" strokeWidth={2.7} />
                                 </TouchableOpacity>
                             )}
                         </View>

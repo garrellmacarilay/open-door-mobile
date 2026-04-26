@@ -1,17 +1,15 @@
 import { Redirect } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
-import { ActivityIndicator, View } from 'react-native';
+import { useState } from 'react';
+import SplashScreen from '@/components/loading/SplashScreen';
 
 export default function Index() {
   const { user, loading } = useAuth();
+  const [splashFinished, setSplashFinished] = useState(true);
 
-  // 1. Still checking the server/storage? Show nothing or a spinner.
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
-    );
+  // 1. Show splash screen while loading
+  if (loading || splashFinished) {
+    return <SplashScreen onFinish={() => setSplashFinished(false)} />;
   }
 
   // 2. If no user is found after loading, send to Login

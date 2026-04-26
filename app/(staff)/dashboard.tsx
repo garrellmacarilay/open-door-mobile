@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput, ActivityIndicator, RefreshControl, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AppointmentCard from '../../components/student/AppointmentCard';
 import CalendarWidget from '../../components/student/CalendarWidget';
@@ -8,6 +8,8 @@ import TimePickerModal from '../../components/student/TimePickerModal';
 import { useOfficeUpcomingAppointments } from '@/hooks/staffHooks';
 import { useEvents } from '@/hooks/staffAdminHooks';
 import { useAuth } from '@/context/AuthContext';
+import EventCard from '@/components/student/EventCard';
+import LoadingBlock from '@/components/loading/LoadingBlock';
 
 
 export default function OfficeDashboard() {
@@ -19,7 +21,7 @@ export default function OfficeDashboard() {
 
     const { appointments, loading, refresh } = useOfficeUpcomingAppointments(currentMonth, currentYear);
 
-    const { setError, error, createEvent, events, refreshEvents} = useEvents()
+    const { setError, error, createEvent, events, refreshEvents, loading: eventLoading, isSubmitting } = useEvents(currentMonth, currentYear)
 
     const [showAddEventModal, setShowAddEventModal] = useState(false);
     const [showDatePickerModal, setShowDatePickerModal] = useState(false);
@@ -48,12 +50,16 @@ export default function OfficeDashboard() {
         const result = await createEvent(payload);
 
         if (result?.success) {
+
+            Alert.alert('Success', 'Event uploaded successfully')
             // Reset Form
             setEventTitle('');
             setEventDate('');
             setEventTime('');
             setEventDescription('');
             setShowAddEventModal(false);
+
+
         } else {
             alert(error || 'Failed to create event');
         }
@@ -92,8 +98,6 @@ export default function OfficeDashboard() {
 
                         setCurrentMonth(d.getMonth() + 1);
                         setCurrentYear(d.getFullYear());
-
-                        refreshEvents()
                     }}
                     onAddEvent={() => setShowAddEventModal(true)}
                     userRole={user?.role}
@@ -102,21 +106,51 @@ export default function OfficeDashboard() {
                     {/* Appointment Feed */}
                     <View className="mb-6 mt-4">
                         <View className="flex-row items-center justify-between mb-5">
-                            <Text className="text-[#1C274C] text-[22px] font-bold tracking-tight">
+                            <Text className="text-[#1C274C] text-[18.5px] font-bold tracking-tight">
                                 Appointments and Events Feed
                             </Text>
                         </View>
 
-                        {appointments.map(apt => (
-                            // @ts-ignore
-                            <AppointmentCard key={apt.id} appointment={apt} />
-                        ))}
+                        <ScrollView
+                            showsVerticalScrollIndicator={false}
+                            scrollEnabled={events.length > 3}
+                            style={{ maxHeight: 320 }}
+                            nestedScrollEnabled
+                        >
+                            {events.map(apt => (
+                                <EventCard key={apt.id} event={apt} />
+                            ))}
+                        </ScrollView>
 
-                        {!loading && appointments.length === 0 && (
-                            <View className="bg-white rounded-xl p-8 items-center">
+                        <View className="flex-row items-center mb-6">
+                            <View className="flex-1 h-[1px] bg-gray-200" />
+                            <View className="flex-1 h-[1px] bg-gray-200" />
+                        </View>
+
+                        {loading && (
+                            <View className="py-6">
+                                <LoadingBlock height={100} />
+                                <LoadingBlock height={100} />
+                            </View>
+                        )}
+
+                        {/* Appointment List */}
+                        <ScrollView
+                            showsVerticalScrollIndicator={false}
+                            scrollEnabled={appointments.length > 3}
+                            style={{ maxHeight: 320 }}
+                            nestedScrollEnabled
+                        >
+                            {appointments.map((apt: any, index: number) => (
+                                <AppointmentCard key={`${apt.id}-${index}`} appointment={apt} />
+                            ))}
+                        </ScrollView>
+
+                        {!loading && !eventLoading && appointments.length === 0 && events.length === 0 && (
+                            <View className="bg-white rounded-xl p-8 items-center border border-gray-100">
                                 <Ionicons name="search-outline" size={48} color="#D1D5DB" />
                                 <Text className="text-gray-400 text-center mt-3 font-semibold">
-                                    No appointments found
+                                    No upcoming appointments and events found for {viewDate.toLocaleString('default', { month: 'long' })}
                                 </Text>
                             </View>
                         )}
@@ -209,12 +243,15 @@ export default function OfficeDashboard() {
                             >
                                 <Text className="text-gray-600 font-bold text-[15px]">Cancel</Text>
                             </TouchableOpacity>
+
                             <TouchableOpacity
-                                // onPress={handleAddEvent}
-                                className="flex-1 bg-[#1C274C] rounded-[12px] py-3.5 items-center"
+                                onPress={handleAddEvent}
+                                disabled={isSubmitting}
+                                className={`flex-1 rounded-[12px] py-3.5 items-center ${isSubmitting ? 'bg-[#1C274C]/60' : 'bg-[#1C274C]'}`}
                                 activeOpacity={0.8}
                             >
-                                <Text className="text-white font-bold text-[15px]">Create Event</Text>
+                                {isSubmitting ? <ActivityIndicator color="white"/> : <Text className="text-white font-bold text-[15px]">Create Event</Text>}
+                                
                             </TouchableOpacity>
                         </View>
                     </View>

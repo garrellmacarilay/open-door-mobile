@@ -8,7 +8,7 @@ interface AppointmentCardProps {
         details: {
             student?: string;
             office: string;
-            status: string; // 'pending' | 'approved' | 'rescheduled' | 'cancelled' | 'declined'
+            status: string;
             service_type: string;
             reference_code: string;
         };

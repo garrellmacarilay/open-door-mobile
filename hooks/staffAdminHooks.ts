@@ -1,5 +1,5 @@
 import api from '@/utils/api'
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { History } from './staffHooks';
 import { useAuth } from '@/context/AuthContext'
 
@@ -62,22 +62,36 @@ export function useAppointmentDetail() {
     };
 }
 
-export function useEvents() {
-    const [events, setEvents] = useState<any[]>([]);
+interface CalendarEvent {
+    id: number;
+    event_title: string;
+    description: string;
+    event_date: string;
+    event_time: string;
+    dateString: string; 
+}
+
+export function useEvents(month?: number, year?: number) {
+    const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [loading, setLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // 1. Fetch Events
     const fetchEvents = useCallback(async () => {
         setLoading(true);
+        setEvents([]);
         try {
-            const res = await api.get('/calendar/events');
+            const params: Record<string, number> = {};
+            if (month && year) {
+                params.month = month;
+                params.year = year;
+            }
+
+            const res = await api.get('/calendar/events', { params });
             if (res.data.success) {
-                // Map the data to match your CalendarWidget 'dateString' requirement
                 const mappedEvents = res.data.data.map((evt: any) => ({
                     ...evt,
-                    dateString: evt.event_date, // CalendarWidget looks for this
+                    dateString: evt.event_date,
                 }));
                 setEvents(mappedEvents);
             }
@@ -86,23 +100,23 @@ export function useEvents() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [month, year]); // ✅ re-fetches when month/year changes
 
-    // 2. Create Event
-    const createEvent = async (payload: { 
-        event_title: string; 
-        description: string; 
-        event_date: string; 
-        event_time: string; 
+    const createEvent = async (payload: {
+        event_title: string;
+        description: string;
+        event_date: string;
+        event_time: string;
     }) => {
         setIsSubmitting(true);
         setError(null);
         try {
             const res = await api.post('/create/event', payload);
             if (res.data.success) {
-                await fetchEvents(); // Refresh list after creating
+                await fetchEvents();
                 return { success: true };
             }
+            return { success: false, message: res.data.message || 'Unexpected error' };
         } catch (err: any) {
             const msg = err.response?.data?.message || "Failed to create event";
             setError(msg);
@@ -114,15 +128,15 @@ export function useEvents() {
 
     useEffect(() => {
         fetchEvents();
-    }, [fetchEvents]);
+    }, [fetchEvents]); // ✅ triggers when fetchEvents changes (i.e. month/year changes)
 
-    return { 
-        events, 
-        loading, 
-        isSubmitting, 
+    return {
+        events,
+        loading,
+        isSubmitting,
         setError,
-        error, 
-        createEvent, 
-        refreshEvents: fetchEvents 
+        error,
+        createEvent,
+        refreshEvents: fetchEvents
     };
 }

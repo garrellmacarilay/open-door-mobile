@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Modal, FlatList, ActivityIndicator, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import LoadingBlock from '@/components/loading/LoadingBlock';
 import AppointmentCard from '../../components/student/AppointmentCard';
+import EventCard from '@/components/student/EventCard';
 import CalendarWidget from '../../components/student/CalendarWidget';
 import BookConsultationModal from '../../components/student/BookConsultationModal';
 import BookingInfoModal from '../../components/student/BookingInfoModal';
@@ -9,7 +12,7 @@ import BookingSuccessModal from '../../components/student/BookingSuccessModal';
 
 import { useUpcomingAppointments, useOffices } from '@/hooks/globalHooks';
 import { useBookings } from '@/hooks/studentHooks';
-
+import { useEvents } from '@/hooks/staffAdminHooks';
 import { useAuth } from '@/context/AuthContext';
 
 const STATUSES = [
@@ -89,6 +92,10 @@ export default function StudentDashboard() {
     const [showStatusDropdown, setShowStatusDropdown] = useState(false);
     const [viewDate, setViewDate] = useState(new Date());
 
+    const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
+    const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+
+    const insets = useSafeAreaInsets();
     const { user } = useAuth()
 
     // 2. Hook Integration
@@ -104,6 +111,11 @@ export default function StudentDashboard() {
         viewDate.getMonth() + 1,
         viewDate.getFullYear()
     );
+    const {
+        events,
+        refreshEvents,
+        loading: eventLoading
+    } = useEvents(currentMonth, currentYear)
 
     const { handleSubmit, loading: isSubmitting, offices: officeOptions } = useBookings(() => {
         setShowBookingModal(false);
@@ -197,8 +209,14 @@ export default function StudentDashboard() {
                 <View className="px-6 mt-2">
                     {/* Calendar Section */}
                     <CalendarWidget
-                        events={appointments}
-                        onMonthChange={(date) => setViewDate(new Date(date))}
+                        appointments={appointments}
+                        events={events}
+                        onMonthChange={(date) => {
+                            const d = new Date(date);
+                            setViewDate(d);
+                            setCurrentMonth(d.getMonth() + 1);
+                            setCurrentYear(d.getFullYear());
+                        }}
                         onBookPress={handleFabPress}
                         userRole={user?.role}
                     />
@@ -206,7 +224,7 @@ export default function StudentDashboard() {
                     {/* Appointment Feed */}
                     <View className="mb-6 mt-4">
                         <View className="flex-row items-center justify-between mb-5">
-                            <Text className="text-[#1C274C] text-[22px] font-bold tracking-tight">
+                            <Text className="text-[#1C274C] text-[18.5px] font-bold tracking-tight">
                                 Appointments and Events Feed
                             </Text>
                             {(!isDefaultOffice || selectedStatus !== 'all') && (
@@ -218,28 +236,59 @@ export default function StudentDashboard() {
                             )}
                         </View>
 
-                        {/* Appointment List */}
-                        {appointments.map((apt: any, index: number) => (
-                            <AppointmentCard key={`${apt.id}-${index}`} appointment={apt} />
-                        ))}
-
                         {/* Loading States */}
-                        {loading && (
+                        {eventLoading && (
                             <View className="py-6">
-                                <ActivityIndicator size="small" color="#1D4ED8" />
+                                <LoadingBlock height={100} />
+                                <LoadingBlock height={100} />
                             </View>
                         )}
 
-                        {!loading && appointments.length === 0 && (
+                        <ScrollView
+                            showsVerticalScrollIndicator={false}
+                            scrollEnabled={events.length > 3}
+                            style={{ maxHeight: 320 }}
+                            nestedScrollEnabled
+                        >
+                            {events.map(apt => (
+                                <EventCard key={apt.id} event={apt} />
+                            ))}
+                        </ScrollView>
+
+                        <View className="flex-row items-center mb-6">
+                            <View className="flex-1 h-[1px] bg-gray-200" />
+                            <View className="flex-1 h-[1px] bg-gray-200" />
+                        </View>
+
+                        {loading && (
+                            <View className="py-6">
+                                <LoadingBlock height={100} />
+                                <LoadingBlock height={100} />
+                            </View>
+                        )}
+
+                        {/* Appointment List */}
+                        <ScrollView
+                            showsVerticalScrollIndicator={false}
+                            scrollEnabled={appointments.length > 3}
+                            style={{ maxHeight: 320 }}
+                            nestedScrollEnabled
+                        >
+                            {appointments.map((apt: any, index: number) => (
+                                <AppointmentCard key={`${apt.id}-${index}`} appointment={apt} />
+                            ))}
+                        </ScrollView>
+
+                        {!loading && !eventLoading && appointments.length === 0 && events.length === 0 && (
                             <View className="bg-white rounded-xl p-8 items-center border border-gray-100">
                                 <Ionicons name="search-outline" size={48} color="#D1D5DB" />
                                 <Text className="text-gray-400 text-center mt-3 font-semibold">
-                                    No upcoming appointments found for {viewDate.toLocaleString('default', { month: 'long' })}
+                                    No upcoming appointments and events found for {viewDate.toLocaleString('default', { month: 'long' })}
                                 </Text>
                             </View>
                         )}
                     </View>
-                    <View className="h-24" />
+                    <View className="h-24" style={{ paddingBottom: Math.max(insets.bottom + 36, 130) }} />
                 </View>
             </ScrollView>
 

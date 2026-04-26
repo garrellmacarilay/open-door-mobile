@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, FlatList, Modal, TextInput, ActivityIndicator, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AppointmentCard from '../../components/student/AppointmentCard';
+import EventCard from '@/components/student/EventCard';
 import CalendarWidget from '../../components/student/CalendarWidget';
 import DatePickerModal from '../../components/student/DatePickerModal';
 import TimePickerModal from '../../components/student/TimePickerModal';
+
+import LoadingBlock from '@/components/loading/LoadingBlock';
 
 import { useUpcomingAppointments, useOffices } from '@/hooks/globalHooks';
 import { useAuth } from '@/context/AuthContext'
@@ -93,7 +96,10 @@ export default function AdminDashboard() {
     const [showStatusDropdown, setShowStatusDropdown] = useState(false);
 
     const [viewDate, setViewDate] = useState(new Date());
-    const { setError, error, createEvent, events, refreshEvents} = useEvents()
+    const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
+    const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+
+    const { setError, error, createEvent, events, refreshEvents, loading: eventLoading} = useEvents(currentMonth, currentYear)
 
     const { user } = useAuth()
 
@@ -208,8 +214,14 @@ export default function AdminDashboard() {
 
                 <View className="px-6 mt-2">
                     <CalendarWidget 
-                        events={appointments} 
-                        onMonthChange={(date) => setViewDate(new Date(date))}
+                        appointments={appointments}
+                        events={events} 
+                        onMonthChange={(date) => {
+                            const d = new Date(date);
+                            setViewDate(d);
+                            setCurrentMonth(d.getMonth() + 1);
+                            setCurrentYear(d.getFullYear());
+                        }}
                         
                         onAddEvent={() => setShowAddEventModal(true)} 
                         userRole={user?.role} 
@@ -218,7 +230,7 @@ export default function AdminDashboard() {
                     {/* Appointment Feed */}
                     <View className="mb-6 mt-4">
                         <View className="flex-row items-center justify-between mb-5">
-                            <Text className="text-[#1C274C] text-[22px] font-bold tracking-tight">
+                            <Text className="text-[#1C274C] text-[18.5px] font-bold tracking-tight">
                                 Appointments and Events Feed
                             </Text>
                             {(!isDefaultOffice || selectedStatus !== 'all') && (
@@ -230,23 +242,46 @@ export default function AdminDashboard() {
                             )}
                         </View>
 
-                        {/* Appointment List */}
-                        {appointments.map((apt: any, index: number) => (
-                            <AppointmentCard key={`${apt.id}-${index}`} appointment={apt} />
-                        ))}
+                        <ScrollView
+                            showsVerticalScrollIndicator={false}
+                            scrollEnabled={events.length > 3}
+                            style={{ maxHeight: 320 }}
+                            nestedScrollEnabled
+                        >
+                            {events.map(apt => (
+                                <EventCard key={apt.id} event={apt} />
+                            ))}
+                        </ScrollView>
 
-                        {/* Loading States */}
+                        <View className="flex-row items-center mb-6">
+                            <View className="flex-1 h-[1px] bg-gray-200" />
+                            <View className="flex-1 h-[1px] bg-gray-200" />
+                        </View>
+
                         {loading && (
                             <View className="py-6">
-                                <ActivityIndicator size="small" color="#1D4ED8" />
+                                <LoadingBlock height={100} />
+                                <LoadingBlock height={100} />
                             </View>
                         )}
 
-                        {!loading && appointments.length === 0 && (
+                        {/* Appointment List */}
+                        <ScrollView
+                            showsVerticalScrollIndicator={false}
+                            scrollEnabled={appointments.length > 3}
+                            style={{ maxHeight: 320 }}
+                            nestedScrollEnabled
+                        >
+                            {appointments.map((apt: any, index: number) => (
+                                <AppointmentCard key={`${apt.id}-${index}`} appointment={apt} />
+                            ))}
+                        </ScrollView>
+
+                        {!loading && !eventLoading && appointments.length === 0 && events.length === 0 && (
                             <View className="bg-white rounded-xl p-8 items-center border border-gray-100">
                                 <Ionicons name="search-outline" size={48} color="#D1D5DB" />
                                 <Text className="text-gray-400 text-center mt-3 font-semibold">
-                                    No upcoming appointments found for {viewDate.toLocaleString('default', { month: 'long' })}
+                                    No upcoming appointments and events found for {viewDate.toLocaleString('default', { month: 'long' })}
                                 </Text>
                             </View>
                         )}
