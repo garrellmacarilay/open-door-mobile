@@ -44,7 +44,7 @@ function RootLayoutNav() {
 
   // 2. Show a global spinner while the /show/user API is running
   if (loading || !splashFinished) {
-    return <SplashScreen onFinish={() => setSplashFinished(false)} />;
+    return <SplashScreen onFinish={() => setSplashFinished(true)} />;
   }
 
   return (
