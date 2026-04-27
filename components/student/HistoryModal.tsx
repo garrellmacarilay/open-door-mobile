@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, ScrollView, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import EvaluationModal from './EvaluationModal';
 
@@ -11,8 +11,24 @@ interface HistoryModalProps {
 
 export default function HistoryModal({ visible, appointment, onClose }: HistoryModalProps) {
     const [showEvaluation, setShowEvaluation] = useState(false);
+    const [showCancelReason, setShowCancelReason] = useState(false);
+    const [cancelReason, setCancelReason] = useState('');
 
     if (!appointment) return null;
+
+    const handleCloseCancelReason = () => {
+        setShowCancelReason(false);
+        setCancelReason('');
+    };
+
+    const handleSubmitCancellation = () => {
+        if (!cancelReason.trim()) {
+            return;
+        }
+
+        handleCloseCancelReason();
+        onClose();
+    };
 
     const getStatusStyle = (status: string) => {
         switch (status.toLowerCase()) {
@@ -137,6 +153,7 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
                                     <TouchableOpacity
                                         className="bg-[#FEE2E2] rounded-full py-3.5 flex-row items-center justify-center border border-[#FCA5A5]"
                                         activeOpacity={0.7}
+                                        onPress={() => setShowCancelReason(true)}
                                     >
                                         <Text className="text-[#FB7185] font-bold text-[15px]">Cancel Consultation</Text>
                                     </TouchableOpacity>
@@ -162,6 +179,60 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
                 appointmentTitle={appointment?.title}
                 onClose={() => setShowEvaluation(false)}
             />
+
+            <Modal
+                animationType="fade"
+                transparent={true}
+                statusBarTranslucent
+                navigationBarTranslucent
+                visible={showCancelReason}
+                onRequestClose={handleCloseCancelReason}
+            >
+                <View className="absolute top-0 left-0 right-0 bottom-0 bg-black/45 justify-center items-center px-6">
+                    <KeyboardAvoidingView
+                        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                        className="w-full max-w-md"
+                    >
+                        <View className="bg-white rounded-[24px] px-6 pt-7 pb-6 shadow-xl">
+                            <Text className="text-[#2F3136] text-[28px] font-extrabold mb-6">
+                                Reason for Cancellation
+                            </Text>
+
+                            <Text className="text-[#3F3F46] text-[15px] font-medium mb-5 leading-6">
+                                Please provide a reason for cancelling this request.
+                            </Text>
+
+                            <TextInput
+                                className="w-full border border-[#D4D4D8] rounded-[16px] px-4 py-4 text-[#18181B] text-[15px] bg-white"
+                                placeholder="Provide a reason for cancelling this request..."
+                                placeholderTextColor="#A1A1AA"
+                                multiline
+                                numberOfLines={6}
+                                style={{ height: 180, textAlignVertical: 'top' }}
+                                value={cancelReason}
+                                onChangeText={setCancelReason}
+                            />
+
+                            <TouchableOpacity
+                                className={`rounded-[14px] py-4 items-center justify-center mt-6 ${cancelReason.trim() ? 'bg-[#FF473A]' : 'bg-[#FCA5A5]'}`}
+                                activeOpacity={0.8}
+                                onPress={handleSubmitCancellation}
+                                disabled={!cancelReason.trim()}
+                            >
+                                <Text className="text-white text-[18px] font-bold">Cancel Request</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                className="items-center justify-center mt-4"
+                                activeOpacity={0.7}
+                                onPress={handleCloseCancelReason}
+                            >
+                                <Text className="text-[#6B7280] text-[15px] font-semibold">Back</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </KeyboardAvoidingView>
+                </View>
+            </Modal>
         </>
     );
 }
