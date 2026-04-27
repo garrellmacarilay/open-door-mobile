@@ -95,6 +95,7 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
     const isPending = status === 'pending';
     const isApproved = status === 'approved';
     const isCompleted = status === 'completed';
+    const isDeclined = status === 'declined';
 
     return (
         <>
@@ -231,6 +232,19 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
                                     <View className="bg-white border border-gray-200 rounded-[14px] px-5 py-4">
                                         <Text className="text-gray-400 italic text-[14px] font-medium">
                                             Waiting for student interaction...
+                                        </Text>
+                                    </View>
+                                </View>
+                            )}
+
+                            {isDeclined && (
+                                <View>
+                                    <View className="h-[1px] bg-gray-200 mb-7" />
+
+                                    <Text className="text-gray-400 text-[15px] font-bold mb-4">Reason</Text>
+                                    <View className="bg-white border border-gray-200 rounded-[14px] px-5 py-4">
+                                        <Text className="text-gray-400 text-[14px] font-medium">
+                                            {appointment.reason || 'The office has an urgent meeting.'}
                                         </Text>
                                     </View>
                                 </View>
