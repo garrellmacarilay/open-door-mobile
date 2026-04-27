@@ -246,8 +246,11 @@ export function useGoogleLogin() {
             handleDeepLink(url);
         });
 
+        // Only process initial URL if it's actually our deep link
         Linking.getInitialURL().then(url => {
-            if (url) handleDeepLink(url);
+            if (url && url.startsWith('opendoomobile://')) {
+                handleDeepLink(url);
+            }
         });
 
         return () => linkSub.remove();
@@ -267,6 +270,9 @@ export function useGoogleLogin() {
     }, [user]);
 
     const handleDeepLink = async (url: string) => {
+        // Ignore URLs that aren't our scheme
+        if (!url.startsWith('opendoomobile://')) return;
+
         const { queryParams } = Linking.parse(url);
 
         if (queryParams?.token) {
