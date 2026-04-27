@@ -25,7 +25,7 @@ function RootLayoutNav() {
   const segments = useSegments();
   const router = useRouter();
 
-  const [splashFinished, setSplashFinished] = useState(true);
+  const [splashFinished, setSplashFinished] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -33,17 +33,17 @@ function RootLayoutNav() {
     // Check if the user is currently in the (auth) group
     const inAuthGroup = segments[0] === '(auth)';
 
-    if (!user && !inAuthGroup) {
-      // If NOT logged in and NOT in auth screens, kick to login
+    const isDeepLink = segments[0] === undefined && !user;
+
+    if (!user && !inAuthGroup && !isDeepLink) {
       router.replace('/(auth)/login');
     } else if (user && inAuthGroup) {
-      // If logged in but trying to see login screen, redirect to index (which handles roles)
       router.replace('/');
     }
   }, [user, loading, segments]);
 
   // 2. Show a global spinner while the /show/user API is running
-  if (loading || splashFinished) {
+  if (loading || !splashFinished) {
     return <SplashScreen onFinish={() => setSplashFinished(false)} />;
   }
 
