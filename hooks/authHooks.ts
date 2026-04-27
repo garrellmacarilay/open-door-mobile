@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Alert } from 'react-native';
 import api from '../utils/api';
+import * as SecureStore from 'expo-secure-store'
 
 export interface RegisterData {
     full_name: string;
@@ -234,23 +235,16 @@ export const useLogout = () => {
     return { handleLogout, loading };
 };
 
-
-//TODO: update google client
-interface GoogleLoginHook {
-    handleGoogleLogin: () => Promise<void>;
-}
-WebBrowser.maybeCompleteAuthSession(); // Required for redirect handling
-
 export function useGoogleLogin() {
     const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+    const router = useRouter();
+    const { login, user } = useAuth();
 
     useEffect(() => {
-        // Handles deep link when app is already open
         const linkSub = Linking.addEventListener('url', ({ url }) => {
             handleDeepLink(url);
         });
 
-        // Handles deep link when app was in background or closed
         Linking.getInitialURL().then(url => {
             if (url) handleDeepLink(url);
         });
@@ -258,17 +252,24 @@ export function useGoogleLogin() {
         return () => linkSub.remove();
     }, []);
 
-    const handleDeepLink = (url: string) => {
+    useEffect(() => {
+        if (!user) return;
+
+        if (user.role === 'admin') {
+            router.replace('/(admin)/dashboard');
+        } else if (user.role === 'staff') {
+            router.replace('/(staff)/dashboard');
+        } else {
+            router.replace('/(student)/dashboard');
+        }
+    }, [user]);
+
+    const handleDeepLink = async (url: string) => {
         const { queryParams } = Linking.parse(url);
 
         if (queryParams?.token) {
             const token = queryParams.token as string;
-            const role = queryParams.role as string;
-
-            // TODO: save token to SecureStore or AsyncStorage
-            // TODO: navigate based on role
-            console.log('Token:', token);
-            console.log('Role:', role);
+            await login(token);
         }
 
         if (queryParams?.error) {
