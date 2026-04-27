@@ -271,7 +271,7 @@ export function useGoogleLogin() {
 
         if (queryParams?.token) {
             const token = queryParams.token as string;
-            isGoogleLoginRef.current = false;
+            isGoogleLoginRef.current = true;
             await login(token);
         }
 
