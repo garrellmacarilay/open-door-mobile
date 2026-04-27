@@ -150,13 +150,15 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
                                     <View className="bg-[#F3F4F6] rounded-full py-3.5 flex-row items-center justify-center border border-gray-200">
                                         <Text className="text-[#D1D5DB] font-bold text-[13px]">Feedback Available Upon Completion</Text>
                                     </View>
-                                    <TouchableOpacity
-                                        className="bg-[#FEE2E2] rounded-full py-3.5 flex-row items-center justify-center border border-[#FCA5A5]"
-                                        activeOpacity={0.7}
-                                        onPress={() => setShowCancelReason(true)}
-                                    >
-                                        <Text className="text-[#FB7185] font-bold text-[15px]">Cancel Consultation</Text>
-                                    </TouchableOpacity>
+                                    {!isDeclined && (
+                                        <TouchableOpacity
+                                            className="bg-[#FEE2E2] rounded-full py-3.5 flex-row items-center justify-center border border-[#FCA5A5]"
+                                            activeOpacity={0.7}
+                                            onPress={() => setShowCancelReason(true)}
+                                        >
+                                            <Text className="text-[#FB7185] font-bold text-[15px]">Cancel Consultation</Text>
+                                        </TouchableOpacity>
+                                    )}
                                     {(isApproved || isDeclined) && (
                                         <TouchableOpacity
                                             className="bg-[#16264D] rounded-full py-3.5 flex-row items-center justify-center gap-2"
