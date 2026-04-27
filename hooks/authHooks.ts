@@ -2,7 +2,7 @@
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Alert } from 'react-native';
 import api from '../utils/api';
@@ -239,6 +239,7 @@ export function useGoogleLogin() {
     const apiUrl = process.env.EXPO_PUBLIC_API_URL;
     const router = useRouter();
     const { login, user } = useAuth();
+    const isGoogleLoginRef = useRef(false);
 
     useEffect(() => {
         const linkSub = Linking.addEventListener('url', ({ url }) => {
@@ -253,7 +254,8 @@ export function useGoogleLogin() {
     }, []);
 
     useEffect(() => {
-        if (!user) return;
+        if (!user || !isGoogleLoginRef.current) return;
+        isGoogleLoginRef.current = false;
 
         if (user.role === 'admin') {
             router.replace('/(admin)/dashboard');
@@ -269,6 +271,7 @@ export function useGoogleLogin() {
 
         if (queryParams?.token) {
             const token = queryParams.token as string;
+            isGoogleLoginRef.current = false;
             await login(token);
         }
 
