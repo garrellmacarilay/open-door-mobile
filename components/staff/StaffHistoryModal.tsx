@@ -93,6 +93,7 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
     const statusStyle = getStatusStyle(appointment.status);
     const status = appointment.status.toLowerCase();
     const isPending = status === 'pending';
+    const isApproved = status === 'approved';
 
     return (
         <>
@@ -197,6 +198,19 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
                                         <Text className="text-white font-bold text-[15px]">Approve</Text>
                                     </TouchableOpacity>
                                 </View>
+                            )}
+
+                            {isApproved && (
+                                <TouchableOpacity
+                                    activeOpacity={0.8}
+                                    className="bg-[#4C55F5] rounded-[12px] py-4 items-center justify-center"
+                                    onPress={() => {
+                                        // TODO: complete action
+                                        onClose();
+                                    }}
+                                >
+                                    <Text className="text-white font-bold text-[16px]">Complete</Text>
+                                </TouchableOpacity>
                             )}
 
                             {/* approved / declined / completed -> no footer actions */}
