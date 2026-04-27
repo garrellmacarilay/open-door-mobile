@@ -94,6 +94,7 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
     const status = appointment.status.toLowerCase();
     const isPending = status === 'pending';
     const isApproved = status === 'approved';
+    const isCompleted = status === 'completed';
 
     return (
         <>
@@ -211,6 +212,28 @@ export default function StaffHistoryModal({ visible, appointment, onClose }: Sta
                                 >
                                     <Text className="text-white font-bold text-[16px]">Complete</Text>
                                 </TouchableOpacity>
+                            )}
+
+                            {isCompleted && (
+                                <View>
+                                    <View className="h-[1px] bg-gray-200 mb-7" />
+
+                                    <Text className="text-gray-400 text-[15px] font-bold mb-4">Student Rating</Text>
+                                    <View className="flex-row items-center gap-1 mb-7">
+                                        <Ionicons name="star" size={30} color="#E5E7EB" />
+                                        <Ionicons name="star" size={30} color="#E5E7EB" />
+                                        <Ionicons name="star" size={30} color="#E5E7EB" />
+                                        <Ionicons name="star" size={30} color="#E5E7EB" />
+                                        <Ionicons name="star" size={30} color="#E5E7EB" />
+                                    </View>
+
+                                    <Text className="text-gray-400 text-[15px] font-bold mb-4">Student Feedback</Text>
+                                    <View className="bg-white border border-gray-200 rounded-[14px] px-5 py-4">
+                                        <Text className="text-gray-400 italic text-[14px] font-medium">
+                                            Waiting for student interaction...
+                                        </Text>
+                                    </View>
+                                </View>
                             )}
 
                             {/* approved / declined / completed -> no footer actions */}
