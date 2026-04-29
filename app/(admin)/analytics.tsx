@@ -232,7 +232,7 @@ export default function AdminAnalyticsPage() {
                             <View className="flex-row items-start gap-3 mb-5">
                                 <View className="w-1 h-7 rounded-full bg-[#E400D9] mt-0.5" />
                                 <View>
-                                    <Text className="text-[#1F2937] text-[16px] font-extrabold mb-1">Offices that were commonly vistied</Text>
+                                    <Text className="text-[#1F2937] text-[16px] font-extrabold mb-1">Offices that were commonly visited</Text>
                                     <Text className="text-[#7B7280] text-[11px] font-semibold">Top consultation categories</Text>
                                 </View>
                             </View>
