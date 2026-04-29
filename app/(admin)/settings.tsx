@@ -150,7 +150,7 @@ export default function AdminSettingsPage() {
                                         <Ionicons name="close" size={18} color="#9CA3AF" />
                                     </TouchableOpacity>
                                 )}
-                            </View>x
+                            </View>
 
                             {/* Profile Image */}
                             <View className="items-center mb-8">
