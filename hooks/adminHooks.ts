@@ -124,12 +124,15 @@ export interface History {
     staff: string;
     attachment_url: string | null;
     attachment_name: string | null;
+    cancelled_reason: string
+    declined_reason: string
+    rescheduled_reason: string
     group_members: any;
     concern_description: string;
     status: string;
     reference_code: string;
     feedback: {
-      ratings: number | string;
+      ratings: number ;
       comment: string;
     };
   };

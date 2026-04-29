@@ -161,10 +161,13 @@ export interface OfficeHistory {
     attachment_name: string | null;
     group_members: any;
     concern_description: string;
+    cancelled_reason: string;
+    rescheduled_reason: string;
+    declined_reason: string
     status: string;
     reference_code: string;
     feedback: {
-      ratings: number | string;
+      ratings: number ;
       comment: string;
     };
   };

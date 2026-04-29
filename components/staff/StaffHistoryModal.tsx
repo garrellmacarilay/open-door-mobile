@@ -103,6 +103,7 @@ export default function StaffHistoryModal({ visible, appointment, onClose, onRef
     const isPending = status === 'pending';
     const isApproved = status === 'approved';
     const isCompleted = status === 'completed';
+    const isCancelled = status === 'cancelled'
 
     const handleAction = async (newStatus: 'approved' | 'completed' | 'declined', reason?: string) => {
         setActionType(newStatus);
@@ -284,27 +285,59 @@ export default function StaffHistoryModal({ visible, appointment, onClose, onRef
                                 </View>
                             )}
 
-                            {/* {isCompleted && (
+                            {isCompleted && (
                                 <View>
-                                    <View className="bg-[#F0FDF4] rounded-[20px] p-5 flex-row items-center gap-4 mb-4 border border-[#BBF7D0]">
-                                        <Ionicons name="information-circle-outline" size={26} color="#166534" />
-                                        <View className="flex-1">
-                                            <Text className="text-[#166534] font-bold text-[14px]">Evaluation is Mandatory</Text>
-                                            <Text className="text-[#166534] font-bold text-[14px]">for Completed Services.</Text>
+                                    {!appointment.details.feedback?.ratings && !appointment.details.feedback?.comment ? (
+                                        <View className="bg-[#F9FAFB] border border-gray-100 rounded-[16px] p-5 flex-row items-center gap-4">
+                                            <Ionicons name="time-outline" size={24} color="#9CA3AF" />
+                                            <View className="flex-1">
+                                                <Text className="text-gray-500 font-bold text-[14px]">Awaiting Student Feedback</Text>
+                                                <Text className="text-gray-400 font-semibold text-[13px]">No rating or feedback submitted yet.</Text>
+                                            </View>
                                         </View>
-                                    </View>
-                                    <TouchableOpacity
-                                        className="bg-[#0F766E] rounded-full py-4 flex-row items-center justify-center gap-2"
-                                        activeOpacity={0.8}
-                                        onPress={() => setShowEvaluation(true)}
-                                    >
-                                        <Ionicons name="chatbubble-ellipses-outline" size={20} color="white" />
-                                        <Text className="text-white font-bold text-[16px]">Leave Required Feedback</Text>
-                                    </TouchableOpacity>
+                                    ) : (
+                                        <View className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-[16px] p-5">
+                                            <View className="flex-row items-center gap-2 mb-3">
+                                                <Ionicons name="chatbubble-ellipses-outline" size={18} color="#16A34A" />
+                                                <Text className="text-[#16A34A] font-bold text-[13px]">Student Feedback</Text>
+                                            </View>
+
+                                            {/* Star Rating */}
+                                            <View className="flex-row items-center gap-1 mb-3">
+                                                {[1, 2, 3, 4, 5].map((star) => (
+                                                    <Ionicons
+                                                        key={star}
+                                                        name={star <= (appointment.details.feedback?.ratings ?? 0) ? 'star' : 'star-outline'}
+                                                        size={20}
+                                                        color={star <= (appointment.details.feedback?.ratings ?? 0) ? '#FACC15' : '#D1D5DB'}
+                                                    />
+                                                ))}
+                                                <Text className="text-gray-400 font-bold text-[13px] ml-1">
+                                                    {appointment.details.feedback?.ratings}/5
+                                                </Text>
+                                            </View>
+
+                                            {/* Feedback Comment */}
+                                            <Text className="text-gray-600 font-semibold text-[14px]">
+                                                {appointment.details.feedback?.comment ?? 'No written feedback provided.'}
+                                            </Text>
+                                        </View>
+                                    )}
                                 </View>
-                            )} */}
+)}
 
                             {/* approved / declined → no footer actions */}
+                            {isCancelled && (
+                                <View className="bg-[#FEF2F2] border border-[#FECACA] rounded-[16px] p-5">
+                                    <View className="flex-row items-center gap-2 mb-2">
+                                        <Ionicons name="close-circle-outline" size={18} color="#EF4444" />
+                                        <Text className="text-[#EF4444] font-bold text-[13px]">Cancellation Reason</Text>
+                                    </View>
+                                    <Text className="text-[#DC2626] font-semibold text-[14px]">
+                                        {appointment.details.cancelled_reason ?? 'No reason provided.'}
+                                    </Text>
+                                </View>
+                            )}
                         </ScrollView>
                     </View>
                 </View>
