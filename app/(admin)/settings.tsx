@@ -133,13 +133,21 @@ export default function AdminSettingsPage() {
                             {/* Header Title & Edit Button */}
                             <View className="flex-row justify-between items-center mb-10">
                                 <Text className="text-3xl font-extrabold text-[#1C274C]">Profile</Text>
-                                {!isEditing && (
+                                {!isEditing ? (
                                     <TouchableOpacity
                                         onPress={() => setIsEditing(true)}
                                         className="w-9 h-9 bg-gray-100 rounded-[10px] items-center justify-center border border-gray-200"
                                         activeOpacity={0.7}
                                     >
                                         <Pencil size={16} color="#9CA3AF" />
+                                    </TouchableOpacity>
+                                ) : (
+                                    <TouchableOpacity
+                                        onPress={() => setIsEditing(false)}
+                                        className="w-9 h-9 bg-gray-100 rounded-[10px] items-center justify-center border border-gray-200"
+                                        activeOpacity={0.7}
+                                    >
+                                        <Ionicons name="close" size={18} color="#9CA3AF" />
                                     </TouchableOpacity>
                                 )}
                             </View>
