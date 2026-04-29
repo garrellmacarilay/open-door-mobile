@@ -230,7 +230,7 @@ export default function SignupPage() {
                                         )}
                                     </TouchableOpacity>
                                     <Text className="text-gray-500 text-xs flex-1">
-                                        By signing up, you are agree <Text className="text-blue-600 font-semibold" onPress={() => alert("Open Terms of Service")}>Terms of Services</Text> and <Text className="text-blue-600 font-semibold" onPress={() => alert("Open Privacy Policy")}>Privacy Policy</Text>.
+                                        By signing up, you agree <Text className="text-blue-600 font-semibold" onPress={() => alert("Open Terms of Service")}>Terms of Services</Text> and <Text className="text-blue-600 font-semibold" onPress={() => alert("Open Privacy Policy")}>Privacy Policy</Text>.
                                     </Text>
                                 </View>
 
