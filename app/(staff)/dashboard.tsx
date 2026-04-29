@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AppointmentCard from '../../components/student/AppointmentCard';
 import CalendarWidget from '../../components/student/CalendarWidget';
@@ -38,10 +38,29 @@ export default function OfficeDashboard() {
     const [showAddEventModal, setShowAddEventModal] = useState(false);
     const [showDatePickerModal, setShowDatePickerModal] = useState(false);
     const [showTimePickerModal, setShowTimePickerModal] = useState(false);
+    const [keyboardHeight, setKeyboardHeight] = useState(0);
     const [eventTitle, setEventTitle] = useState('');
     const [eventDate, setEventDate] = useState('');
     const [eventTime, setEventTime] = useState('');
     const [eventDescription, setEventDescription] = useState('');
+
+    useEffect(() => {
+        const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+        const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+        const showSubscription = Keyboard.addListener(showEvent, (event) => {
+            setKeyboardHeight(event.endCoordinates.height);
+        });
+
+        const hideSubscription = Keyboard.addListener(hideEvent, () => {
+            setKeyboardHeight(0);
+        });
+
+        return () => {
+            showSubscription.remove();
+            hideSubscription.remove();
+        };
+    }, []);
 
     const handleAddEvent = () => {
         if (!eventTitle.trim() || !eventDate.trim()) {
@@ -131,89 +150,101 @@ export default function OfficeDashboard() {
                 visible={showAddEventModal}
                 onRequestClose={() => setShowAddEventModal(false)}
             >
-                <View className="absolute top-0 left-0 right-0 bottom-0 bg-black/40 justify-end">
-                    <View className="bg-white rounded-t-[28px] px-6 pt-5 pb-4 shadow-xl">
-                        {/* Drag handle */}
-                        <View className="w-10 h-1 bg-gray-300 rounded-full self-center mb-5" />
-                        <Text className="text-[#1C274C] text-[22px] font-extrabold mb-6">
-                            Add Event
-                        </Text>
-
-                        {/* Event Title */}
-                        <View className="mb-5">
-                            <Text className="text-gray-500 text-[13px] font-bold mb-2 ml-1">Event Title</Text>
-                            <TextInput
-                                value={eventTitle}
-                                onChangeText={setEventTitle}
-                                placeholder="Internship Preparation"
-                                placeholderTextColor="#9CA3AF"
-                                className="w-full border border-gray-300 rounded-[12px] px-4 py-3.5 text-gray-800 text-[15px]"
-                            />
-                        </View>
-
-                        {/* Date and Time Row */}
-                        <View className="flex-row gap-3 mb-5">
-                            <View className="flex-1">
-                                <Text className="text-gray-500 text-[13px] font-bold mb-2 ml-1">Date</Text>
-                                <TouchableOpacity
-                                    onPress={() => setShowDatePickerModal(true)}
-                                    activeOpacity={0.75}
-                                    className="border border-gray-300 rounded-[12px] px-4 py-3.5 flex-row items-center justify-between"
-                                >
-                                    <Text className={`text-[15px] ${eventDate ? 'text-gray-800' : 'text-gray-400'}`}>
-                                        {eventDate || 'mm/dd/yyyy'}
-                                    </Text>
-                                    <Ionicons name="calendar-outline" size={18} color="#6B7280" />
-                                </TouchableOpacity>
-                            </View>
-                            <View className="flex-1">
-                                <Text className="text-gray-500 text-[13px] font-bold mb-2 ml-1">Time</Text>
-                                <TouchableOpacity
-                                    onPress={() => setShowTimePickerModal(true)}
-                                    activeOpacity={0.75}
-                                    className="border border-gray-300 rounded-[12px] px-4 py-3.5 flex-row items-center justify-between"
-                                >
-                                    <Text className={`text-[15px] ${eventTime ? 'text-gray-800' : 'text-gray-400'}`}>
-                                        {eventTime || '--:--'}
-                                    </Text>
-                                    <Ionicons name="time-outline" size={18} color="#6B7280" />
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-
-                        {/* Description */}
-                        <View className="mb-6">
-                            <Text className="text-gray-500 text-[13px] font-bold mb-2 ml-1">Description</Text>
-                            <TextInput
-                                value={eventDescription}
-                                onChangeText={setEventDescription}
-                                placeholder="Event details..."
-                                placeholderTextColor="#9CA3AF"
-                                multiline
-                                numberOfLines={4}
-                                textAlignVertical="top"
-                                className="border border-gray-300 rounded-[12px] px-4 py-3.5 text-gray-800 text-[15px]"
-                            />
-                        </View>
-
-                        {/* Buttons */}
-                        <View className="flex-row gap-3">
-                            <TouchableOpacity
-                                onPress={() => setShowAddEventModal(false)}
-                                className="flex-1 border border-gray-300 rounded-[12px] py-3.5 items-center"
-                                activeOpacity={0.7}
+                <View className="absolute top-0 left-0 right-0 bottom-0 bg-black/40">
+                    <KeyboardAvoidingView
+                        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                        className="absolute bottom-0 left-0 right-0"
+                        style={{ marginBottom: Platform.OS === 'android' ? keyboardHeight : 0 }}
+                    >
+                        <View className="bg-white rounded-t-[28px] shadow-xl">
+                            <ScrollView
+                                showsVerticalScrollIndicator={false}
+                                keyboardShouldPersistTaps="handled"
+                                contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 20, paddingBottom: 16 }}
                             >
-                                <Text className="text-gray-600 font-bold text-[15px]">Cancel</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={handleAddEvent}
-                                className="flex-1 bg-[#1C274C] rounded-[12px] py-3.5 items-center"
-                                activeOpacity={0.8}
-                            >
-                                <Text className="text-white font-bold text-[15px]">Create Event</Text>
-                            </TouchableOpacity>
+                                {/* Drag handle */}
+                                <View className="w-10 h-1 bg-gray-300 rounded-full self-center mb-5" />
+                                <Text className="text-[#1C274C] text-[22px] font-extrabold mb-6">
+                                    Add Event
+                                </Text>
+
+                                {/* Event Title */}
+                                <View className="mb-5">
+                                    <Text className="text-gray-500 text-[13px] font-bold mb-2 ml-1">Event Title</Text>
+                                    <TextInput
+                                        value={eventTitle}
+                                        onChangeText={setEventTitle}
+                                        placeholder="Internship Preparation"
+                                        placeholderTextColor="#9CA3AF"
+                                        className="w-full border border-gray-300 rounded-[12px] px-4 py-3.5 text-gray-800 text-[15px]"
+                                    />
+                                </View>
+
+                                {/* Date and Time Row */}
+                                <View className="flex-row gap-3 mb-5">
+                                    <View className="flex-1">
+                                        <Text className="text-gray-500 text-[13px] font-bold mb-2 ml-1">Date</Text>
+                                        <TouchableOpacity
+                                            onPress={() => setShowDatePickerModal(true)}
+                                            activeOpacity={0.75}
+                                            className="border border-gray-300 rounded-[12px] px-4 py-3.5 flex-row items-center justify-between"
+                                        >
+                                            <Text className={`text-[15px] ${eventDate ? 'text-gray-800' : 'text-gray-400'}`}>
+                                                {eventDate || 'mm/dd/yyyy'}
+                                            </Text>
+                                            <Ionicons name="calendar-outline" size={18} color="#6B7280" />
+                                        </TouchableOpacity>
+                                    </View>
+                                    <View className="flex-1">
+                                        <Text className="text-gray-500 text-[13px] font-bold mb-2 ml-1">Time</Text>
+                                        <TouchableOpacity
+                                            onPress={() => setShowTimePickerModal(true)}
+                                            activeOpacity={0.75}
+                                            className="border border-gray-300 rounded-[12px] px-4 py-3.5 flex-row items-center justify-between"
+                                        >
+                                            <Text className={`text-[15px] ${eventTime ? 'text-gray-800' : 'text-gray-400'}`}>
+                                                {eventTime || '--:--'}
+                                            </Text>
+                                            <Ionicons name="time-outline" size={18} color="#6B7280" />
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+
+                                {/* Description */}
+                                <View className="mb-6">
+                                    <Text className="text-gray-500 text-[13px] font-bold mb-2 ml-1">Description</Text>
+                                    <TextInput
+                                        value={eventDescription}
+                                        onChangeText={setEventDescription}
+                                        placeholder="Event details..."
+                                        placeholderTextColor="#9CA3AF"
+                                        multiline
+                                        numberOfLines={4}
+                                        textAlignVertical="top"
+                                        className="border border-gray-300 rounded-[12px] px-4 py-3.5 text-gray-800 text-[15px]"
+                                    />
+                                </View>
+
+                                {/* Buttons */}
+                                <View className="flex-row gap-3">
+                                    <TouchableOpacity
+                                        onPress={() => setShowAddEventModal(false)}
+                                        className="flex-1 border border-gray-300 rounded-[12px] py-3.5 items-center"
+                                        activeOpacity={0.7}
+                                    >
+                                        <Text className="text-gray-600 font-bold text-[15px]">Cancel</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={handleAddEvent}
+                                        className="flex-1 bg-[#1C274C] rounded-[12px] py-3.5 items-center"
+                                        activeOpacity={0.8}
+                                    >
+                                        <Text className="text-white font-bold text-[15px]">Create Event</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </ScrollView>
                         </View>
-                    </View>
+                    </KeyboardAvoidingView>
                 </View>
             </Modal>
 
