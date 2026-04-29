@@ -122,7 +122,7 @@ export interface History {
     student: string;
     office: string;
     staff: string;
-    attachment: string | null;
+    attachment_url: string | null;
     attachment_name: string | null;
     group_members: any;
     concern_description: string;
@@ -335,7 +335,7 @@ export const useDeleteOffice = (onSuccess: () => void) => {
   return { deleteOffice, isDeleting }; 
 }
 
-export const useGenerateReport = () => {
+export const useGenerateReport = (date: Date) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string>('');
 
@@ -351,9 +351,11 @@ export const useGenerateReport = () => {
       }
 
       const apiUrl = getBaseUrl();
+      const month = date.getMonth() + 1;
+      const year = date.getFullYear();
 
       // 1. Kick off the job
-      const startRes = await fetch(`${apiUrl}/admin/analytics/generate-report?token=${encodeURIComponent(token)}`);
+      const startRes = await fetch(`${apiUrl}/admin/analytics/generate-report?token=${encodeURIComponent(token)}&month=${month}&year=${year}`);
       const startData = await startRes.json();
       const { job_id } = startData;
       if (!job_id) throw new Error('Failed to start report generation.');
@@ -401,12 +403,12 @@ export const useGenerateReport = () => {
     } finally {
       setIsGenerating(false);
     }
-  }, []);
+  }, [date]);
 
   return { generateReport, isGenerating, error };
 };
 
-export const useConsultationStats = () => {
+export const useConsultationStats = (date: Date) => {
     const [stats, setStats] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -414,7 +416,12 @@ export const useConsultationStats = () => {
     const fetchStats = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await api.get('/admin/analytics/stats');
+            const response = await api.get('/admin/analytics/stats', {
+              params: {
+                month: date.getMonth() + 1,
+                year: date.getFullYear()
+              }
+            });
           
             if (response.data?.success) {
                 setStats(response.data.stats);
@@ -425,7 +432,7 @@ export const useConsultationStats = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [date]);
 
     useEffect(() => {
         fetchStats();
@@ -433,6 +440,7 @@ export const useConsultationStats = () => {
 
     return { stats, loading, error, refresh: fetchStats };
 };
+
 interface ServiceDistribution {
   id: number;
   label: string;
@@ -440,16 +448,21 @@ interface ServiceDistribution {
   color: string;
 }
 
-export const useServiceDistribution = () => {
+export const useServiceDistribution = (date: Date) => {
   const [distribution, setDistribution] = useState<ServiceDistribution[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('')
 
   const COLORS = ['#6366F1', '#06B6D4', '#10B981', '#A855F7', '#F59E0B', '#EC4899', '#8B5CF6'];
 
-  const fetchDistribution = async () => {
+  const fetchDistribution = useCallback(async () => {
     try {
-      const res = await api.get('/admin/analytics/distribution')
+      const res = await api.get('/admin/analytics/distribution', {
+        params: {
+          month: date.getMonth() + 1,
+          year: date.getFullYear()
+        }
+      })
 
       if (res.data.success) {
         const formatted: ServiceDistribution[] = res.data.distribution.map((item: any, index: number) => ({
@@ -465,9 +478,9 @@ export const useServiceDistribution = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [date])
 
-  useEffect(() => { fetchDistribution(); }, []);
+  useEffect(() => { fetchDistribution(); }, [fetchDistribution]);
 
   return { distribution, loading, error };
 }
@@ -480,16 +493,21 @@ export interface Feedback {
   feedback: []
 }
 
-export const useOfficesFeedback = () => {
+export const useOfficesFeedback = (date: Date) => {
   const [officeFeedback, setOfficeFeedback] = useState<Feedback[]>([])
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>('')
 
-  const fetchFeedback = async () => {
+  const fetchFeedback = useCallback(async () => {
     setLoading(true)
 
     try {
-      const res = await api.get('/admin/analytics/office-feedback')
+      const res = await api.get('/admin/analytics/office-feedback', {
+        params: {
+          month: date.getMonth() + 1,
+          year: date.getFullYear()
+        }
+      })
 
       if (res.data.success) {
         const formattedData = res.data.feedback.map((item: any) => ({
@@ -504,9 +522,9 @@ export const useOfficesFeedback = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [date])
 
-  useEffect(() => { fetchFeedback(); }, []);
+  useEffect(() => { fetchFeedback(); }, [fetchFeedback]);
 
   return { officeFeedback, loading, error, refresh: fetchFeedback };
 }

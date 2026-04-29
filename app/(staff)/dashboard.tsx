@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput, ActivityIndicator, RefreshControl, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput, ActivityIndicator, RefreshControl, Alert, KeyboardAvoidingView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AppointmentCard from '../../components/student/AppointmentCard';
 import CalendarWidget from '../../components/student/CalendarWidget';
@@ -18,8 +18,9 @@ export default function OfficeDashboard() {
     const [currentMonth, setCurrentMonth] = useState(now.getMonth() + 1);
     const [currentYear, setCurrentYear] = useState(now.getFullYear())
     const [viewDate, setViewDate] = useState(new Date());
+    const [selectedDay, setSelectedDay] = useState<number | undefined>(undefined);
 
-    const { appointments, loading, refresh } = useOfficeUpcomingAppointments(currentMonth, currentYear);
+    const { appointments, loading, refresh } = useOfficeUpcomingAppointments(currentMonth, currentYear, selectedDay, undefined);
 
     const { setError, error, createEvent, events, refreshEvents, loading: eventLoading, isSubmitting } = useEvents(currentMonth, currentYear)
 
@@ -98,6 +99,11 @@ export default function OfficeDashboard() {
 
                         setCurrentMonth(d.getMonth() + 1);
                         setCurrentYear(d.getFullYear());
+                        setSelectedDay(undefined)
+                    }}
+                    onDateSelect={(date) => {
+                        const day = date.getDate();
+                        setSelectedDay(prev => prev === day ? undefined : day);
                     }}
                     onAddEvent={() => setShowAddEventModal(true)}
                     userRole={user?.role}
@@ -107,8 +113,16 @@ export default function OfficeDashboard() {
                     <View className="mb-6 mt-4">
                         <View className="flex-row items-center justify-between mb-5">
                             <Text className="text-[#1C274C] text-[18.5px] font-bold tracking-tight">
-                                Appointments and Events Feed
+                                {selectedDay
+                                    ? `${viewDate.toLocaleString('default', { month: 'long' })} ${selectedDay}`
+                                    : 'Appointments and Events Feed'
+                                }
                             </Text>
+                            {selectedDay && (
+                                <TouchableOpacity onPress={() => setSelectedDay(undefined)}>
+                                <Text className="text-[#1D4ED8] text-[13px] font-semibold">Show all</Text>
+                                </TouchableOpacity>
+                            )}
                         </View>
 
                         <ScrollView
@@ -150,7 +164,10 @@ export default function OfficeDashboard() {
                             <View className="bg-white rounded-xl p-8 items-center border border-gray-100">
                                 <Ionicons name="search-outline" size={48} color="#D1D5DB" />
                                 <Text className="text-gray-400 text-center mt-3 font-semibold">
-                                    No upcoming appointments and events found for {viewDate.toLocaleString('default', { month: 'long' })}
+                                    {selectedDay
+                                        ? `No appointments or events on ${viewDate.toLocaleString('default', { month: 'long' })} ${selectedDay}`
+                                        : `No upcoming appointments and events found for ${viewDate.toLocaleString('default', { month: 'long' })}`
+                                    }
                                 </Text>
                             </View>
                         )}
@@ -169,7 +186,7 @@ export default function OfficeDashboard() {
                 visible={showAddEventModal}
                 onRequestClose={() => setShowAddEventModal(false)}
             >
-                <View className="absolute top-0 left-0 right-0 bottom-0 bg-black/40 justify-end">
+                <KeyboardAvoidingView className="absolute top-0 left-0 right-0 bottom-0 bg-black/40 justify-end">
                     <View className="bg-white rounded-t-[28px] px-6 pt-5 pb-10 shadow-xl">
                         {/* Drag handle */}
                         <View className="w-10 h-1 bg-gray-300 rounded-full self-center mb-5" />
@@ -258,7 +275,7 @@ export default function OfficeDashboard() {
                             </TouchableOpacity>
                         </View>
                     </View>
-                </View>
+                </KeyboardAvoidingView>
             </Modal>
 
             <DatePickerModal

@@ -283,10 +283,6 @@ export default function CalendarWidget({
                         <View className="w-2 h-2 rounded-full bg-[#3B82F6]" />
                         <Text className="text-[10px] font-bold text-[#6B7280]">Events</Text>
                     </View>
-                    <View className="flex-row items-center gap-1">
-                        <View className="w-3 h-3 rounded-full border-2 border-[#3B82F6]" />
-                        <Text className="text-[10px] font-bold text-[#6B7280]">Today</Text>
-                    </View>
                 </View>
             </View>
         </View>

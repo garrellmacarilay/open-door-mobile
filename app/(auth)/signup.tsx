@@ -195,29 +195,13 @@ export default function SignupPage() {
                                         className="absolute right-4 top-3.5"
                                     >
                                         {showConfirmPassword ?
-                                            <EyeOff size={22} color="#9CA3AF" /> :
-                                            <Eye size={22} color="#9CA3AF" />
+                                            <Eye size={22} color="#9CA3AF" /> :
+                                            <EyeOff size={22} color="#9CA3AF" />
                                         }
                                     </TouchableOpacity>
                                     {fieldErrors.password_confirmation && (
                                         <Text className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.password_confirmation[0]}</Text>
                                     )}
-                                </View>
-
-                                {/* Terms Checkbox (Optional but good for signup) */}
-                                <View className="flex-row items-start gap-2 mt-1">
-                                    <TouchableOpacity
-                                        onPress={() => setAcceptedTerms(!acceptedTerms)}
-                                        activeOpacity={0.7}
-                                        className={`w-5 h-5 rounded border items-center justify-center mt-0.5 ${acceptedTerms ? 'border-blue-600 bg-blue-600' : 'border-gray-400 bg-white'}`}
-                                    >
-                                        {acceptedTerms && (
-                                            <View className="w-2.5 h-2.5 bg-white rounded-sm" />
-                                        )}
-                                    </TouchableOpacity>
-                                    <Text className="text-gray-500 text-xs flex-1">
-                                        By signing up, you are agree <Text className="text-blue-600 font-semibold" onPress={() => alert("Open Terms of Service")}>Terms of Services</Text> and <Text className="text-blue-600 font-semibold" onPress={() => alert("Open Privacy Policy")}>Privacy Policy</Text>.
-                                    </Text>
                                 </View>
 
                                 {/* Signup Button */}

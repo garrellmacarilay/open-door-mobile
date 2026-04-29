@@ -94,6 +94,7 @@ export default function StudentDashboard() {
 
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+    const [selectedDay, setSelectedDay] = useState<number | undefined>(undefined);
 
     const insets = useSafeAreaInsets();
     const { user } = useAuth()
@@ -109,13 +110,14 @@ export default function StudentDashboard() {
     } = useUpcomingAppointments(
         selectedOffice, selectedStatus,
         viewDate.getMonth() + 1,
-        viewDate.getFullYear()
+        viewDate.getFullYear(),
+        selectedDay
     );
     const {
         events,
         refreshEvents,
         loading: eventLoading
-    } = useEvents(currentMonth, currentYear)
+    } = useEvents(currentMonth, currentYear, selectedDay)
 
     const { handleSubmit, loading: isSubmitting, offices: officeOptions } = useBookings(() => {
         setShowBookingModal(false);
@@ -216,6 +218,11 @@ export default function StudentDashboard() {
                             setViewDate(d);
                             setCurrentMonth(d.getMonth() + 1);
                             setCurrentYear(d.getFullYear());
+                            setSelectedDay(undefined); 
+                        }}
+                        onDateSelect={(date) => {
+                            const day = date.getDate()
+                            setSelectedDay(prev => prev === day ? undefined : day);
                         }}
                         onBookPress={handleFabPress}
                         userRole={user?.role}
@@ -225,8 +232,16 @@ export default function StudentDashboard() {
                     <View className="mb-6 mt-4">
                         <View className="flex-row items-center justify-between mb-5">
                             <Text className="text-[#1C274C] text-[18.5px] font-bold tracking-tight">
-                                Appointments and Events Feed
+                                {selectedDay
+                                    ? `${viewDate.toLocaleString('default', { month: 'long' })} ${selectedDay}`
+                                    : 'Appointments and Events Feed'
+                                }   
                             </Text>
+                            {selectedDay && (
+                                <TouchableOpacity onPress={() => setSelectedDay(undefined)}>
+                                    <Text className="text-[#1D4ED8] text-[13px] font-semibold">Show all</Text>
+                                </TouchableOpacity>
+                            )}
                             {(!isDefaultOffice || selectedStatus !== 'all') && (
                                 <TouchableOpacity 
                                     onPress={() => { setSelectedOffice('All Offices'); setSelectedStatus('all'); }}
@@ -282,9 +297,12 @@ export default function StudentDashboard() {
                         {!loading && !eventLoading && appointments.length === 0 && events.length === 0 && (
                             <View className="bg-white rounded-xl p-8 items-center border border-gray-100">
                                 <Ionicons name="search-outline" size={48} color="#D1D5DB" />
-                                <Text className="text-gray-400 text-center mt-3 font-semibold">
-                                    No upcoming appointments and events found for {viewDate.toLocaleString('default', { month: 'long' })}
-                                </Text>
+                                    <Text className="text-gray-400 text-center mt-3 font-semibold">
+                                        {selectedDay
+                                            ? `No appointments or events on ${viewDate.toLocaleString('default', { month: 'long' })} ${selectedDay}`
+                                            : `No upcoming appointments and events found for ${viewDate.toLocaleString('default', { month: 'long' })}`
+                                        }
+                                    </Text>
                             </View>
                         )}
                     </View>

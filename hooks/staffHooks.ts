@@ -21,7 +21,7 @@ export interface Appointment {
         reference_code: string;
     }
 }
-export function useOfficeUpcomingAppointments(month?: number, year?: number, status?: string) {
+export function useOfficeUpcomingAppointments(month?: number, year?: number, day?: number, status?: string) {
     const { user } = useAuth();
     const [rawAppointments, setRawAppointments] = useState<Appointment[]>([]);
     const [loading, setLoading] = useState(false)
@@ -30,6 +30,18 @@ export function useOfficeUpcomingAppointments(month?: number, year?: number, sta
 
     const fetchAppointments = useCallback(async (isNextPage = false) => {
         if (loading || (isNextPage && !hasMore) || !user) return;
+
+        const now = new Date();
+        const isCurrentMonth = month === now.getMonth() + 1 && year === now.getFullYear();
+        const isPastMonth = year !== undefined && month !== undefined &&
+            (year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth() + 1));
+
+        if (isPastMonth) {
+            setRawAppointments([]);
+            setHasMore(false);
+            return;
+        }
+
 
         setLoading(true)
         
@@ -40,7 +52,9 @@ export function useOfficeUpcomingAppointments(month?: number, year?: number, sta
                 page: currPage,
                 month: month,
                 year: year,
+                day,
                 status: status !== 'all' ? status : undefined,
+                min_day: isCurrentMonth && !day ? now.getDate() : undefined,
             }
 
             const res = await api.get('/office/dashboard', {params})
@@ -57,17 +71,23 @@ export function useOfficeUpcomingAppointments(month?: number, year?: number, sta
         } finally {
             setLoading(false)
         }
-    }, [user, month, year, status, page, hasMore, loading])
+    }, [user, month, year, status, day, page, hasMore, loading])
 
     useEffect(() => {
         setRawAppointments([])
         setPage(1)
         setHasMore(true)
         fetchAppointments(false)
-    }, [month, year, status])
+    }, [month, year, day, status])
 
     const filterAppointments = useMemo(() => {
-        // 1. Define what we NEVER want to show
+        const now = new Date();
+        const isCurrentMonth = month === now.getMonth() + 1 && year === now.getFullYear();
+        const isPastMonth = year !== undefined && month !== undefined &&
+            (year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth() + 1));
+
+        if (isPastMonth) return [];
+
         const excludedStatuses = ['rescheduled', 'cancelled', 'completed'];
         
         let list = rawAppointments.filter((apt: any) => {
@@ -78,9 +98,31 @@ export function useOfficeUpcomingAppointments(month?: number, year?: number, sta
         // 2. Filter by Date
         if (month && year) {
             list = list.filter((apt: any) => {
-                const [datePart] = apt.start.split(' ');
-                const [y, m] = datePart.split('-').map(Number);
+                const dateStr = apt.start || apt.dateString;
+                if (!dateStr) return false;
+                const parts = dateStr.split('-');
+                const y = Number(parts[0]);
+                const m = Number(parts[1]);
                 return m === month && y === year;
+            });
+        }
+
+        if (isCurrentMonth && !day) {
+            const today = now.getDate();
+            list = list.filter((apt: any) => {
+                const dateStr = apt.start || apt.dateString;
+                if (!dateStr) return false;
+                const d = Number(dateStr.split('-')[2]?.split(' ')[0]?.split('T')[0]);
+                return d >= today;
+            });
+        }
+
+        if (day) {
+            list = list.filter((apt: any) => {
+                const dateStr = apt.start || apt.dateString;
+                if (!dateStr) return false;
+                const d = Number(dateStr.split('-')[2]?.split(' ')[0]?.split('T')[0]);
+                return d === day;
             });
         }
 
@@ -93,7 +135,7 @@ export function useOfficeUpcomingAppointments(month?: number, year?: number, sta
         }
         
         return list;
-    }, [rawAppointments, month, year, status]);
+    }, [rawAppointments, month, year, day, status]);
 
     return {
         appointments: filterAppointments,
@@ -104,7 +146,7 @@ export function useOfficeUpcomingAppointments(month?: number, year?: number, sta
     }
 } 
 
-export interface History {
+export interface OfficeHistory {
   id: number;
   title: string;
   start: string;
@@ -115,7 +157,7 @@ export interface History {
     student: string;
     office: string;
     staff: string;
-    attachment: string | null;
+    attachment_url: string | null;
     attachment_name: string | null;
     group_members: any;
     concern_description: string;
@@ -129,7 +171,7 @@ export interface History {
 }
 
 export function useOfficeHistory(status: string = 'all') {
-  const [appointments, setAppointments] = useState<History[]>([]);
+  const [appointments, setAppointments] = useState<OfficeHistory[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);

@@ -1,6 +1,6 @@
 import api from '@/utils/api'
 import { useState, useCallback, useEffect, useMemo } from 'react'
-import { History } from './staffHooks';
+import { OfficeHistory } from './staffHooks';
 import { useAuth } from '@/context/AuthContext'
 
 export function useUpdateStatus() {
@@ -71,7 +71,7 @@ interface CalendarEvent {
     dateString: string; 
 }
 
-export function useEvents(month?: number, year?: number) {
+export function useEvents(month?: number, year?: number, day?: number) {
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [loading, setLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -85,6 +85,7 @@ export function useEvents(month?: number, year?: number) {
             if (month && year) {
                 params.month = month;
                 params.year = year;
+                if (day) params.day = day; 
             }
 
             const res = await api.get('/calendar/events', { params });
@@ -100,7 +101,7 @@ export function useEvents(month?: number, year?: number) {
         } finally {
             setLoading(false);
         }
-    }, [month, year]); // ✅ re-fetches when month/year changes
+    }, [month, year, day]); // ✅ re-fetches when month/year changes
 
     const createEvent = async (payload: {
         event_title: string;

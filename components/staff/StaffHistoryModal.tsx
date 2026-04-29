@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import {
-    View, Text, TouchableOpacity, Modal, ScrollView, TextInput, ActivityIndicator
+    View, Text, TouchableOpacity, Modal, ScrollView, TextInput, ActivityIndicator, Linking
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import EvaluationModal from '../student/EvaluationModal';
-import { Appointment } from '@/hooks/staffHooks';
+import { OfficeHistory } from '@/hooks/staffHooks';
+import { History } from '@/hooks/adminHooks';
 import { useUpdateStatus } from '@/hooks/staffAdminHooks';
 
 interface StaffHistoryModalProps {
     visible: boolean;
-    appointment: Appointment | null;   
+    appointment: History | OfficeHistory | null;   
     onClose: () => void;
     onRefresh: () => void;
 }
@@ -204,7 +205,24 @@ export default function StaffHistoryModal({ visible, appointment, onClose, onRef
                                         <Ionicons name="attach-outline" size={18} color="#9CA3AF" />
                                         <Text className="text-gray-400 font-bold text-[14px]">Files</Text>
                                     </View>
-                                    <Text className="text-gray-300 font-bold text-[13px]">{appointment.details.attachment_name ?? 'No Upload'}</Text>
+                                    <TouchableOpacity 
+                                        onPress={async () => {
+                                            const url = appointment.details.attachment_url;
+                                            console.log('Trying to open:', url);
+                                            if (!url) return;
+                                            
+                                            const supported = await Linking.canOpenURL(url);
+                                            console.log('Can open URL:', supported);
+                                            
+                                            if (supported) {
+                                                await Linking.openURL(url);
+                                            } else {
+                                                console.log('URL not supported:', url);
+                                            }
+                                        }}
+                                    >
+                                        <Text numberOfLines={1} ellipsizeMode='tail' className="text-[#2563EB] font-bold text-[13px]"  >{appointment.details.attachment_name ?? "No Upload"}</Text>
+                                    </TouchableOpacity>
                                 </View>
                             </View>
 

@@ -179,7 +179,7 @@ interface Appointment {
   [key: string]: any; // Allow for other dynamic fields
 }
 
-export function useUpcomingAppointments(office: string, status: string, month?: number, year?: number) {
+export function useUpcomingAppointments(office: string, status: string, month?: number, year?: number, day?: number) {
   const [rawAppointments, setRawAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1)
@@ -187,16 +187,29 @@ export function useUpcomingAppointments(office: string, status: string, month?: 
 
   const fetchAppointments = useCallback(async (isNextPage = false) => {
     if (loading || (isNextPage && !hasMore)) return;
+
+    const nextPageNum = isNextPage ? page + 1 : 1;  
+    const now = new Date();
+    const isCurrentMonth = month === now.getMonth() + 1 && year === now.getFullYear()
+    const isPastMonth = year !== undefined && month !== undefined && 
+        (year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth() + 1));
+
+    if (isPastMonth) {
+        setRawAppointments([]);
+        setHasMore(false);
+        return;
+    }
     setLoading(true);
 
-    try {
-      const nextPageNum = isNextPage ? page + 1 : 1;
+    try {      
       const params = { 
         page: nextPageNum,
         office: office !== 'All Offices' ? office : undefined,
         status: status !== 'all' ? status : undefined,
         month,
-        year
+        year,
+        day,
+        min_day: isCurrentMonth && !day ? now.getDate() : undefined,
       };
     
       const res = await api.get('/calendar/appointments', { params });
@@ -224,18 +237,21 @@ export function useUpcomingAppointments(office: string, status: string, month?: 
     } finally {
       setLoading(false);
     }
-  }, [office, status, month, year, page, hasMore, loading]);
+  }, [office, status, month, year, day, page, hasMore, loading]);
 
   useEffect(() => {
     setRawAppointments([]);
     setPage(1);
     setHasMore(true);
     fetchAppointments(false);
-  }, [office, status, month, year]);
+  }, [office, status, month, year, day]);
 
   // INTERNAL FILTERING LOGIC
   const filteredAppointments = useMemo(() => {
     let list = [...rawAppointments];
+
+    const now = new Date();
+    const isCurrentMonth = month === now.getMonth() + 1 && year === now.getFullYear();
 
     //filter by month and year
     if (month && year) {
@@ -243,9 +259,30 @@ export function useUpcomingAppointments(office: string, status: string, month?: 
         const dateStr = apt.start || apt.dateString;
         if (!dateStr) return false;
 
-        const [y, m] = dateStr.split('-').map(Number);
+        const parts = dateStr.split('-');
+        const y = Number(parts[0]);
+        const m = Number(parts[1]);
         
         return m === month && y === year;
+      });
+    }
+
+    if (isCurrentMonth && !day) {
+      const today = now.getDate();
+      list = list.filter((apt: any) => {
+        const dateStr = apt.start || apt.dateString;
+        if (!dateStr) return false;
+        const d = Number(dateStr.split('-')[2]?.split(' ')[0]?.split('T')[0]);
+        return d >= today;
+      });
+    }
+
+    if (day) {
+      list = list.filter((apt: any) => {
+        const dateStr = apt.start || apt.dateString;
+        if (!dateStr) return false;
+        const d = Number(dateStr.split('-')[2]?.split(' ')[0]?.split('T')[0]);
+        return d === day;
       });
     }
     //filter by office
@@ -273,7 +310,7 @@ export function useUpcomingAppointments(office: string, status: string, month?: 
     }
 
     return list
-  }, [rawAppointments, status, office, month, year]);
+  }, [rawAppointments, status, office, month, year, day]);
 
   return { 
     appointments: filteredAppointments, 

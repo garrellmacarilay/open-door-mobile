@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, type DimensionValue } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -39,10 +39,37 @@ const OFFICE_FEEDBACK = [
 
 export default function AdminAnalyticsPage() {
     const insets = useSafeAreaInsets();
-    const { stats, loading } = useConsultationStats();
-    const { generateReport, isGenerating } = useGenerateReport();
-    const { distribution, loading: distLoading } = useServiceDistribution();
-    const { officeFeedback, loading: isLoading, error} = useOfficesFeedback();
+    const [currentDate, setCurrentDate] = useState(new Date());
+
+    const { stats, loading } = useConsultationStats(currentDate);
+    const { generateReport, isGenerating } = useGenerateReport(currentDate);
+    const { distribution, loading: distLoading } = useServiceDistribution(currentDate);
+    const { officeFeedback, loading: isLoading, error} = useOfficesFeedback(currentDate);
+
+    const isPageLoading = loading || distLoading || isLoading;
+
+    const monthLabel = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+    const isCurrentMonth = 
+        currentDate.getMonth() === new Date().getMonth() &&
+        currentDate.getFullYear() === new Date().getFullYear();
+
+    const goToPrevMonth = () => {
+        setCurrentDate(prev => {
+            const d = new Date(prev);
+            d.setMonth(d.getMonth() - 1);
+            return d;
+        });
+    };
+
+    const goToNextMonth = () => {
+        if (isCurrentMonth) return; // don't go beyond current month
+        setCurrentDate(prev => {
+            const d = new Date(prev);
+            d.setMonth(d.getMonth() + 1);
+            return d;
+        });
+    };
 
     const MAX_OFFICE_COUNT = useMemo(() => {
         return distribution.length > 0 
@@ -123,145 +150,170 @@ export default function AdminAnalyticsPage() {
                     </TouchableOpacity>
                 </View>
 
-                <View className="px-4 pt-4">
-                    {/* Stats Cards */}
-                    <View className="flex-row gap-2 mb-6">
-                        {topStats.map((stat, index) => (
-                            <View key={index} className="flex-1 bg-[#13244F] rounded-[10px] px-2 py-3 items-center">
-                                <Text className="text-white text-[20px] leading-[42px] font-extrabold mb-1">{stat.value}</Text>
-                                <Text className="text-[#C8D0E3] text-[10px] font-semibold text-center leading-[12px]">{stat.label}</Text>
-                            </View>
-                        ))}
-                    </View>
-
-                    {/* Appointments per Status Section */}
-                    <View className="bg-white rounded-[22px] p-5 mb-6 border border-[#E5E7EB] shadow-sm elevation-1">
-                        <View className="flex-row items-start gap-3 mb-2">
-                            <View className="w-1 h-7 rounded-full bg-[#4387FF] mt-0.5" />
-                            <View>
-                                <Text className="text-[#1F2937] text-[16px] font-extrabold mb-1">Appointments per status</Text>
-                                <Text className="text-[#9CA3AF] text-[11px] font-semibold">
-                                    Total of {stats?.total ?? 0} appointments
-                                </Text>
-                            </View>
+                <View className='flex-row px-4 pt-4 justify-between ml-4'>
+                    <TouchableOpacity onPress={goToPrevMonth}>
+                        <View className='flex-row items-center'>
+                            <Ionicons name="arrow-back" size={24} color="black" />
+                            <Text className='text-black text-[12px]'>Previous Month</Text>
                         </View>
+                    </TouchableOpacity>
 
-                        {/* Multi-color Horizontal Bar */}
-                        <View className="flex-row mb-5 mt-3 h-5 rounded-full overflow-hidden bg-[#F3F4F6]">
-                            {appointmentStatusCards.map((status, index) => (
-                                <View
-                                    key={status.label}
-                                    style={{
-                                        flex: status.count || 0.1, // Small flex if 0 to show line
-                                        backgroundColor: status.color,
-                                        marginRight: index === appointmentStatusCards.length - 1 ? 0 : 1,
-                                    }}
-                                />
+                    <Text className='text-[#1C274C] font-bold text-[13px]'>{monthLabel}</Text>
+
+                    <TouchableOpacity onPress={goToNextMonth} disabled={isCurrentMonth}>
+                        <View className='flex-row items-center'>
+                            <Text className='text-black text-[12px]'>Next Month</Text>
+                            <Ionicons name="arrow-forward" size={20} color={isCurrentMonth ? '#D1D5DB' : 'black'} />
+                        </View>
+                    </TouchableOpacity>
+                </View>
+                
+                {isPageLoading ? (
+                    <View className="flex-1 items-center justify-center py-32">
+                        <ActivityIndicator size="large" color="#13244F" />
+                    </View>
+                ) : (
+                    <View className="px-4 pt-4">
+                    {/* Stats Cards */}
+                        <View className="flex-row gap-2 mb-6">
+                            {topStats.map((stat, index) => (
+                                <View key={index} className="flex-1 bg-[#13244F] rounded-[10px] px-2 py-3 items-center">
+                                    <Text className="text-white text-[20px] leading-[42px] font-extrabold mb-1">{stat.value}</Text>
+                                    <Text className="text-[#C8D0E3] text-[10px] font-semibold text-center leading-[12px]">{stat.label}</Text>
+                                </View>
                             ))}
                         </View>
 
-                        {/* Status Grid */}
-                        <View className="flex-row gap-3">
-                            {appointmentStatusCards.map((status) => {
-                                const barWidth: DimensionValue = `${Math.max((status.count / maxStatusCount) * 100, 15)}%`;
-                                return (
-                                    <View key={status.label} className="flex-1 rounded-[14px] px-3 py-4" style={{ backgroundColor: status.backgroundColor }}>
-                                        <Text className="text-[14px] font-bold mb-3" style={{ color: status.color }}>{status.label}</Text>
-                                        <Text className="text-[#111827] text-[20px] font-extrabold mb-4">{status.count}</Text>
-                                        <View className="h-1.5 bg-white/80 rounded-full overflow-hidden">
-                                            <View className="h-full rounded-full" style={{ width: barWidth, backgroundColor: status.color }} />
-                                        </View>
-                                    </View>
-                                );
-                            })}
-                        </View>
-                    </View>
-
-                    {/* Common Reasons Section */}
-                    <View className="bg-white rounded-[22px] p-5 mb-6 border border-[#E5E7EB] shadow-sm elevation-1">
-                        <View className="flex-row items-start gap-3 mb-5">
-                            <View className="w-1 h-7 rounded-full bg-[#E400D9] mt-0.5" />
-                            <View>
-                                <Text className="text-[#1F2937] text-[16px] font-extrabold mb-1">Offices that were commonly vistied</Text>
-                                <Text className="text-[#7B7280] text-[11px] font-semibold">Top consultation categories</Text>
-                            </View>
-                        </View>
-                            
-                    {distLoading ? (
-                            <ActivityIndicator color="#E400D9" className="py-10" />
-                        ) : (
-                            distribution.map((item, index) => {
-                                // Logic: (Current Office Count / Highest Office Count) * 100
-                                const barWidth: DimensionValue = `${Math.max((item.count / MAX_OFFICE_COUNT) * 100, 18)}%`;
-                                
-                                return (
-                                    <View key={index} className={index === distribution.length - 1 ? '' : 'mb-5'}>
-                                        <View className="flex-row items-start gap-4">
-                                            {/* Rank Badge */}
-                                            <View 
-                                                className="w-8 h-8 rounded-[10px] items-center justify-center" 
-                                                style={{ backgroundColor: item.color }}
-                                            >
-                                                <Text className="text-white text-[18px] font-extrabold leading-[20px]">
-                                                    {index + 1}
-                                                </Text>
-                                            </View>
-
-                                            <View className="flex-1 pt-0.5">
-                                                <View className="flex-row items-center justify-between mb-2">
-                                                    <Text className="text-[#6B7280] text-[13px] font-extrabold flex-1 pr-3">
-                                                        {item.label}
-                                                    </Text>
-                                                    <Text className="text-[#4B5563] text-[13px] font-extrabold">
-                                                        {item.count}
-                                                    </Text>
-                                                </View>
-
-                                                {/* Dynamic Bar */}
-                                                <View className="h-3 bg-[#F1F2F4] rounded-full overflow-hidden">
-                                                    <View 
-                                                        className="h-full rounded-full" 
-                                                        style={{ 
-                                                            width: barWidth, 
-                                                            backgroundColor: item.color 
-                                                        }} 
-                                                    />
-                                                </View>
-                                            </View>
-                                        </View>
-                                    </View>
-                                );
-                            })
-                        )}
-                    </View>
-
-                    {/* Office Feedback Section */}
-                    <View className="mb-6">
-                        <View className="flex-row items-center gap-2 mb-4">
-                            <View className="w-1 h-5 bg-[#F59E0B] rounded-full" />
-                            <Text className="text-[#1C274C] text-[18px] font-extrabold">Office Feedback</Text>
-                        </View>
-
-                        {officeFeedback.map((item) => (
-                            <View key={item.id} className="bg-white rounded-[16px] p-5 mb-4 border border-gray-100 shadow-sm elevation-1">
-                                <Text className="text-[#1C274C] text-[15px] font-extrabold mb-2">{item.office}</Text>
-                                <View className="flex-row items-center gap-2 mb-3">
-                                    <StarRating rating={item.rating} />
-                                    <Text className="text-[#1C274C] text-[13px] font-bold">{item.rating.toFixed(1)}</Text>
-                                    <Text className="text-gray-400 text-[12px] font-medium">({item.reviews} reviews)</Text>
+                        {/* Appointments per Status Section */}
+                        <View className="bg-white rounded-[22px] p-5 mb-6 border border-[#E5E7EB] shadow-sm elevation-1">
+                            <View className="flex-row items-start gap-3 mb-2">
+                                <View className="w-1 h-7 rounded-full bg-[#4387FF] mt-0.5" />
+                                <View>
+                                    <Text className="text-[#1F2937] text-[16px] font-extrabold mb-1">Appointments per status</Text>
+                                    <Text className="text-[#9CA3AF] text-[11px] font-semibold">
+                                        Total of {stats?.total ?? 0} appointments
+                                    </Text>
                                 </View>
-                                <Text className="text-[#1C274C] text-[13px] font-bold mb-2">Recent Feedback</Text>
-                                {item.feedback.map((text, i) => (
-                                    <View key={i} className="bg-gray-50 border border-gray-100 rounded-[10px] px-4 py-3 mb-2">
-                                        <Text className="text-gray-600 text-[12px] font-medium">{text}</Text>
-                                    </View>
+                            </View>
+
+                            {/* Multi-color Horizontal Bar */}
+                            <View className="flex-row mb-5 mt-3 h-5 rounded-full overflow-hidden bg-[#F3F4F6]">
+                                {appointmentStatusCards.map((status, index) => (
+                                    <View
+                                        key={status.label}
+                                        style={{
+                                            flex: status.count || 0.1, // Small flex if 0 to show line
+                                            backgroundColor: status.color,
+                                            marginRight: index === appointmentStatusCards.length - 1 ? 0 : 1,
+                                        }}
+                                    />
                                 ))}
                             </View>
-                        ))}
-                    </View>
 
-                    <View style={{ height: Math.max(insets.bottom + 80, 112) }} />
-                </View>
+                            {/* Status Grid */}
+                            <View className="flex-row gap-3">
+                                {appointmentStatusCards.map((status) => {
+                                    const barWidth: DimensionValue = `${Math.max((status.count / maxStatusCount) * 100, 15)}%`;
+                                    return (
+                                        <View key={status.label} className="flex-1 rounded-[14px] px-3 py-4" style={{ backgroundColor: status.backgroundColor }}>
+                                            <Text className="text-[14px] font-bold mb-3" style={{ color: status.color }}>{status.label}</Text>
+                                            <Text className="text-[#111827] text-[20px] font-extrabold mb-4">{status.count}</Text>
+                                            <View className="h-1.5 bg-white/80 rounded-full overflow-hidden">
+                                                <View className="h-full rounded-full" style={{ width: barWidth, backgroundColor: status.color }} />
+                                            </View>
+                                        </View>
+                                    );
+                                })}
+                            </View>
+                        </View>
+
+                        {/* Common Reasons Section */}
+                        <View className="bg-white rounded-[22px] p-5 mb-6 border border-[#E5E7EB] shadow-sm elevation-1">
+                            <View className="flex-row items-start gap-3 mb-5">
+                                <View className="w-1 h-7 rounded-full bg-[#E400D9] mt-0.5" />
+                                <View>
+                                    <Text className="text-[#1F2937] text-[16px] font-extrabold mb-1">Offices that were commonly vistied</Text>
+                                    <Text className="text-[#7B7280] text-[11px] font-semibold">Top consultation categories</Text>
+                                </View>
+                            </View>
+                                
+                        {distLoading ? (
+                                <ActivityIndicator color="#E400D9" className="py-10" />
+                            ) : (
+                                distribution.map((item, index) => {
+                                    // Logic: (Current Office Count / Highest Office Count) * 100
+                                    const barWidth: DimensionValue = `${Math.max((item.count / MAX_OFFICE_COUNT) * 100, 18)}%`;
+                                    
+                                    return (
+                                        <View key={index} className={index === distribution.length - 1 ? '' : 'mb-5'}>
+                                            <View className="flex-row items-start gap-4">
+                                                {/* Rank Badge */}
+                                                <View 
+                                                    className="w-8 h-8 rounded-[10px] items-center justify-center" 
+                                                    style={{ backgroundColor: item.color }}
+                                                >
+                                                    <Text className="text-white text-[18px] font-extrabold leading-[20px]">
+                                                        {index + 1}
+                                                    </Text>
+                                                </View>
+
+                                                <View className="flex-1 pt-0.5">
+                                                    <View className="flex-row items-center justify-between mb-2">
+                                                        <Text className="text-[#6B7280] text-[13px] font-extrabold flex-1 pr-3">
+                                                            {item.label}
+                                                        </Text>
+                                                        <Text className="text-[#4B5563] text-[13px] font-extrabold">
+                                                            {item.count}
+                                                        </Text>
+                                                    </View>
+
+                                                    {/* Dynamic Bar */}
+                                                    <View className="h-3 bg-[#F1F2F4] rounded-full overflow-hidden">
+                                                        <View 
+                                                            className="h-full rounded-full" 
+                                                            style={{ 
+                                                                width: barWidth, 
+                                                                backgroundColor: item.color 
+                                                            }} 
+                                                        />
+                                                    </View>
+                                                </View>
+                                            </View>
+                                        </View>
+                                    );
+                                })
+                            )}
+                        </View>
+
+                        {/* Office Feedback Section */}
+                        <View className="mb-6">
+                            <View className="flex-row items-center gap-2 mb-4">
+                                <View className="w-1 h-5 bg-[#F59E0B] rounded-full" />
+                                <Text className="text-[#1C274C] text-[18px] font-extrabold">Office Feedback</Text>
+                            </View>
+
+                            {officeFeedback.map((item) => (
+                                <View key={item.id} className="bg-white rounded-[16px] p-5 mb-4 border border-gray-100 shadow-sm elevation-1">
+                                    <Text className="text-[#1C274C] text-[15px] font-extrabold mb-2">{item.office}</Text>
+                                    <View className="flex-row items-center gap-2 mb-3">
+                                        <StarRating rating={item.rating} />
+                                        <Text className="text-[#1C274C] text-[13px] font-bold">{item.rating.toFixed(1)}</Text>
+                                        <Text className="text-gray-400 text-[12px] font-medium">({item.reviews} reviews)</Text>
+                                    </View>
+                                    <Text className="text-[#1C274C] text-[13px] font-bold mb-2">Recent Feedback</Text>
+                                    {item.feedback.map((text, i) => (
+                                        <View key={i} className="bg-gray-50 border border-gray-100 rounded-[10px] px-4 py-3 mb-2">
+                                            <Text className="text-gray-600 text-[12px] font-medium">{text}</Text>
+                                        </View>
+                                    ))}
+                                </View>
+                            ))}
+                        </View>
+
+                        <View style={{ height: Math.max(insets.bottom + 80, 112) }} />
+                    </View>
+                )}
+
             </ScrollView>
         </View>
     );

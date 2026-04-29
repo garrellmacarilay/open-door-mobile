@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, RefreshContr
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useNotifications, Notification } from '@/hooks/globalHooks';
-import { useOfficeHistory, History } from '@/hooks/staffHooks';
+import { useOfficeHistory, OfficeHistory } from '@/hooks/staffHooks';
 import { useAppointmentDetail } from '@/hooks/staffAdminHooks';
 import StaffHistoryModal from '@/components/staff/StaffHistoryModal';
 
@@ -15,7 +15,7 @@ export default function StaffNotificationsPage() {
     
     const { getDetail, loading: isFetchingDetail } = useAppointmentDetail();
     
-    const [selectedAppointment, setSelectedAppointment] = useState<History | null>(null);
+    const [selectedAppointment, setSelectedAppointment] = useState<OfficeHistory | null>(null);
     const [modalVisible, setModalVisible] = useState(false);
 
     const unreadCount = notifications.filter(n => !n.read_at).length;

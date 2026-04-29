@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Modal, ScrollView, Alert, KeyboardAvoidingView, Platform, Linking, Touchable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import EvaluationModal from './EvaluationModal';
-import { BookingHistory } from '@/hooks/studentHooks';
+import { BookingHistory, useCancelBooking } from '@/hooks/studentHooks';
 import RescheduleModal from './RescheduleModal';
 import api from '@/utils/api';
 
@@ -15,8 +15,19 @@ interface HistoryModalProps {
 export default function HistoryModal({ visible, appointment, onClose }: HistoryModalProps) {
     const [showEvaluation, setShowEvaluation] = useState(false);
     const [showReschedule, setShowReschedule] = useState(false);
+    const [showCancelReason, setShowCancelReason] = useState(false);
+    const [cancelReason, setCancelReason] = useState('');
+
+    const { cancelBooking, isCancelling } = useCancelBooking(() => {
+        // This runs on success
+        handleCloseCancelReason();
+        onClose(); 
+    });
+
 
     if (!appointment) return null;
+
+    
 
     const getStatusStyle = (status: string) => {
         switch (status.toLowerCase()) {
@@ -35,32 +46,16 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
      const isPending = appointment.status.toLowerCase() === 'pending';
     const alreadyHasFeedback = appointment.hasFeedback;
 
-    const handleCancel = () => {
-        Alert.alert(
-            "Cancel Consultation",
-            "Are you sure you want to cancel this booking? This action cannot be undone.",
-            [
-                { text: "No, Keep it", style: "cancel" },
-                { 
-                    text: "Yes, Cancel", 
-                    style: "destructive",
-                    onPress: async () => {
-                        try {
-                            // Assuming your api instance is accessible
-                            const res = await api.patch(`/cancel/booking/${appointment.id}`);
-                            
-                            if (res.data.success) {
-                                Alert.alert("Success", "Booking has been cancelled.");
-                                onClose(); 
-                            }
-                        } catch (error: any) {
-                            const msg = error.response?.data?.message || "Failed to cancel";
-                            Alert.alert("Error", msg);
-                        }
-                    }
-                }
-            ]
-        );
+    const handleSubmitCancellation = async () => {
+        if (!cancelReason.trim()) return;
+        
+        // Use the hook
+        await cancelBooking(appointment.id, cancelReason);
+    };
+
+    const handleCloseCancelReason = () => {
+        setShowCancelReason(false);
+        setCancelReason('');
     };
 
     return (
@@ -151,7 +146,11 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
                                         <Ionicons name="attach-outline" size={18} color="#9CA3AF" />
                                         <Text className="text-gray-400 font-bold text-[14px]">Files</Text>
                                     </View>
-                                    <Text className="text-gray-300 font-bold text-[13px]">{appointment.attachment_name ?? "No Upload"}</Text>
+                                    <TouchableOpacity 
+                                        onPress={() => appointment.attachment_url && Linking.openURL(appointment.attachment_url)}
+                                    >
+                                        <Text numberOfLines={1} ellipsizeMode='tail' className="text-[#2563EB] font-bold text-[13px]"  >{appointment.attachment_name ?? "No Upload"}</Text>
+                                    </TouchableOpacity>
                                 </View>
                             </View>
 
@@ -195,7 +194,7 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
                                     <View className="bg-[#F3F4F6] rounded-full py-3.5 flex-row items-center justify-center border border-gray-200">
                                         <Text className="text-[#D1D5DB] font-bold text-[14px]">Feedback Available Upon Completion</Text>
                                     </View>
-                                        <TouchableOpacity className="bg-[#FEF2F2] rounded-full py-4 flex-row items-center justify-center border border-[#FECACA]" activeOpacity={0.7} onPress={handleCancel}>
+                                        <TouchableOpacity className="bg-[#FEF2F2] rounded-full py-4 flex-row items-center justify-center border border-[#FECACA]" activeOpacity={0.7} onPress={() => setShowCancelReason(true)}>
                                             <Text className="text-[#EF4444] font-bold text-[15px]">Cancel Consultation</Text>
                                         </TouchableOpacity>
                                     {(isApproved || isDeclined) && (
@@ -232,7 +231,63 @@ export default function HistoryModal({ visible, appointment, onClose }: HistoryM
                 onRefresh={() => { 
                     onClose();    // Close the history detail modal
                 }}
-        />
+            />
+            <Modal
+                animationType="fade"
+                transparent={true}
+                statusBarTranslucent
+                navigationBarTranslucent
+                visible={showCancelReason}
+                onRequestClose={handleCloseCancelReason}
+            >
+                <View className="absolute top-0 left-0 right-0 bottom-0 bg-black/45 justify-center items-center px-6">
+                    <KeyboardAvoidingView
+                        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                        className="w-full max-w-md"
+                    >
+                        <View className="bg-white rounded-[24px] px-6 pt-7 pb-6 shadow-xl">
+                            <Text className="text-[#2F3136] text-[28px] font-extrabold mb-6">
+                                Reason for Cancellation
+                            </Text>
+
+                            <Text className="text-[#3F3F46] text-[15px] font-medium mb-5 leading-6">
+                                Please provide a reason for cancelling this request.
+                            </Text>
+
+                            <TextInput
+                                className="w-full border border-[#D4D4D8] rounded-[16px] px-4 py-4 text-[#18181B] text-[15px] bg-white"
+                                placeholder="Provide a reason for cancelling this request..."
+                                placeholderTextColor="#A1A1AA"
+                                multiline
+                                numberOfLines={6}
+                                style={{ height: 180, textAlignVertical: 'top' }}
+                                value={cancelReason}
+                                onChangeText={setCancelReason}
+                            />
+
+                            <TouchableOpacity
+                                className={`rounded-[14px] py-4 items-center justify-center mt-6 ${cancelReason.trim() && !isCancelling ? 'bg-[#FF473A]' : 'bg-[#FCA5A5]'}`}
+                                activeOpacity={0.8}
+                                onPress={handleSubmitCancellation}
+                                disabled={!cancelReason.trim() || isCancelling}
+                            >
+                                <Text className="text-white text-[18px] font-bold">
+                                    {isCancelling ? "Cancelling..." : "Cancel Request"}
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                className="items-center justify-center mt-4"
+                                activeOpacity={0.7}
+                                onPress={handleCloseCancelReason}
+                                disabled={isCancelling}
+                            >
+                                <Text className="text-[#6B7280] text-[15px] font-semibold">Back</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </KeyboardAvoidingView>
+                </View>
+            </Modal>
         </>
     );
 }

@@ -287,12 +287,18 @@ export function useGoogleLogin() {
     };
 
     const handleGoogleLogin = async () => {
-        if (!apiUrl) {
-            console.error('API URL not defined');
-            return;
+
+        console.log('=== GOOGLE LOGIN PRESSED ===');
+        console.log('apiUrl:', apiUrl);
+        console.log('Full URL:', `${apiUrl}/auth/google/mobile`);
+
+        try {
+            const result = await WebBrowser.openBrowserAsync(`${apiUrl}/auth/google/mobile`);
+            console.log('Browser result:', JSON.stringify(result));
+        } catch (err: any) {
+            console.error('Browser error:', err.message);
         }
 
-        await WebBrowser.openBrowserAsync(`${apiUrl}/auth/google/mobile`);
     };
 
     return { handleGoogleLogin };

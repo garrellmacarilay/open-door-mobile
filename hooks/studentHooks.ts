@@ -130,6 +130,7 @@ export interface BookingHistory {
     office_name: string;
     service_type: string;
     attachment_name: any;
+    attachment_url: any;
     concern_description: string;
     consultation_date: string;
     status: string;
@@ -169,14 +170,38 @@ export function useHistory() {
   return { bookings, fetchHistoryBookings, refreshing, loading, error, setError }
 }
 
-export function useCancelBooking() {
-    
+export function useCancelBooking (onSuccess: () => void) {
+    const [ isCancelling, setIsCancelling] = useState(false);
+
+    const cancelBooking = async (bookingId: number, reason?: string) => {
+        setIsCancelling(true);
+
+        try {
+            const res = await api.patch(`/cancel/booking/${bookingId}`, {
+                cancelled_reason: reason,
+            })
+
+            if (res.data.success) {
+                Alert.alert('Success', 'Booking has been cancelled')
+                if (onSuccess) onSuccess();
+                return true
+            }
+
+        } catch (err: any) {
+            const msg = err.response?.data?.message || "Failed to cancel booking";
+            Alert.alert("Error", msg);
+            return false;
+        } finally {
+            setIsCancelling(false)
+        }
+    }
+    return { cancelBooking, isCancelling };
 }
 
-export const useReschedule = () => {
+export const useReschedule = (onSuccess: () => void) => {
     const [loading, setLoading] = useState(false);
 
-    const rescheduleBooking = async (bookingId: number, dateStr: string, timeStr: string) => {
+    const rescheduleBooking = async (bookingId: number, dateStr: string, timeStr: string, reason?: string) => {
         setLoading(true);
         try {
             // Convert "04/17/2026" + "10:30 AM" to "2026-04-17T10:30"
@@ -191,9 +216,13 @@ export const useReschedule = () => {
 
             const res = await api.patch(`/reschedule/booking/${bookingId}`, {
                 consultation_date: formattedDate,
+                rescheduled_reason: reason
             });
 
-            return res.data.success;
+            if (res.data.success) {
+                if (onSuccess) onSuccess
+                return true
+            }
         } catch (error: any) {
             const msg = error.response?.data?.message || "Reschedule failed";
             Alert.alert("Error", msg);
