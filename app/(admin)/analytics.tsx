@@ -227,6 +227,31 @@ export default function AdminAnalyticsPage() {
                             </View>
                         </View>
 
+                        {/* Office Feedback Section */}
+                        <View className="mb-6">
+                            <View className="flex-row items-center gap-2 mb-4">
+                                <View className="w-1 h-5 bg-[#F59E0B] rounded-full" />
+                                <Text className="text-[#1C274C] text-[18px] font-extrabold">Office Feedback</Text>
+                            </View>
+
+                            {officeFeedback.map((item) => (
+                                <View key={item.id} className="bg-white rounded-[16px] p-5 mb-4 border border-gray-100 shadow-sm elevation-1">
+                                    <Text className="text-[#1C274C] text-[15px] font-extrabold mb-2">{item.office}</Text>
+                                    <View className="flex-row items-center gap-2 mb-3">
+                                        <StarRating rating={item.rating} />
+                                        <Text className="text-[#1C274C] text-[13px] font-bold">{item.rating.toFixed(1)}</Text>
+                                        <Text className="text-gray-400 text-[12px] font-medium">({item.reviews} reviews)</Text>
+                                    </View>
+                                    <Text className="text-[#1C274C] text-[13px] font-bold mb-2">Recent Feedback</Text>
+                                    {item.feedback.map((text, i) => (
+                                        <View key={i} className="bg-gray-50 border border-gray-100 rounded-[10px] px-4 py-3 mb-2">
+                                            <Text className="text-gray-600 text-[12px] font-medium">{text}</Text>
+                                        </View>
+                                    ))}
+                                </View>
+                            ))}
+                        </View>
+
                         {/* Common Reasons Section */}
                         <View className="bg-white rounded-[22px] p-5 mb-6 border border-[#E5E7EB] shadow-sm elevation-1">
                             <View className="flex-row items-start gap-3 mb-5">
@@ -283,31 +308,6 @@ export default function AdminAnalyticsPage() {
                                     );
                                 })
                             )}
-                        </View>
-
-                        {/* Office Feedback Section */}
-                        <View className="mb-6">
-                            <View className="flex-row items-center gap-2 mb-4">
-                                <View className="w-1 h-5 bg-[#F59E0B] rounded-full" />
-                                <Text className="text-[#1C274C] text-[18px] font-extrabold">Office Feedback</Text>
-                            </View>
-
-                            {officeFeedback.map((item) => (
-                                <View key={item.id} className="bg-white rounded-[16px] p-5 mb-4 border border-gray-100 shadow-sm elevation-1">
-                                    <Text className="text-[#1C274C] text-[15px] font-extrabold mb-2">{item.office}</Text>
-                                    <View className="flex-row items-center gap-2 mb-3">
-                                        <StarRating rating={item.rating} />
-                                        <Text className="text-[#1C274C] text-[13px] font-bold">{item.rating.toFixed(1)}</Text>
-                                        <Text className="text-gray-400 text-[12px] font-medium">({item.reviews} reviews)</Text>
-                                    </View>
-                                    <Text className="text-[#1C274C] text-[13px] font-bold mb-2">Recent Feedback</Text>
-                                    {item.feedback.map((text, i) => (
-                                        <View key={i} className="bg-gray-50 border border-gray-100 rounded-[10px] px-4 py-3 mb-2">
-                                            <Text className="text-gray-600 text-[12px] font-medium">{text}</Text>
-                                        </View>
-                                    ))}
-                                </View>
-                            ))}
                         </View>
 
                         <View style={{ height: Math.max(insets.bottom + 80, 112) }} />
